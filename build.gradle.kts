@@ -1,9 +1,10 @@
 plugins {
     java
+    id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
 group = "de.jvstvshd"
-version = "1.0.0-SNAPSHOT"
+version = "1.0.0-alpha.0"
 
 val jdaVersion = "4.3.0_280"
 val log4jVersion = "2.14.1"
@@ -32,4 +33,12 @@ dependencies {
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
+}
+
+tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>().configureEach {
+    destinationDirectory.set(file("C:\\IntelliJ\\Projects\\FoxesBot\\jars"))
+    manifest {
+        attributes["Main-Class"] = "de.jvstvshd.foxesbot.Launcher"
+        attributes["Multi-Release"] = true
+    }
 }
