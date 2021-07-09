@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.jvstvshd"
-version = "1.0.0-alpha.0"
+version = "1.0.0-alpha.1"
 
 val jdaVersion = "4.3.0_280"
 val log4jVersion = "2.14.1"
