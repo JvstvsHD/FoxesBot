@@ -22,12 +22,11 @@ public class StatusCommand extends SimpleCommand {
     public StatusCommand(FoxesBot bot) {
         super("status",
                 new String[]{},
-                "command.status",
-                argsBuilder().add(OptionType.STRING, "query", "Name of the object from which the status should be read-").build(),
+                "command.status.description",
+                argsBuilder().add(OptionType.STRING, "query", "Name of the object from which the status should be read.", true).build(),
                 Permission.UNKNOWN);
         this.bot = bot;
     }
-
 
 
     @Override

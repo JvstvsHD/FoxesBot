@@ -11,6 +11,7 @@ import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.IssueService;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -106,7 +107,7 @@ public class IssueStatus extends StatusObject {
                     new MessageEmbed.Field(issue.getTitle() + ": " + issue.getState().getTranslation(),
                             status.toString(),
                             false);
-            eb.addField(field).setTimestamp(LocalDateTime.now());
+            eb.addField(field).setTimestamp(Instant.now());
 
         }
         return eb.build();

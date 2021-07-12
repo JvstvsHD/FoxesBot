@@ -29,7 +29,6 @@ public class FoxesScheduler implements Scheduler {
     public ScheduleTask run(Runnable task) {
         handleUnsupportedSyncOperation();
         return null;
-        //return build(new FoxesTask(task, UUID.randomUUID(), 0L, 0L)).schedule();
     }
 
     @Override

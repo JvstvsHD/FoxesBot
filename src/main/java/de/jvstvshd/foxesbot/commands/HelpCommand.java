@@ -1,6 +1,6 @@
 package de.jvstvshd.foxesbot.commands;
 
-import com.google.common.collect.Sets;
+import de.chojo.jdautil.command.SimpleArgument;
 import de.chojo.jdautil.command.SimpleCommand;
 import de.chojo.jdautil.wrapper.CommandContext;
 import de.chojo.jdautil.wrapper.MessageEventWrapper;
@@ -8,15 +8,15 @@ import de.chojo.jdautil.wrapper.SlashCommandContext;
 import de.jvstvshd.foxesbot.FoxesBot;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class HelpCommand extends SimpleCommand {
 
@@ -24,58 +24,55 @@ public class HelpCommand extends SimpleCommand {
 
 
     public HelpCommand(FoxesBot bot) {
-        super("help", new String[]{"hilfe"}, "Command to show all commands of this bot.", argsBuilder()
-                .add(OptionType.INTEGER, "page", "page of commands to show", false)
-                .build(), Permission.UNKNOWN);
+        super("help", new String[]{"hilfe"}, "command.help.description", (SimpleArgument[]) null, Permission.UNKNOWN);
         this.bot = bot;
     }
 
     @Override
     public boolean onCommand(MessageEventWrapper eventWrapper, CommandContext context) {
-        int page = context.argInt(0).orElse(1);
-        eventWrapper.reply(getHelp(page)).queue();
+        eventWrapper.reply(getHelp(eventWrapper.getMember())).queue();
         return true;
     }
 
     @Override
     public void onSlashCommand(SlashCommandEvent event, SlashCommandContext context) {
-        var page = event.getOption("page");
-        var val = page == null ? 1 : page.getAsLong();
-        event.replyEmbeds(getHelp((int) val)).queue();
+        event.replyEmbeds(getHelp(event.getMember())).queue();
     }
 
-    private MessageEmbed getHelp(int page) {
-        int entriesPerPage = bot.getConfiguration().getConfigFile().getBaseSettings().getHelpEntriesPerPage();
+    private MessageEmbed getHelp(Member member) {
         StringBuilder helpBuilder = new StringBuilder();
-        for (SimpleCommand command : getCommands(entriesPerPage, page)) {
-            helpBuilder.append(command.command()).append(": ").append(command.description()).append("\n");
+        for (SimpleCommand command : getCommands()) {
+            if (!member.hasPermission(command.permission())) {
+                continue;
+            }
+            helpBuilder.append("**").append(command.command()).append("** ").append(args(command)).append(bot.getLocalizer().localize(command.description())).append("\n");
         }
         return new EmbedBuilder()
-                .setTitle("FoxesBot: Hilfe (Seite " + page + "/" + getMaxPages(entriesPerPage) + ")")
+                .setTitle("FoxesBot: Hilfe")
                 .appendDescription(helpBuilder.toString())
+                .appendDescription(String.format(bot.getLocalizer().localize("command.help.information"), bot.getConfiguration()
+                .getConfigFile().getBaseSettings().getCommandChar() + "info oder /info"))
                 .setTimestamp(Instant.now())
                 .build();
 
     }
 
-    private Set<SimpleCommand> getCommands(int entries, int page) {
-        List<SimpleCommand> simpleCommands = new ArrayList<>(bot.getCommandHub().getCommands());
-        if (entries > simpleCommands.size())
-            return new HashSet<>(simpleCommands);
-        Set<SimpleCommand> commands = Sets.newHashSet();
-        int start = (page-1)*entries;
-        for (int i = start; i < page*entries; i++) {
-            commands.add(simpleCommands.get(i));
-        }
-        return commands;
+    private Set<SimpleCommand> getCommands() {
+        return bot.getCommandHub().getCommands().stream().sorted(Comparator.comparing(SimpleCommand::command)).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    private int getMaxPages(int entries) {
-        int size = new ArrayList<>(bot.getCommandHub().getCommands()).size();
-        int modulo = size % entries;
-        if (modulo == 0)
-            return size / entries;
-        return ((size - modulo) / entries) + 1;
-
+    private String args(SimpleCommand command) {
+        if (command.args() == null || command.args().length == 0) {
+            return "";
+        }
+        StringBuilder argsBuilder = new StringBuilder();
+        for (SimpleArgument arg : command.args()) {
+            if (arg.isRequired()) {
+                argsBuilder.append(" *<").append(bot.getLocalizer().localize(arg.name())).append(">*");
+                continue;
+            }
+            argsBuilder.append(" *[").append(bot.getLocalizer().localize(arg.name())).append("]*");
+        }
+        return argsBuilder.append(" ").toString();
     }
 }

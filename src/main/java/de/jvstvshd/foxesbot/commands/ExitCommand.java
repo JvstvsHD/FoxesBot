@@ -1,5 +1,6 @@
 package de.jvstvshd.foxesbot.commands;
 
+import de.chojo.jdautil.command.SimpleArgument;
 import de.chojo.jdautil.command.SimpleCommand;
 import de.chojo.jdautil.wrapper.CommandContext;
 import de.chojo.jdautil.wrapper.MessageEventWrapper;
@@ -17,8 +18,8 @@ public class ExitCommand extends SimpleCommand {
     private final FoxesBot bot;
 
     public ExitCommand(FoxesBot bot) {
-        super("exit", new String[]{"shutdown"}, "Shutdowns the bot.",
-                argsBuilder().build(), Permission.ADMINISTRATOR);
+        super("exit", new String[]{"shutdown"}, "command.exit.description",
+                (SimpleArgument[]) null, Permission.ADMINISTRATOR);
         this.bot = bot;
     }
 

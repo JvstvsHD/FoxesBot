@@ -16,7 +16,6 @@ public class CustomOutputStream extends OutputStream {
     Logger logger;
     private final Level levels;
     StringBuilder stringBuilder;
-    private TextChannel channel = null;
 
     public CustomOutputStream(Logger logger, Level levelMap) {
         this.logger = logger;

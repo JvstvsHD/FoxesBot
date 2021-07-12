@@ -6,7 +6,6 @@ public class BaseSettings {
     private String commandChar = "c?";
     private String token = "";
     private String githubToken = "";
-    private int helpEntriesPerPage = 0;
 
     public String getCommandChar() {
         return commandChar;
@@ -20,7 +19,4 @@ public class BaseSettings {
         return githubToken;
     }
 
-    public int getHelpEntriesPerPage() {
-        return helpEntriesPerPage;
-    }
 }

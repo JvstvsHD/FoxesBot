@@ -11,9 +11,9 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 public class BanCommand extends SimpleModerationCommand {
 
     public BanCommand() {
-        super("ban", new String[]{"permban"}, "Bans the user from the arguments for a specific reason permanent.",
-                argsBuilder().add(OptionType.USER, "user", "User to ban")
-                .add(OptionType.STRING, "reason", "Reason for the ban").
+        super("ban", new String[]{"permban"}, "command.ban.description",
+                argsBuilder().add(OptionType.USER, "user", "User to ban", true)
+                .add(OptionType.STRING, "reason", "Reason for the ban", true).
                         add(OptionType.INTEGER, "del", "Duration of messages sent by the user which should be deleted", false).build(), Permission.BAN_MEMBERS);
     }
 
@@ -24,11 +24,12 @@ public class BanCommand extends SimpleModerationCommand {
 
     @Override
     public boolean onCommand(MessageEventWrapper eventWrapper, CommandContext context) {
+        eventWrapper.reply("in Arbeit...").queue();
         return false;
     }
 
     @Override
     public void onSlashCommand(SlashCommandEvent event, SlashCommandContext context) {
-
+        event.reply("In Arbeit...").queue();
     }
 }

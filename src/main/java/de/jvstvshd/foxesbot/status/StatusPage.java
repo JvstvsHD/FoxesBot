@@ -8,6 +8,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 
 public class StatusPage extends StatusObject {
@@ -35,7 +36,7 @@ public class StatusPage extends StatusObject {
                 builder.appendDescription("**").appendDescription(component.getName()).appendDescription("**: ").appendDescription(component.getStatusState().getTranslation()).appendDescription("\n");
             }
         }
-        return builder.build();
+        return builder.setTimestamp(Instant.now()).build();
     }
 
     public static StatusPage fromURL(String url, String title) throws IOException {
@@ -75,10 +76,6 @@ public class StatusPage extends StatusObject {
         }
         components.sort((o1, o2) -> Boolean.compare(o1.hasChildComponents(), o2.hasChildComponents()));
         return new StatusPage(components, title, url);
-    }
-
-    public static StatusPage fromURL(String url) throws IOException {
-        return fromURL(url, url);
     }
 
     private static boolean isUsable(String string) {
