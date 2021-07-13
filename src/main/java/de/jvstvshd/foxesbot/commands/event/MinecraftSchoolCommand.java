@@ -13,11 +13,11 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
-public class SimpleEventCommand extends SimpleCommand {
+public class MinecraftSchoolCommand extends SimpleCommand {
 
     private final FoxesBot bot;
 
-    public SimpleEventCommand(FoxesBot bot) {
+    public MinecraftSchoolCommand(FoxesBot bot) {
         super("school", new String[]{}, "command.event.mcschool.description",
                 argsBuilder().add(OptionType.STRING, "type", "command.event.mcschool.type", true).build(),
                 Permission.UNKNOWN);

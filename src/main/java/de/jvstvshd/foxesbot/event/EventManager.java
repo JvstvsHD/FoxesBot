@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.entities.User;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class EventManager {
@@ -26,13 +25,18 @@ public class EventManager {
         bot.getScheduler().scheduleAsync(() -> {
             for (Map.Entry<User, EventSession> entry : eventSessions.entrySet()) {
                 if (entry.getValue().isInactive()) {
-                    entry.getKey().openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessage("Die Befragung wurde aufgrund von Inaktivität beendet.")).queue();
+                    if (!entry.getValue().wasSessionClosed()) {
+                        entry.getKey().openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessage("Die Befragung wurde aufgrund von Inaktivität beendet.")).queue();
+                        entry.getValue().setSessionClosed(System.currentTimeMillis());
+                    }
                     entry.getValue().setBuilderData(EventSession.State.TIMEOUT);
-                    eventSessions.remove(entry.getKey());
+                    if (entry.getValue().shouldBeRemoved()) {
+                        eventSessions.remove(entry.getKey());
+                    }
                     break;
                 }
             }
-        }, 60L, TimeUnit.SECONDS);
+        }, 1L, TimeUnit.SECONDS);
 
     }
 
@@ -44,16 +48,14 @@ public class EventManager {
         return eventSessions;
     }
 
-    public void remove(User user) {
-        eventSessions.remove(user);
-    }
-
     public boolean newEventSession(User user, EventSession.Type type, Guild guild) {
-        if (eventSessions.containsKey(user))
+        if (isOnCooldown(user))
             return false;
         String questionString = bot.getLocalizer().localize("event.school.question." + type.getKey());
         String[] questions = questionString.split("\\|");
         final TextChannel channel = guild.getTextChannelById(logChannel.get(String.valueOf(guild.getIdLong())));
+        if (channel == null)
+            throw new RuntimeException(new NullPointerException("The text channel with the id " + logChannel.get(guild.getId()) + " for the guild " + guild.getIdLong() + " could not be found."));
         bot.getScheduler().runAsync(() -> {
             EventSession session = new EventSession(new ArrayList<>(Arrays.asList(questions)), bot, type);
             eventSessions.put(user, session);
@@ -70,5 +72,11 @@ public class EventManager {
         EventManager eventManager = new EventManager(bot);
         eventManager.init();
         return eventManager;
+    }
+
+    public boolean isOnCooldown(User user) {
+        if (eventSessions.containsKey(user))
+            return true;
+        return System.currentTimeMillis() - bot.getStartTime() >= bot.getConfiguration().getConfigFile().getEventSettings().getEventSessionCooldown();
     }
 }

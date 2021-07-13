@@ -8,6 +8,7 @@ import java.util.Map;
 public class EventSettings {
 
     private long eventSessionTimeout = 0L;
+    private long eventSessionCooldown = 0L;
     private Map<String, Long> guildChannels = Maps.newHashMap();
 
     public long getEventSessionTimeout() {
@@ -16,5 +17,9 @@ public class EventSettings {
 
     public Map<String, Long> getGuildChannels() {
         return guildChannels;
+    }
+
+    public long getEventSessionCooldown() {
+        return eventSessionCooldown;
     }
 }

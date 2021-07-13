@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.entities.User;
 import java.awt.*;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,8 @@ public class EventSession {
     private final FoxesBot bot;
     private final int questionNumber;
     private final Type type;
+    private long sessionClosed;
+    private boolean wasSessionClosed;
 
     public EventSession(List<String> questions, FoxesBot bot, Type type) {
         this.questions = questions;
@@ -63,6 +64,7 @@ public class EventSession {
         logBuilder.appendDescription(answers.size() + ".: " + message.getContentRaw() + "\n");
         setBuilderData(State.RUNNING);
         if (answers.size() == questionNumber) {
+            this.sessionClosed = System.currentTimeMillis();
             setBuilderData(State.SUCCESS);
             channel.sendMessage(bot.getLocalizer().localize("event.school.survey.end")).queue();
             return;
@@ -76,29 +78,43 @@ public class EventSession {
 
     public void setEnded(boolean ended) {
         this.ended = ended;
-        if (ended)
-            bot.getEventManager().remove(this.channel.getUser());
+        if (ended) {
+
+            this.wasSessionClosed = true;
+        }
     }
 
     public boolean isInactive() {
         if (isEnded())
             return true;
+        return timedOut();
+    }
+
+    public boolean timedOut() {
+        if (logMessage == null) {
+            bot.getLogger().debug(logMessage);
+            return false;
+        }
         OffsetDateTime time = logMessage.getTimeEdited();
         if (time == null)
-            return true;
-        return Duration.between(time, LocalDateTime.now()).toMillis() >= bot.getConfiguration().getConfigFile().getEventSettings().getEventSessionTimeout();
+            time = logMessage.getTimeCreated();
+        OffsetDateTime now = OffsetDateTime.now(time.getOffset());
+        Duration duration = Duration.between(time, now);
+        return duration.toMillis() >= bot.getConfiguration().getConfigFile().getEventSettings().getEventSessionTimeout();
     }
 
     public void setBuilderData(State state) {
         logMessage.editMessageEmbeds(
                 logBuilder.setTitle("Befragung – Status: " + state.getName(bot.getLocalizer())).setTimestamp(Instant.now()).setColor(state.getColor()).build()).queue();
+        if (state == State.RUNNING)
+            wasSessionClosed = true;
         if (state == State.RUNNING || state == State.NOT_CONFIRMED)
             return;
         setEnded(true);
     }
 
     public enum State {
-        NOT_CONFIRMED("not_confirmed", Color.ORANGE),
+        NOT_CONFIRMED("notconfirmed", Color.ORANGE),
         RUNNING("running", Color.YELLOW),
         SUCCESS("success", Color.GREEN),
         TIMEOUT("timeout", Color.RED);
@@ -146,14 +162,6 @@ public class EventSession {
             return localizer.localize("event.school.type." + key);
         }
 
-        public static String getKey(String name, Localizer localizer) {
-            for (Type value : values()) {
-                if (localizer.localize("event.school.type." + value.getKey()).equalsIgnoreCase(name))
-                    return value.getKey();
-            }
-            return "";
-        }
-
         public static Optional<Type> getType(String key) {
             for (Type value : values()) {
                 if (value.getKey().equalsIgnoreCase(key))
@@ -161,5 +169,23 @@ public class EventSession {
             }
             return Optional.empty();
         }
+    }
+
+    public long getSessionClosed() {
+        return sessionClosed;
+    }
+
+    public boolean shouldBeRemoved() {
+        long difference = System.currentTimeMillis() - getSessionClosed();
+        System.out.println(difference);
+        return System.currentTimeMillis() - getSessionClosed() > bot.getConfiguration().getConfigFile().getEventSettings().getEventSessionCooldown();
+    }
+
+    public boolean wasSessionClosed() {
+        return wasSessionClosed;
+    }
+
+    public void setSessionClosed(long sessionClosed) {
+        this.sessionClosed = sessionClosed;
     }
 }

@@ -9,7 +9,7 @@ import de.jvstvshd.foxesbot.commands.ExitCommand;
 import de.jvstvshd.foxesbot.commands.HelpCommand;
 import de.jvstvshd.foxesbot.commands.InfoCommand;
 import de.jvstvshd.foxesbot.commands.StatusCommand;
-import de.jvstvshd.foxesbot.commands.event.SimpleEventCommand;
+import de.jvstvshd.foxesbot.commands.event.MinecraftSchoolCommand;
 import de.jvstvshd.foxesbot.commands.moderation.BanCommand;
 import de.jvstvshd.foxesbot.config.Configuration;
 import de.jvstvshd.foxesbot.event.EventManager;
@@ -42,8 +42,10 @@ public class FoxesBot {
     private CommandHub<SimpleCommand> commandHub;
     private Localizer localizer;
     private final EventManager eventManager;
+    private long startTime;
 
     public FoxesBot() {
+        this.startTime = Long.MAX_VALUE;
         this.scheduler = new FoxesScheduler(this);
         this.githubClient = new GitHubClient();
         this.eventManager = EventManager.build(this);
@@ -59,6 +61,7 @@ public class FoxesBot {
 
     protected void start() throws Exception {
         init();
+        this.startTime = System.currentTimeMillis();
     }
 
     private void loadConfiguration() {
@@ -71,7 +74,7 @@ public class FoxesBot {
         this.shardManager = DefaultShardManagerBuilder.createDefault(token)
                 .addEventListeners(new EventMessageListener(this), new ReadyListener(this))
                 .setEnableShutdownHook(false)
-                .setActivity(Activity.playing("c?help"))
+                .setActivity(Activity.playing(getConfiguration().getConfigFile().getBaseSettings().getCommandChar() + "help"))
                 .build();
         Map<Language, ResourceBundle> resourceBundleMap;
         try {
@@ -102,7 +105,7 @@ public class FoxesBot {
                         new BanCommand(),
                         new HelpCommand(this),
                         new InfoCommand(this),
-                        new SimpleEventCommand(this)
+                        new MinecraftSchoolCommand(this)
                 );
         this.commandHub = command.build();
     }
@@ -182,5 +185,9 @@ public class FoxesBot {
 
     public EventManager getEventManager() {
         return eventManager;
+    }
+
+    public long getStartTime() {
+        return startTime;
     }
 }
