@@ -33,6 +33,7 @@ public class EventSession {
     private long sessionClosed;
     private boolean wasSessionClosed;
     private long lastEdited;
+    private String currentQuestion;
 
     public EventSession(List<String> questions, FoxesBot bot, Type type) {
         this.questions = questions;
@@ -57,14 +58,14 @@ public class EventSession {
         if (isEnded())
             return;
         int number = ThreadLocalRandom.current().nextInt(questions.size());
-        String question = questions.get(number);
+        String question = currentQuestion = questions.get(number);
         channel.sendMessage((answers.size() + 1) + ". " + question).queue(message -> questions.remove(question));
     }
 
     public void answer(Message message) {
         this.lastEdited = System.currentTimeMillis();
         this.answers.put(answers.size() + 1, message.getContentRaw());
-        logBuilder.appendDescription(answers.size() + ".: " + message.getContentRaw() + "\n");
+        logBuilder.appendDescription("**" + answers.size() + "." + currentQuestion + "**\n" + message.getContentRaw() + "\n");
         setBuilderData(State.RUNNING);
         if (answers.size() == questionNumber) {
             this.sessionClosed = System.currentTimeMillis();
