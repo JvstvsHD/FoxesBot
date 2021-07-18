@@ -32,6 +32,7 @@ public class EventSession {
     private final Type type;
     private long sessionClosed;
     private boolean wasSessionClosed;
+    private long lastEdited;
 
     public EventSession(List<String> questions, FoxesBot bot, Type type) {
         this.questions = questions;
@@ -43,6 +44,7 @@ public class EventSession {
 
     public void start(User user, Message logMessage) {
         user.openPrivateChannel().flatMap(privateChannel -> {
+            this.lastEdited = System.currentTimeMillis();
             this.channel = privateChannel;
             this.logMessage = logMessage;
             bot.getScheduler().delayAsync(this::ask, 1L, TimeUnit.SECONDS);
@@ -60,6 +62,7 @@ public class EventSession {
     }
 
     public void answer(Message message) {
+        this.lastEdited = System.currentTimeMillis();
         this.answers.put(answers.size() + 1, message.getContentRaw());
         logBuilder.appendDescription(answers.size() + ".: " + message.getContentRaw() + "\n");
         setBuilderData(State.RUNNING);
@@ -85,8 +88,9 @@ public class EventSession {
     }
 
     public boolean isInactive() {
-        if (isEnded())
+        if (isEnded()) {
             return true;
+        }
         return timedOut();
     }
 
@@ -95,12 +99,7 @@ public class EventSession {
             bot.getLogger().debug(logMessage);
             return false;
         }
-        OffsetDateTime time = logMessage.getTimeEdited();
-        if (time == null)
-            time = logMessage.getTimeCreated();
-        OffsetDateTime now = OffsetDateTime.now(time.getOffset());
-        Duration duration = Duration.between(time, now);
-        return duration.toMillis() >= bot.getConfiguration().getConfigFile().getEventSettings().getEventSessionTimeout();
+        return System.currentTimeMillis()-lastEdited >= bot.getConfiguration().getConfigFile().getEventSettings().getEventSessionTimeout();
     }
 
     public void setBuilderData(State state) {
@@ -157,7 +156,6 @@ public class EventSession {
         public String getKey() {
             return key;
         }
-
         public String getName(Localizer localizer) {
             return localizer.localize("event.school.type." + key);
         }
@@ -177,8 +175,8 @@ public class EventSession {
 
     public boolean shouldBeRemoved() {
         long difference = System.currentTimeMillis() - getSessionClosed();
-        System.out.println(difference);
-        return System.currentTimeMillis() - getSessionClosed() > bot.getConfiguration().getConfigFile().getEventSettings().getEventSessionCooldown();
+        boolean shouldRemove = difference > bot.getConfiguration().getConfigFile().getEventSettings().getEventSessionCooldown();
+        return shouldRemove;
     }
 
     public boolean wasSessionClosed() {
