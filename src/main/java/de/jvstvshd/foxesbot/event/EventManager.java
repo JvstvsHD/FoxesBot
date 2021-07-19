@@ -7,9 +7,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -18,11 +15,9 @@ public class EventManager {
     private final Map<User, EventSession> eventSessions = Maps.newHashMap();
     private Map<String, Long> logChannel;
     private final FoxesBot bot;
-    private final QuestionSystem questionSystem;
 
     private EventManager(FoxesBot bot) {
         this.bot = bot;
-        this.questionSystem = QuestionSystem.loadQuestions(EventManager.class.getResourceAsStream("/questions.properties")).orElse(null);
     }
 
     public void init() {
@@ -55,12 +50,11 @@ public class EventManager {
     public boolean newEventSession(User user, EventSession.Type type, Guild guild) {
         if (isOnCooldown(user))
             return false;
-        String questionString = bot.getLocalizer().localize("event.school.question." + type.getKey());
-        String[] questions = questionString.split("\\|");
         final TextChannel channel = guild.getTextChannelById(logChannel.get(String.valueOf(guild.getIdLong())));
         if (channel == null)
             throw new RuntimeException(new NullPointerException("The text channel with the id " + logChannel.get(guild.getId()) + " for the guild " + guild.getIdLong() + " could not be found."));
         bot.getScheduler().runAsync(() -> {
+            QuestionSystem questionSystem = new QuestionSystem(bot.getLocalizer());
             EventSession session = new EventSession(questionSystem.getQuestions(type.getKey()), bot, type);
             eventSessions.put(user, session);
             channel.sendMessage(bot.getLocalizer().localize("event.school.log", Replacement.create("USER", user.getAsMention()), Replacement.create("SUBJECT", type.getName(bot.getLocalizer())))).queue(message -> session.start(user, message));

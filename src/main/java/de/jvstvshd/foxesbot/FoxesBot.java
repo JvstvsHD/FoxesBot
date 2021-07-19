@@ -3,6 +3,7 @@ package de.jvstvshd.foxesbot;
 import com.google.common.collect.Maps;
 import de.chojo.jdautil.command.SimpleCommand;
 import de.chojo.jdautil.command.dispatching.CommandHub;
+import de.chojo.jdautil.localization.ILocalizer;
 import de.chojo.jdautil.localization.Localizer;
 import de.chojo.jdautil.localization.util.Language;
 import de.jvstvshd.foxesbot.commands.ExitCommand;
