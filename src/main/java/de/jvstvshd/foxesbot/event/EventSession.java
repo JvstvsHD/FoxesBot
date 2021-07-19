@@ -8,6 +8,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.User;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.time.Instant;
@@ -32,6 +34,7 @@ public class EventSession {
     private boolean wasSessionClosed;
     private long lastEdited;
     private String currentQuestion;
+    private final static Logger logger = LogManager.getLogger(EventSession.class);
 
     public EventSession(List<String> questions, FoxesBot bot, Type type) {
         this.questions = questions;
@@ -95,17 +98,17 @@ public class EventSession {
 
     public boolean timedOut() {
         if (logMessage == null) {
-            bot.getLogger().debug(logMessage);
+            this.lastEdited = System.currentTimeMillis();
             return false;
         }
-        return System.currentTimeMillis()-lastEdited >= bot.getConfiguration().getConfigFile().getEventSettings().getEventSessionTimeout();
+        long difference = System.currentTimeMillis() - lastEdited;
+        long timeout = bot.getConfiguration().getConfigFile().getEventSettings().getEventSessionTimeout();
+        return difference >= timeout;
     }
 
     public void setBuilderData(State state) {
         logMessage.editMessageEmbeds(
                 logBuilder.setTitle("Befragung – Status: " + state.getName(bot.getLocalizer())).setTimestamp(Instant.now()).setColor(state.getColor()).build()).queue();
-        if (state == State.RUNNING)
-            wasSessionClosed = true;
         if (state == State.RUNNING || state == State.NOT_CONFIRMED)
             return;
         setEnded(true);
@@ -184,5 +187,6 @@ public class EventSession {
 
     public void setSessionClosed(long sessionClosed) {
         this.sessionClosed = sessionClosed;
+        this.wasSessionClosed = true;
     }
 }
