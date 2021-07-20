@@ -8,10 +8,13 @@ import de.jvstvshd.foxesbot.FoxesBot;
 import de.jvstvshd.foxesbot.event.EventSession;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
+
+import java.util.Map;
 
 public class MinecraftSchoolCommand extends SimpleCommand {
 
@@ -24,9 +27,23 @@ public class MinecraftSchoolCommand extends SimpleCommand {
         this.bot = bot;
     }
 
-    protected final String startEvent(User user, String typeString, Guild guild) {
+    protected final String startEvent(MessageChannel channel, User user, String typeString, Guild guild) {
         if (typeString.equalsIgnoreCase("help")) {
             return getHelp();
+        }
+        Map<String, Long> channelMap = bot.getConfiguration().getConfigFile().getEventSettings().getExecuteChannels();
+        boolean allowed = false;
+        long channelLong = 0;
+        try {
+            channelLong = channelMap.get(String.valueOf(guild.getIdLong()));
+        } catch (NullPointerException exception) {
+            bot.getLogger().warn("Channel for guild " + guild.getName() + " (" + guild.getIdLong() + ") was not set, setting it to zero.");
+            channelMap.put(String.valueOf(guild.getIdLong()), channel.getIdLong());
+        }
+        if (channelLong == channel.getIdLong() || channelLong == 0)
+            allowed = true;
+        if (!allowed) {
+            return "Bitte benutze diesen Befehl im zugehörigen Channel!";
         }
         EventSession.Type type = EventSession.Type.getType(typeString).orElse(EventSession.Type.UNKNOWN);
         if (type == EventSession.Type.UNKNOWN)
@@ -38,7 +55,7 @@ public class MinecraftSchoolCommand extends SimpleCommand {
     @Override
     public boolean onCommand(MessageEventWrapper eventWrapper, CommandContext context) {
         String type = context.argString(0).orElse("unknown");
-        eventWrapper.reply(startEvent(eventWrapper.getAuthor(), type, eventWrapper.getGuild())).queue();;
+        eventWrapper.reply(startEvent(eventWrapper.getChannel(), eventWrapper.getAuthor(), type, eventWrapper.getGuild())).queue();
         return true;
     }
 
@@ -50,7 +67,7 @@ public class MinecraftSchoolCommand extends SimpleCommand {
             type = "unknown";
         else
             type = option.getAsString();
-        event.reply(startEvent(event.getUser(), type, event.getGuild())).queue();
+        event.reply(startEvent(event.getChannel(), event.getUser(), type, event.getGuild())).queue();
     }
 
     private String getHelp() {

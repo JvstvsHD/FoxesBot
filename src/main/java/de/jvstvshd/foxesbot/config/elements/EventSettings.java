@@ -10,6 +10,7 @@ public class EventSettings {
     private long eventSessionTimeout = 0L;
     private long eventSessionCooldown = 0L;
     private Map<String, Long> guildChannels = Maps.newHashMap();
+    private Map<String, Long> executeChannels = Maps.newHashMap();
 
     public long getEventSessionTimeout() {
         return eventSessionTimeout;
@@ -21,5 +22,9 @@ public class EventSettings {
 
     public long getEventSessionCooldown() {
         return eventSessionCooldown;
+    }
+
+    public Map<String, Long> getExecuteChannels() {
+        return executeChannels;
     }
 }
