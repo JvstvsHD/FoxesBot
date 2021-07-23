@@ -3,13 +3,9 @@ package de.jvstvshd.foxesbot;
 import com.google.common.collect.Maps;
 import de.chojo.jdautil.command.SimpleCommand;
 import de.chojo.jdautil.command.dispatching.CommandHub;
-import de.chojo.jdautil.localization.ILocalizer;
 import de.chojo.jdautil.localization.Localizer;
 import de.chojo.jdautil.localization.util.Language;
-import de.jvstvshd.foxesbot.commands.ExitCommand;
-import de.jvstvshd.foxesbot.commands.HelpCommand;
-import de.jvstvshd.foxesbot.commands.InfoCommand;
-import de.jvstvshd.foxesbot.commands.StatusCommand;
+import de.jvstvshd.foxesbot.commands.*;
 import de.jvstvshd.foxesbot.commands.event.MinecraftSchoolCommand;
 import de.jvstvshd.foxesbot.commands.moderation.BanCommand;
 import de.jvstvshd.foxesbot.config.Configuration;
@@ -106,7 +102,8 @@ public class FoxesBot {
                         new BanCommand(),
                         new HelpCommand(this),
                         new InfoCommand(this),
-                        new MinecraftSchoolCommand(this)
+                        new MinecraftSchoolCommand(this),
+                        new InviteCommand()
                 );
         this.commandHub = command.build();
     }
