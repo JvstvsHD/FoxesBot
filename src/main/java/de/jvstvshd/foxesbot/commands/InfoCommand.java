@@ -42,7 +42,13 @@ public class InfoCommand extends SimpleCommand {
         EmbedBuilder builder = new EmbedBuilder();
         StringBuilder uptimeBuilder = new StringBuilder();
         Duration duration = Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime());
-        uptimeBuilder.append(duration.toDaysPart()).append(":").append(duration.toHoursPart()).append(":").append(duration.toMinutesPart()).append(":").append(duration.toSecondsPart());
+        uptimeBuilder.append(duration.toDaysPart())
+                .append(":")
+                .append(format(duration.toHoursPart()))
+                .append(":")
+                .append(format(duration.toMinutesPart()))
+                .append(":")
+                .append(format(duration.toSecondsPart()));
         String uptime = UserUtils.isPermitted(member, Permission.ADMINISTRATOR) ? "Uptime: " + uptimeBuilder + "\n" : "";
         long memoryUsage = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         DecimalFormat decimalFormat = new DecimalFormat("####,##");
@@ -57,5 +63,12 @@ public class InfoCommand extends SimpleCommand {
                 .appendDescription(memory);
         message = builder.build();
         return message;
+    }
+
+    private String format(int number) {
+        String s = String.valueOf(number);
+        if (s.length() <= 1)
+            s = "0" + s;
+        return s;
     }
 }

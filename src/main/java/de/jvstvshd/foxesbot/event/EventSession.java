@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -66,7 +67,8 @@ public class EventSession {
     public void answer(Message message) {
         this.lastEdited = System.currentTimeMillis();
         this.answers.put(answers.size() + 1, message.getContentRaw());
-        logBuilder.appendDescription("**" + answers.size() + "." + currentQuestion + "**\n" + message.getContentRaw() + "\n");
+        logger.debug(message.getAuthor().getName() + " has answered his " + answers.size() + 1 + " question '" + currentQuestion + "' with '" + message.getContentRaw() + "'.");
+        logBuilder.appendDescription("__" + answers.size() + "." + currentQuestion + "__\n" + message.getContentRaw() + "\n");
         setBuilderData(State.RUNNING);
         if (answers.size() == questionNumber) {
             this.sessionClosed = System.currentTimeMillis();
