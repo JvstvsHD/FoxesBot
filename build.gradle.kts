@@ -1,44 +1,75 @@
 plugins {
+    kotlin("jvm") version "1.5.31"
     java
-    id("com.github.johnrengelman.shadow") version "7.0.0"
+    application
 }
 
-group = "de.jvstvshd"
-version = "1.0.0-alpha.6.4"
+group = "de.jvstvshd.foxesbot"
+version = "1.0.0"
 
-val jdaVersion = "4.3.0_298"
 val log4jVersion = "2.14.1"
 
 repositories {
     mavenCentral()
-    maven("https://m2.dv8tion.net/releases")
-    maven("https://repo.hypixel.net/repository/Hypixel/")
-    maven("https://eldonexus.de/repository/maven-public")
+    maven("https://oss.sonatype.org/content/repositories/snapshots")
+    maven {
+        name = "Kotlin Discord"
+        url = uri("https://maven.kotlindiscord.com/repository/maven-public/")
+    }
+    maven("https://s01.oss.sonatype.org/content/repositories/snapshots")
 }
 
 dependencies {
-    implementation("net.dv8tion", "JDA", jdaVersion)
-    implementation("org.slf4j", "slf4j-api", "1.7.30")
-    implementation("org.apache.logging.log4j", "log4j-core", log4jVersion)
-    implementation("org.apache.logging.log4j", "log4j-slf4j-impl", log4jVersion)
-    implementation("com.google.guava:guava:30.1.1-jre")
-    implementation("org.jsoup:jsoup:1.13.1")
-    implementation("com.google.code.gson:gson:2.8.7")
-    implementation("org.apache.httpcomponents:httpclient:4.5.13")
-    implementation("org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.3")
-    implementation("net.hypixel:HypixelAPI:3.0.0")
-    implementation("de.chojo", "cjda-util", "1.4.1")
+    //kotlin
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.5.2")
+    implementation("io.github.qbosst:kordex-hybrid-commands:1.0.3-SNAPSHOT")
+
+    //discord
+    implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.1-SNAPSHOT")
+
+    //logging
+    implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
+    implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
+    implementation("org.slf4j:slf4j-api:1.7.30")
+
+    //database
+    implementation("org.mariadb.jdbc:mariadb-java-client:2.7.4")
+    implementation("com.zaxxer:HikariCP:5.0.0")
+
+    //(de)serialization
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0-rc2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0")
+
+    //some other stuff
+    implementation("org.kohsuke:github-api:1.135")
+    implementation("org.jsoup:jsoup:1.14.3")
+
+    //JUnit
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
 }
 
-tasks.withType<JavaCompile>().configureEach {
-    options.encoding = "UTF-8"
+tasks.getByName<Test>("test") {
+    useJUnitPlatform()
 }
 
-tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>().configureEach {
-    destinationDirectory.set(file("C:\\IntelliJ\\Projects\\FoxesBot\\jars"))
-    manifest {
-        attributes["Main-Class"] = "de.jvstvshd.foxesbot.Launcher"
-        attributes["Multi-Release"] = true
+tasks {
+    jar {
+        manifest {
+            attributes["Main-Class"] = "de.jvstvshd.foxesbot.LauncherKt"
+            attributes["Multi-Release"] = true
+
+        }
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+    }
+
+    compileKotlin {
+        kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+    }
+
+    compileTestKotlin {
+        kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
     }
 }
