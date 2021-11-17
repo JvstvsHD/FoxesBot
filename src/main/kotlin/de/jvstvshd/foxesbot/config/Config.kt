@@ -7,7 +7,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.fileSize
 
-class Config(private val path: Path) {
+class Config(private val path: Path = Path.of("config.json")) {
 
     private val objectMapper = ObjectMapper()
     lateinit var configData: ConfigData

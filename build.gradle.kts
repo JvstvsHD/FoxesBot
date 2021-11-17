@@ -30,15 +30,16 @@ dependencies {
     //logging
     implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
-    implementation("org.slf4j:slf4j-api:1.7.30")
+    implementation("org.slf4j:slf4j-api:1.7.32")
 
     //database
     implementation("org.mariadb.jdbc:mariadb-java-client:2.7.4")
     implementation("com.zaxxer:HikariCP:5.0.0")
+    implementation("org.mybatis:mybatis:3.5.7")
 
     //(de)serialization
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.0")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0-rc2")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0")
 
     //some other stuff
@@ -67,9 +68,11 @@ tasks {
 
     compileKotlin {
         kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+        targetCompatibility = "17"
     }
 
     compileTestKotlin {
         kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+        targetCompatibility = "17"
     }
 }

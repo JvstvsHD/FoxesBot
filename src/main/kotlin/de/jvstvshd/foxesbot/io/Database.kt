@@ -2,8 +2,11 @@ package de.jvstvshd.foxesbot.io
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import de.jvstvshd.foxesbot.FoxesBot
 import de.jvstvshd.foxesbot.config.data.DataBaseData
+import org.apache.ibatis.jdbc.ScriptRunner
 import org.mariadb.jdbc.MariaDbDataSource
+import java.io.InputStreamReader
 import java.util.*
 
 class Database(private val dataBaseData: DataBaseData) {
@@ -28,65 +31,8 @@ class Database(private val dataBaseData: DataBaseData) {
     }
 
     private fun init() {
-        dataSource.connection.use { connection ->
-            connection.prepareStatement(
-                "CREATE TABLE IF NOT EXISTS updates " +
-                        "(" +
-                        "url VARCHAR (1024) NOT NULL," +
-                        "type VARCHAR (100) NOT NULL," +
-                        "primary key(type)" +
-                        ");"
-            ).use { preparedStatement ->
-                preparedStatement.executeUpdate()
-            }
-        }
-        dataSource.connection.use { connection ->
-            connection.prepareStatement(
-                "CREATE TABLE IF NOT EXISTS update_tracker_subscriptions" +
-                        "(" +
-                        "id BIGINT NOT NULL," +
-                        "type CHAR (255) NOT NULL," +
-                        "CONSTRAINT update_tracker_subscriptions_constraint " +
-                        "UNIQUE (type, id)" +
-                        ");"
-            ).use { preparedStatement -> preparedStatement.executeUpdate() }
-        }
-        dataSource.connection.use { connection ->
-            connection.prepareStatement(
-                "CREATE TABLE IF NOT EXISTS status_aliases" +
-                        "(" +
-                        "name CHAR (255) NOT NULL," +
-                        "url CHAR (255) NOT NULL," +
-                        "type CHAR (255) NOT NULL," +
-                        "primary key (name)" +
-                        ");"
-            ).use { preparedStatement -> preparedStatement.executeUpdate() }
-        }
-        dataSource.connection.use { connection ->
-            connection.prepareStatement(
-                "CREATE TABLE IF NOT EXISTS presence_status" +
-                        "(" +
-                        "id BIGINT NOT NULL," +
-                        "status CHAR (255) NOT NULL," +
-                        "primary key (id)" +
-                        ");"
-            ).use {
-                it.executeUpdate()
-            }
-        }
-        dataSource.connection.use { connection ->
-            connection.prepareStatement(
-                "CREATE TABLE IF NOT EXISTS offline_checker" +
-                        "(" +
-                        "id BIGINT NOT NULL," +
-                        "suppressed BOOLEAN NOT NULL," +
-                        "banned BOOLEAN NOT NULL," +
-                        "type CHAR (64)," +
-                        "primary key (id)" +
-                        ");"
-            ).use {
-                it.executeUpdate()
-            }
+        dataSource.connection.use {
+            ScriptRunner(it).runScript(InputStreamReader(FoxesBot::class.java.getResourceAsStream("/init.sql")!!))
         }
     }
 }
