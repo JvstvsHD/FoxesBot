@@ -7,4 +7,5 @@ suspend fun CoreModule.commands(config: Config) {
     infoCommand()
     exitCommand()
     helpCommand(config)
+    settingsCommand()
 }

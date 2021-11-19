@@ -62,7 +62,7 @@ class OfflineCheckerModule(private val dataSource: HikariDataSource, private val
                         }
                     }
                 }
-                if (event.presence.status == PresenceStatus.Offline) {
+                if (event.presence.status == PresenceStatus.Offline && event.member.getVoiceStateOrNull()?.channelId != null) {
                     getOrCreateOfflineChecker(event.getMember()).start()
                 }
             }
