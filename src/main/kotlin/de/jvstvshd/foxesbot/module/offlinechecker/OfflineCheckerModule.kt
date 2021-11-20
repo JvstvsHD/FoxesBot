@@ -14,7 +14,10 @@ import dev.kord.core.entity.Member
 import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.user.PresenceUpdateEvent
 import dev.kord.core.event.user.VoiceStateUpdateEvent
-import kotlinx.coroutines.*
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import java.util.concurrent.Executor
@@ -37,17 +40,15 @@ class OfflineCheckerModule(private val dataSource: HikariDataSource, private val
         }
         event<ReadyEvent> {
             action {
-                GlobalScope.launch {
-                    async {
-                        delay(Duration.Companion.seconds(5))
-                        check(kord)
-                    }
+                GlobalScope.async {
+                    delay(Duration.Companion.seconds(5))
+                    check(kord)
                 }
             }
         }
         event<PresenceUpdateEvent> {
             action {
-                GlobalScope.async {
+                /*GlobalScope.async {
                     dataSource.connection.use { connection ->
                         try {
                             connection.prepareStatement("INSERT INTO presence_status (id, status) VALUES (?, ?) ON DUPLICATE KEY UPDATE status = ?;")
@@ -61,7 +62,7 @@ class OfflineCheckerModule(private val dataSource: HikariDataSource, private val
                             e.printStackTrace()
                         }
                     }
-                }
+                }*/
                 if (event.presence.status == PresenceStatus.Offline && event.member.getVoiceStateOrNull()?.channelId != null) {
                     getOrCreateOfflineChecker(event.getMember()).start()
                 }
@@ -77,12 +78,13 @@ class OfflineCheckerModule(private val dataSource: HikariDataSource, private val
 
     private suspend fun checkGuild(guild: Guild) {
         guild.members.filter { member -> member.getVoiceStateOrNull() != null }.collect { member ->
+            if (member.getVoiceStateOrNull()?.channelId == null)
+                return@collect
             checkMember(member)
         }
     }
 
-    private suspend fun checkMember0(member: Member, status: PresenceStatus) {
-        println(status)
+    private fun checkMember0(member: Member, status: PresenceStatus) {
         if (status == PresenceStatus.Offline) {
             println("offline: " + member.username)
             getOrCreateOfflineChecker(member).start()

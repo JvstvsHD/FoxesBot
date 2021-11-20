@@ -26,6 +26,14 @@ class FoxesBot {
         val datasource = database.dataSource
 
         val bot = ExtensibleBot(config.configData.baseData.token) {
+            extensions {
+                add { CoreModule(config, datasource) }
+                add { UpdateTrackerModule(datasource) }
+                add { StatusModule(datasource, config) }
+                add { OfflineCheckerModule(datasource, Executors.newScheduledThreadPool(10)) }
+                add { ChristmasModule(Executors.newScheduledThreadPool(10), datasource) }
+            }
+
             applicationCommands {
                 enabled = true
                 register = true
@@ -41,15 +49,6 @@ class FoxesBot {
                 /*+Intent.GuildMembers
                 +Intent.GuildVoiceStates*/
                 +Intent.GuildPresences
-            }
-
-
-            extensions {
-                add { CoreModule(config, datasource) }
-                add { UpdateTrackerModule(datasource) }
-                add { StatusModule(datasource, config) }
-                add { OfflineCheckerModule(datasource, Executors.newScheduledThreadPool(10)) }
-                add {ChristmasModule(Executors.newScheduledThreadPool(10), datasource)}
             }
 
             members {

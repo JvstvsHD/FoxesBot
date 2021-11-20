@@ -9,7 +9,6 @@ import dev.kord.rest.builder.message.create.embed
 suspend fun CoreModule.infoCommand() = publicSlashCommand {
     name = "info"
     description = "Displays information of the bot"
-    guild(773318688300466187L)
     action {
         respond {
             embed {

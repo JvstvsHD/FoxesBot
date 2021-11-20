@@ -21,7 +21,7 @@ repositories {
 
 dependencies {
     //kotlin
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.5.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.5.2-native-mt")
     implementation("io.github.qbosst:kordex-hybrid-commands:1.0.3-SNAPSHOT")
 
     //discord
