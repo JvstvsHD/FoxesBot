@@ -4,7 +4,7 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.event
 import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.foxesbot.module.updatetracker.gomme.GommeUpdateTracker
-import de.jvstvshd.foxesbot.utils.Util
+import de.jvstvshd.foxesbot.util.Util
 import dev.kord.core.event.gateway.ReadyEvent
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.Callable

@@ -8,4 +8,5 @@ suspend fun CoreModule.commands(config: Config) {
     exitCommand()
     helpCommand(config)
     settingsCommand()
+    musicCommands()
 }

@@ -3,24 +3,29 @@ package de.jvstvshd.foxesbot.module.offlinechecker
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.utils.scheduling.Scheduler
+import com.zaxxer.hikari.HikariDataSource
+import de.jvstvshd.foxesbot.config.Config
+import de.jvstvshd.foxesbot.util.KordUtil.toLong
 import dev.kord.common.entity.PresenceStatus
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Member
+import dev.kord.core.entity.channel.StageChannel
 import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.user.PresenceUpdateEvent
 import dev.kord.core.event.user.VoiceStateUpdateEvent
+import dev.kord.core.supplier.EntitySupplyStrategy
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
-import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
-class OfflineCheckerModule : Extension() {
+class OfflineCheckerModule(private val config: Config, val dataSource: HikariDataSource) : Extension() {
 
     override val name = "offline_checker"
     override val bundle = "offline_checker"
@@ -29,23 +34,28 @@ class OfflineCheckerModule : Extension() {
 
     @OptIn(ExperimentalTime::class, DelicateCoroutinesApi::class)
     override suspend fun setup() {
+        suppressCommand()
         event<VoiceStateUpdateEvent> {
             action {
-                println(event.state.data.channelId)
+                val member: Member = event.state.getMemberOrNull() ?: event.kord.getUser(
+                    event.state.userId,
+                    EntitySupplyStrategy.rest
+                )!!.asMember(event.state.guildId)
+                checkMember(member)
             }
         }
         event<ReadyEvent> {
             action {
                 GlobalScope.async {
-                    delay(Duration.Companion.seconds(5))
+                    delay(5.seconds)
                     check(kord)
                 }
             }
         }
         event<PresenceUpdateEvent> {
             action {
-                if (event.presence.status == PresenceStatus.Offline && event.member.getVoiceStateOrNull()?.channelId != null) {
-                    getOrCreateOfflineChecker(event.getMember()).start()
+                event.member.getPresenceOrNull()?.let {
+                    checkMember0(event.getMember(), event.presence.status)
                 }
             }
         }
@@ -65,21 +75,50 @@ class OfflineCheckerModule : Extension() {
         }
     }
 
-    private fun checkMember0(member: Member, status: PresenceStatus) {
+    private suspend fun suppressed(member: Member, channel: Snowflake?): Boolean {
+        if (channel != null) {
+            dataSource.connection.use { connection ->
+                connection.prepareStatement("SELECT FROM WHERE id = ? AND suppressed = ? AND type = ?").use {
+                    it.setLong(1, channel.value.toLong())
+                    it.setBoolean(2, true)
+                    it.setString(3, "channel")
+                    if (it.executeQuery().next()) {
+                        return true
+                    }
+                }
+            }
+        }
+        dataSource.connection.use { connection ->
+            connection.prepareStatement("SELECT FROM WHERE id = ? AND suppressed = ? AND type = ?").use {
+                it.setLong(1, member.toLong())
+                it.setBoolean(2, true)
+                it.setString(3, "member")
+                return it.executeQuery().next()
+            }
+        }
+    }
+
+    private suspend fun checkMember0(member: Member, status: PresenceStatus) {
         if (status == PresenceStatus.Offline) {
-            println("offline: " + member.username)
+            if (suppressed(member, member.getVoiceStateOrNull()?.channelId)) return
+            member.getVoiceStateOrNull()?.channelId?.let {
+                if (kord.getChannel(it) is StageChannel) {
+                    return
+                }
+            }
+            if (member.getVoiceStateOrNull() == null)
+                return
             getOrCreateOfflineChecker(member).start()
         }
     }
 
     private fun getOrCreateOfflineChecker(member: Member) =
-        offlineCheckers[member.id] ?: OfflineChecker(member).also {
+        offlineCheckers[member.id] ?: OfflineChecker(member, config.configData).also {
             offlineCheckers[member.id] = it
         }
 
     @OptIn(DelicateCoroutinesApi::class)
     private suspend fun checkMember(member: Member) {
-        println(member)
         if (member.getPresenceOrNull() == null) {
             return
         } else {

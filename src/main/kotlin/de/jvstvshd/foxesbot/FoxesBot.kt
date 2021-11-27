@@ -9,8 +9,8 @@ import de.jvstvshd.foxesbot.module.core.CoreModule
 import de.jvstvshd.foxesbot.module.offlinechecker.OfflineCheckerModule
 import de.jvstvshd.foxesbot.module.status.StatusModule
 import de.jvstvshd.foxesbot.module.updatetracker.UpdateTrackerModule
+import de.jvstvshd.foxesbot.util.KordUtil.toSnowflake
 import dev.kord.common.entity.PresenceStatus
-import dev.kord.common.entity.Snowflake
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
 import java.io.File
@@ -30,14 +30,14 @@ class FoxesBot {
                 add { CoreModule(config, datasource) }
                 add { UpdateTrackerModule(datasource) }
                 add { StatusModule(datasource, config) }
-                add { OfflineCheckerModule(datasource, Executors.newScheduledThreadPool(10)) }
-                add { ChristmasModule(Executors.newScheduledThreadPool(10), datasource) }
+                add { OfflineCheckerModule(config, datasource) }
+                add { ChristmasModule(Executors.newScheduledThreadPool(10), datasource, config) }
             }
 
             applicationCommands {
                 enabled = true
                 register = true
-                defaultGuild(Snowflake(config.configData.baseData.testGuildId))
+                config.configData.baseData.testGuildId?.let { defaultGuild(it.toSnowflake()) }
             }
 
             chatCommands {
@@ -46,13 +46,15 @@ class FoxesBot {
             }
 
             intents {
-                /*+Intent.GuildMembers
-                +Intent.GuildVoiceStates*/
+                +Intent.GuildMembers
+                +Intent.GuildVoiceStates
                 +Intent.GuildPresences
             }
 
             members {
                 fillPresences = true
+
+                all()
             }
 
             presence {
@@ -61,7 +63,7 @@ class FoxesBot {
             }
             i18n {
                 defaultLocale = SupportedLocales.GERMAN
-                localeResolver { guild, channel, user ->
+                localeResolver { _, _, _ ->
                     SupportedLocales.GERMAN
                 }
             }

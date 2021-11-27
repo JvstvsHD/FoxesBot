@@ -3,7 +3,7 @@ package de.jvstvshd.foxesbot.module.status.provider
 import de.jvstvshd.foxesbot.module.status.StatusData
 import de.jvstvshd.foxesbot.module.status.StatusMetaData
 import de.jvstvshd.foxesbot.module.status.StatusType
-import de.jvstvshd.foxesbot.utils.HttpUtil
+import de.jvstvshd.foxesbot.util.HttpUtil
 import org.jsoup.nodes.Element
 import java.net.MalformedURLException
 import java.net.URL

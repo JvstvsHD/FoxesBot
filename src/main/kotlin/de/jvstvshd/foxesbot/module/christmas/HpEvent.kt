@@ -6,49 +6,49 @@ import java.util.*
 object BigRegeneration : HpEvent(0.08) {
     override fun execute(startHp: Int): EventResult = EventResult(Type.HP, startHp - 48)
     override fun sendMessage(builder: EmbedBuilder) {
-        builder.description = "BigRegeneration"
+        builder.description = "Große Regeneration"
     }
 }
 
 object BigDegeneration : HpEvent(0.07) {
     override fun execute(startHp: Int): EventResult = EventResult(Type.HP, startHp - 14)
     override fun sendMessage(builder: EmbedBuilder) {
-        builder.description = "BigDeRegeneration"
+        builder.description = "Große Degeneration"
     }
 }
 
 object SmallRegeneration : HpEvent(0.15) {
     override fun execute(startHp: Int): EventResult = EventResult(Type.HP, startHp - 23)
     override fun sendMessage(builder: EmbedBuilder) {
-        builder.description = "SmallRegeneration"
+        builder.description = "Kleine Regeneration"
     }
 }
 
 object SmallDegeneration : HpEvent(0.1) {
     override fun execute(startHp: Int): EventResult = EventResult(Type.HP, startHp - 7)
     override fun sendMessage(builder: EmbedBuilder) {
-        builder.description = "SmallDeRegeneration"
+        builder.description = "Kleine Degeneration"
     }
 }
 
 object SnowballGain : HpEvent(0.3) {
     override fun execute(startHp: Int): EventResult = EventResult(Type.SNOWBALL_GAIN)
     override fun sendMessage(builder: EmbedBuilder) {
-        builder.description = "SnowballGain"
+        builder.description = "Schneebälle"
     }
 }
 
 object LimitExpansion : HpEvent(0.05) {
     override fun execute(startHp: Int): EventResult = EventResult(Type.LIMIT_EXPANSION)
     override fun sendMessage(builder: EmbedBuilder) {
-        builder.description = "LimitExpansion"
+        builder.description = "Limit-Erhöhung"
     }
 }
 
 object Nothing : HpEvent(0.25) {
     override fun execute(startHp: Int): EventResult = EventResult(Type.NOTHING)
     override fun sendMessage(builder: EmbedBuilder) {
-        builder.description = "Nothing"
+        builder.description = "Nichts"
     }
 }
 

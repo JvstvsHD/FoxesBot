@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.5.31"
+    kotlin("jvm") version "1.6.0"
     java
     application
 }
@@ -17,6 +17,7 @@ repositories {
         url = uri("https://maven.kotlindiscord.com/repository/maven-public/")
     }
     maven("https://s01.oss.sonatype.org/content/repositories/snapshots")
+    maven("https://m2.dv8tion.net/releases")
 }
 
 dependencies {
@@ -26,6 +27,7 @@ dependencies {
 
     //discord
     implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.1-SNAPSHOT")
+    implementation("com.sedmelluq:lavaplayer:1.3.77")
 
     //logging
     implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")

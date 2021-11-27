@@ -3,7 +3,7 @@ package de.jvstvshd.foxesbot.module.core.commands
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import de.jvstvshd.foxesbot.module.core.CoreModule
-import de.jvstvshd.foxesbot.utils.KordUtil
+import de.jvstvshd.foxesbot.util.KordUtil
 import dev.kord.rest.builder.message.create.embed
 
 suspend fun CoreModule.infoCommand() = publicSlashCommand {

@@ -3,8 +3,8 @@ package de.jvstvshd.foxesbot.module.updatetracker.gomme.provider
 import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.foxesbot.module.updatetracker.gomme.GommeUpdateContainer
 import de.jvstvshd.foxesbot.module.updatetracker.gomme.GommeUpdateTracker
-import de.jvstvshd.foxesbot.utils.Provider
-import de.jvstvshd.foxesbot.utils.Util
+import de.jvstvshd.foxesbot.util.Provider
+import de.jvstvshd.foxesbot.util.Util
 import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor

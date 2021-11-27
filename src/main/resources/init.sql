@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS channel_barriers
     (
     name CHAR (255) NOT NULL,
     channel_id BIGINT NOT NULL,
+    guild_id BIGINT NOT NULL,
     primary key (name)
     );
 CREATE TABLE IF NOT EXISTS snowballs
@@ -20,4 +21,18 @@ CREATE TABLE IF NOT EXISTS snow_monster
     guild_id BIGINT NOT NULL,
     hp INT NOT NULL,
     primary key (guild_id)
+    );
+CREATE TABLE IF NOT EXISTS snowball_action
+    (
+    id BIGINT NOT NULL,
+    lastDate TIMESTAMP NOT NULL,
+    type VARCHAR (1023)
+    );
+CREATE TABLE IF NOT EXISTS music
+    (
+    name CHAR (255) NOT NULL,
+    url VARCHAR(1023) NOT NULL,
+    state CHAR (63) NOT NULL,
+    topic CHAR (255) NOT NULL,
+    primary key (name)
     );

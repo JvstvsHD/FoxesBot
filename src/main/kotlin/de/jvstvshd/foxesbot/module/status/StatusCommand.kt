@@ -7,7 +7,7 @@ import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.types.respondEphemeral
 import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.foxesbot.module.status.provider.StatusProvider
-import de.jvstvshd.foxesbot.utils.KordUtil
+import de.jvstvshd.foxesbot.util.KordUtil
 import dev.kord.core.Kord
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.embed

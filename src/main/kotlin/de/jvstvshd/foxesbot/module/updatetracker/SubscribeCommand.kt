@@ -1,5 +1,6 @@
 package de.jvstvshd.foxesbot.module.updatetracker
 
+import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
@@ -17,7 +18,9 @@ suspend fun UpdateTrackerModule.subscribeCommand(updateTracking: UpdateTracking,
     publicSlashCommand(::SubscribeCommandArguments) {
         name = "subscribe"
         description = translationsProvider.get("command.subscribe.description", bundleName = "update")
-        requireBotPermissions(Permission.ManageMessages)
+        check {
+            hasPermission(Permission.ManageMessages)
+        }
         action {
             println("executing")
             if (member?.id?.value?.toLong() == null) {

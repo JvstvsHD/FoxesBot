@@ -1,4 +1,4 @@
-package de.jvstvshd.foxesbot.utils
+package de.jvstvshd.foxesbot.util
 
 import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture

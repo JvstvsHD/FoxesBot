@@ -6,7 +6,7 @@ import de.jvstvshd.foxesbot.module.updatetracker.UpdateType
 import de.jvstvshd.foxesbot.module.updatetracker.gomme.provider.ChangelogProvider
 import de.jvstvshd.foxesbot.module.updatetracker.gomme.provider.NewsProvider
 import de.jvstvshd.foxesbot.module.updatetracker.gomme.provider.UpdateProvider
-import de.jvstvshd.foxesbot.utils.KordUtil
+import de.jvstvshd.foxesbot.util.KordUtil
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.behavior.channel.createEmbed

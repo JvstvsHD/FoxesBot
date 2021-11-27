@@ -6,7 +6,7 @@ import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import de.jvstvshd.foxesbot.config.Config
 import de.jvstvshd.foxesbot.module.core.CoreModule
-import de.jvstvshd.foxesbot.utils.KordUtil
+import de.jvstvshd.foxesbot.util.KordUtil
 import dev.kord.core.supplier.EntitySupplyStrategy
 import dev.kord.rest.builder.message.EmbedBuilder
 

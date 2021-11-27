@@ -7,6 +7,5 @@ class EventTest {
         for (i in 0..100) {
             println(HpEvent.pickRandom().javaClass)
         }
-
     }
 }

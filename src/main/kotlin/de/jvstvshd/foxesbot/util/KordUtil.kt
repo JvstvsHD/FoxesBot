@@ -1,4 +1,4 @@
-package de.jvstvshd.foxesbot.utils
+package de.jvstvshd.foxesbot.util
 
 import dev.kord.common.Color
 import dev.kord.common.entity.PresenceStatus
