@@ -2,8 +2,8 @@ package de.jvstvshd.foxesbot.module.christmas.commands
 
 import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.converters.impl.member
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalLong
-import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalMember
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import de.jvstvshd.foxesbot.module.christmas.ChristmasModule
@@ -18,8 +18,10 @@ open class AdministrationArgs : Arguments() {
     val add by optionalLong("add", "Relativer Wert")
 }
 
-class SnowballAdministrationArgs : AdministrationArgs() {
-    val user by optionalMember("user", "Schneebälle des Users")
+class SnowballAdministrationArgs : Arguments() {
+    val user by member("user", "Schneebälle des Users")
+    val set by optionalLong("set", "Absoluter Wert")
+    val add by optionalLong("add", "Relativer Wert")
 }
 
 class SnowMonsterAdministrationArgs : AdministrationArgs()
@@ -38,46 +40,40 @@ suspend fun ChristmasModule.snowballAdministrationCommand() = ephemeralSlashComm
     }
     action {
         GlobalScope.launch {
-            if (arguments.user != null) {
-                val member = arguments.user!!
-                val query: String
-                val amount: Long
-                if (arguments.add != null) {
-                    query =
-                        "INSERT INTO snowballs (id, snowballs) VALUES (?, ?) ON DUPLICATE KEY UPDATE snowballs = snowballs + ?;"
-                    amount = arguments.add!!
-                } else if (arguments.set != null) {
-                    query = "INSERT INTO snowballs (id, snowballs) VALUES (?, ?) ON DUPLICATE KEY UPDATE snowballs = ?;"
-                    amount = arguments.set!!
-                } else {
-                    dataSource.connection.use { connection ->
-                        connection.prepareStatement("SELECT snowballs FROM snowballs WHERE id = ?;").use {
-                            it.setLong(1, member.toLong())
-                            val rs = it.executeQuery()
-                            respond {
-                                content =
-                                    "${member.mention} hat derzeit ${if (rs.next()) rs.getLong(1) else -1} Schneebälle."
-                            }
+            val member = arguments.user
+            val query: String
+            val amount: Long
+            if (arguments.add != null) {
+                query =
+                    "INSERT INTO snowballs (id, snowballs) VALUES (?, ?) ON DUPLICATE KEY UPDATE snowballs = snowballs + ?;"
+                amount = arguments.add!!
+            } else if (arguments.set != null) {
+                query = "INSERT INTO snowballs (id, snowballs) VALUES (?, ?) ON DUPLICATE KEY UPDATE snowballs = ?;"
+                amount = arguments.set!!
+            } else {
+                dataSource.connection.use { connection ->
+                    connection.prepareStatement("SELECT snowballs FROM snowballs WHERE id = ?;").use {
+                        it.setLong(1, member.toLong())
+                        val rs = it.executeQuery()
+                        respond {
+                            content =
+                                "${member.mention} hat derzeit ${if (rs.next()) rs.getLong(1) else -1} Schneebälle."
                         }
                     }
-                    return@launch
                 }
-                dataSource.connection.use { connection ->
-                    connection.prepareStatement(query)
-                        .use {
-                            it.setLong(1, member.toLong())
-                            it.setLong(2, amount)
-                            it.setLong(3, amount)
-                            respond {
-                                content = "Es wurden ${it.executeUpdate()} Reihen in der Datenbank geändert."
-                            }
-                            return@launch
+                return@launch
+            }
+            dataSource.connection.use { connection ->
+                connection.prepareStatement(query)
+                    .use {
+                        it.setLong(1, member.toLong())
+                        it.setLong(2, amount)
+                        it.setLong(3, amount)
+                        respond {
+                            content = "Es wurden ${it.executeUpdate()} Reihen in der Datenbank geändert."
                         }
-                }
-            } else {
-                respond {
-                    content = "Bitte gebe einen User an!"
-                }
+                        return@launch
+                    }
             }
         }
 

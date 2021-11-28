@@ -44,6 +44,13 @@ suspend fun ChristmasModule.christmasTimeCommand() = publicSlashCommand {
             hasPermission(Permission.ManageChannels)
         }
         action {
+            val voiceState = this@publicSlashCommand.kord.getSelf().asMember(guild!!.id).getVoiceStateOrNull()
+            if (voiceState?.channelId != null) {
+                respond {
+                    content = "Der Bot ist bereits mit einem Channel verbunden!"
+                }
+                return@action
+            }
             val channel = guild!!.channels.filter { it is StageChannel }.first()
                 .asChannel() as StageChannel
             christmasTime(channel)

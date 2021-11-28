@@ -29,7 +29,7 @@ class MusicService(private val dataSource: HikariDataSource) {
             }
         }
 
-    private suspend fun getNames(topic: String?, state: MusicState) =
+    suspend fun getNames(topic: String?, state: MusicState) =
         runSuspended {
             dataSource.connection.use { connection ->
                 val query =
@@ -51,6 +51,16 @@ class MusicService(private val dataSource: HikariDataSource) {
             }
         }
 
+    suspend fun changeState(column: String, columnValue: String, state: MusicState) = runSuspended {
+        dataSource.connection.use { connection ->
+            connection.prepareStatement("UPDATE music SET state = ? WHERE $column = ?").use {
+                it.setString(1, state.name)
+                it.setString(2, columnValue)
+                it.executeUpdate()
+            }
+        }
+    }
+
     suspend fun getNames(topic: String?) = getNames(topic, MusicState.ACTIVATED)
 
     suspend fun reactivateAll() = runSuspended {
@@ -61,5 +71,22 @@ class MusicService(private val dataSource: HikariDataSource) {
             }
         }
     }
+
+    suspend fun deleteByTopic(topic: String) = delete(createStatement("topic"), topic)
+
+    private fun createStatement(column: String) = "DELETE FROM music WHERE $column = ?"
+
+    suspend fun delete(query: String, value: String) = runSuspended {
+        dataSource.connection.use { connection ->
+            connection.prepareStatement(query).use {
+                it.setString(1, value)
+                return@runSuspended it.executeUpdate()
+            }
+        }
+    }
+
+    suspend fun deleteByName(name: String) = delete(createStatement("name"), name)
+
+    suspend fun deleteByUrl(url: String) = delete(createStatement("url"), url)
 
 }

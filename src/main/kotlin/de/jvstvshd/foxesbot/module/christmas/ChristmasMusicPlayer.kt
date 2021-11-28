@@ -13,6 +13,7 @@ import de.jvstvshd.foxesbot.util.limit.Limitation
 import de.jvstvshd.foxesbot.util.limit.UnlimitedLimitation
 import dev.kord.common.annotation.KordVoice
 import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
+import dev.kord.core.entity.channel.StageChannel
 import dev.kord.core.supplier.EntitySupplyStrategy
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -62,6 +63,9 @@ class ChristmasMusicPlayer(
     override suspend fun exit0() {
         module.christmasTimes.remove(channel.guildId)
         lavaplayerManager.shutdown()
+        if (channel is StageChannel) {
+            channel.getStageInstance().delete("Beendet.")
+        }
     }
 
     private suspend fun playNext(player: AudioPlayer, refillQueue: Boolean = false): AudioTrack {
