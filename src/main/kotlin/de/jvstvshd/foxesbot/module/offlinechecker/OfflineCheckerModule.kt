@@ -2,7 +2,6 @@ package de.jvstvshd.foxesbot.module.offlinechecker
 
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.event
-import com.kotlindiscord.kord.extensions.utils.scheduling.Scheduler
 import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.foxesbot.config.Config
 import de.jvstvshd.foxesbot.util.KordUtil.toLong
@@ -30,7 +29,6 @@ class OfflineCheckerModule(private val config: Config, val dataSource: HikariDat
     override val name = "offline_checker"
     override val bundle = "offline_checker"
     private val offlineCheckers = mutableMapOf<Snowflake, OfflineChecker>()
-    private val scheduler: Scheduler = Scheduler()
 
     @OptIn(ExperimentalTime::class, DelicateCoroutinesApi::class)
     override suspend fun setup() {
@@ -75,7 +73,7 @@ class OfflineCheckerModule(private val config: Config, val dataSource: HikariDat
         }
     }
 
-    private suspend fun suppressed(member: Member, channel: Snowflake?): Boolean {
+    private fun suppressed(member: Member, channel: Snowflake?): Boolean {
         if (channel != null) {
             dataSource.connection.use { connection ->
                 connection.prepareStatement("SELECT FROM WHERE id = ? AND suppressed = ? AND type = ?").use {

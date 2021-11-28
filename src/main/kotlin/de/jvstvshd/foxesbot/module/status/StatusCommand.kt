@@ -22,12 +22,12 @@ class StatusArguments : Arguments() {
 
 //https://www.codegrepper.com/code-examples/javascript/check+if+valid+url
 private val regex = Regex(
-    "^(https?:\\/\\/)?" + // protocol
+    "^(https?://)?" + // protocol
             "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
             "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
-            "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
+            "(:\\d+)?(/[-a-z\\d%_.~+]*)*" + // port and path
             "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
-            "(\\#[-a-z\\d_]*)?$"
+            "(#[-a-z\\d_]*)?$"
 )
 
 suspend fun StatusModule.statusCommand(dataSource: HikariDataSource) = publicSlashCommand(::StatusArguments) {
@@ -49,9 +49,9 @@ suspend fun StatusModule.statusCommand(dataSource: HikariDataSource) = publicSla
                             provider = createProviderFromUncheckedUrl(keyword)
                             respond {
                                 embed {
-                                    fillIn("", keyword, keyword, kord, provider.provide(), Function {
+                                    fillIn(keyword, keyword, kord, provider.provide(), Function {
                                         return@Function runBlocking {
-                                            return@runBlocking translate(it);
+                                            return@runBlocking translate(it)
                                         }
                                     }, this)
                                 }
@@ -84,9 +84,9 @@ suspend fun StatusModule.statusCommand(dataSource: HikariDataSource) = publicSla
                 val data = provider.provide()
                 respond {
                     embed {
-                        fillIn("", keyword, url, kord, data, Function {
+                        fillIn(keyword, url, kord, data, Function {
                             return@Function runBlocking {
-                                return@runBlocking translate(it);
+                                return@runBlocking translate(it)
                             }
                         }, this)
                     }
@@ -97,7 +97,6 @@ suspend fun StatusModule.statusCommand(dataSource: HikariDataSource) = publicSla
 }
 
 private suspend fun fillIn(
-    description: String,
     keyword: String,
     url: String,
     kord: Kord?,

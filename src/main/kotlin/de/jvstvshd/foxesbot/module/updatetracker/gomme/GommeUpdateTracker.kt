@@ -5,7 +5,6 @@ import de.jvstvshd.foxesbot.module.updatetracker.UpdateTracker
 import de.jvstvshd.foxesbot.module.updatetracker.UpdateType
 import de.jvstvshd.foxesbot.module.updatetracker.gomme.provider.ChangelogProvider
 import de.jvstvshd.foxesbot.module.updatetracker.gomme.provider.NewsProvider
-import de.jvstvshd.foxesbot.module.updatetracker.gomme.provider.UpdateProvider
 import de.jvstvshd.foxesbot.util.KordUtil
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
@@ -22,23 +21,24 @@ class GommeUpdateTracker(
     private val users: MutableList<Long>,
     val kord: Kord?,
     private val executor: ScheduledExecutorService,
-    private val dataSource: HikariDataSource
+    dataSource: HikariDataSource
 ) : UpdateTracker {
 
     override val typeName = "gomme"
     private val icon = "https://www.gommehd.net/styles/gommehd/gommehd/motif.png"
     private val updateProviders =
-        mutableListOf<UpdateProvider>(ChangelogProvider(dataSource, executor), NewsProvider(dataSource, executor))
-
-    suspend fun start(): ScheduledFuture<*> = start(executor)
+        mutableListOf(ChangelogProvider(dataSource, executor), NewsProvider(dataSource, executor))
 
     override suspend fun start(executor: ScheduledExecutorService): ScheduledFuture<*> {
-        return executor.scheduleAtFixedRate(Runnable { runBlocking { try {
-            trackUpdates()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        } }, 5L, 120L, TimeUnit.SECONDS);
+        return executor.scheduleAtFixedRate({
+            runBlocking {
+                try {
+                    trackUpdates()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }, 5L, 120L, TimeUnit.SECONDS)
     }
 
     private suspend fun sendMessage(updateContainer: GommeUpdateContainer) {
@@ -92,9 +92,10 @@ class GommeUpdateTracker(
 
     override fun addUser(id: Long) {
         users.add(id)
-        executor.execute{
+        executor.execute {
             runBlocking {
-                val channel = kord?.getUser(Snowflake(id), EntitySupplyStrategy.cacheWithCachingRestFallback)?.getDmChannel()
+                val channel =
+                    kord?.getUser(Snowflake(id), EntitySupplyStrategy.cacheWithCachingRestFallback)?.getDmChannel()
                 for (updateProvider in updateProviders) {
                     channel?.createEmbed {
                         apply(updateProvider.provide(), this)
@@ -102,16 +103,14 @@ class GommeUpdateTracker(
                 }
             }
         }
-
     }
 
     override fun removeUser(id: Long) {
         users.remove(id)
     }
 
-    enum class GommeUpdateType(private val translationKey: String) : UpdateType {
+    enum class GommeUpdateType(translationKey: String) : UpdateType {
         NEWS("update.gomme.news"),
-        SECONDARY_NEWS("update.gomme.secondary_news"),
         CHANGELOG("update.gomme.changelog");
 
         override val typeName = translationKey

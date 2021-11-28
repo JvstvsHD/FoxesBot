@@ -1,6 +1,6 @@
 package de.jvstvshd.foxesbot.util.limit
 
-class CountBasedLimitation(val maxCount: Long) : Limitation {
+class CountBasedLimitation(@Suppress("MemberVisibilityCanBePrivate") val maxCount: Long) : Limitation {
 
     init {
         if (maxCount < 0) {

@@ -70,7 +70,7 @@ class OfflineChecker(
                     description = "Bitte setzte deinen Online-Status auf etwas anderes als offline/unsichtbar!"
                     footer {
                         text =
-                            "Du bist nicht auf Unsichtbar gestellt? Stelle deinen Status kurz auf etwas anderes (nur nicht Unsichtbar), danach sollte das Problem behoben sein!"
+                            "Du bist nicht auf Unsichtbar gestellt? Stelle deinen Status kurz auf etwas anderes (nur nicht unsichtbar), danach sollte das Problem behoben sein!"
                     }
                     timestamp = Clock.System.now()
                     color = DISCORD_RED

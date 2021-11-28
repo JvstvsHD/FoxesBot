@@ -1,6 +1,7 @@
 package de.jvstvshd.foxesbot.module.status
 
 class StatusType private constructor(val name: String, val translationKey: String) {
+    @Suppress("unused")
     companion object {
         private val types = mutableListOf<StatusType>()
         val OPERATIONAL = create("operational", "status.type.operational")

@@ -12,13 +12,14 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+@Suppress("SameParameterValue")
 class UpdateTrackerModule(private val dataSource: HikariDataSource) : Extension() {
 
     override val bundle = "general"
     override val name = "update-tracker"
 
     private val executor = Executors.newScheduledThreadPool(10)
-    private val updateTracking: UpdateTracking = UpdateTracking(dataSource, executor)
+    private val updateTracking: UpdateTracking = UpdateTracking(executor)
 
     override suspend fun setup() {
         event<ReadyEvent> {

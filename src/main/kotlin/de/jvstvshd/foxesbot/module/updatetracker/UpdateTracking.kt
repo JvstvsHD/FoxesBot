@@ -1,13 +1,11 @@
 package de.jvstvshd.foxesbot.module.updatetracker
 
-import com.zaxxer.hikari.HikariDataSource
 import java.util.concurrent.ScheduledExecutorService
 import java.util.function.Supplier
 
-class UpdateTracking(private val dataSource: HikariDataSource, private val executor: ScheduledExecutorService) {
+class UpdateTracking(private val executor: ScheduledExecutorService) {
 
     private val updateTrackers: MutableSet<UpdateTracker> = mutableSetOf()
-    private var completedRegistrations = 0
 
     fun registerUpdateTracker(updateTracker: UpdateTracker) {
         if (updateTracker.typeName != updateTracker.typeName.lowercase())
@@ -17,7 +15,7 @@ class UpdateTracking(private val dataSource: HikariDataSource, private val execu
 
     suspend fun start() {
         for (updateTracker in updateTrackers) {
-            updateTracker.start(executor);
+            updateTracker.start(executor)
         }
     }
 

@@ -1,12 +1,11 @@
 package de.jvstvshd.foxesbot.module.core.commands
 
-import de.jvstvshd.foxesbot.config.Config
 import de.jvstvshd.foxesbot.module.core.CoreModule
 
-suspend fun CoreModule.commands(config: Config) {
+suspend fun CoreModule.commands() {
     infoCommand()
     exitCommand()
-    helpCommand(config)
+    helpCommand()
     settingsCommand()
     musicCommands()
 }

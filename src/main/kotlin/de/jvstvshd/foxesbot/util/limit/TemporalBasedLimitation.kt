@@ -6,9 +6,7 @@ abstract class TemporalBasedLimitation<T : TemporalAccessor>(open val end: T) : 
 
     var limited = false
 
-    override fun access() {
-
-    }
+    override fun access() {}
 
     override fun limitNow() {
         limited = true

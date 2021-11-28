@@ -7,7 +7,7 @@ class MusicService(private val dataSource: HikariDataSource) {
 
     suspend fun getUrls(topic: String?) = getUrls(topic, MusicState.ACTIVATED)
 
-    suspend fun getUrls(topic: String?, state: MusicState) =
+    private suspend fun getUrls(topic: String?, state: MusicState) =
         runSuspended {
             dataSource.connection.use { connection ->
                 val query =
@@ -29,7 +29,7 @@ class MusicService(private val dataSource: HikariDataSource) {
             }
         }
 
-    suspend fun getNames(topic: String?, state: MusicState) =
+    private suspend fun getNames(topic: String?, state: MusicState) =
         runSuspended {
             dataSource.connection.use { connection ->
                 val query =

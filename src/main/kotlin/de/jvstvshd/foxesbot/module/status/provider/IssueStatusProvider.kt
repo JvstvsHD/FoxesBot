@@ -8,7 +8,7 @@ import org.kohsuke.github.GHIssue
 import org.kohsuke.github.GHIssueState
 import org.kohsuke.github.GitHub
 
-class IssueStatusProvider(private val config: Config, private val repoUrl: String) : StatusProvider {
+class IssueStatusProvider(config: Config, private val repoUrl: String) : StatusProvider {
 
     private val github = GitHub.connectUsingOAuth(config.configData.baseData.gitHubToken)
 
@@ -32,9 +32,6 @@ class IssueStatusProvider(private val config: Config, private val repoUrl: Strin
         }
         return StatusData(map, repoUrl)
     }
-
-    private fun getPair(issue: GHIssue): Pair<String, StatusMetaData> =
-        Pair(issue.title, StatusMetaData(issue.title, getStatusType(issue)))
 
 
     private fun getStatusType(issue: GHIssue): StatusType {

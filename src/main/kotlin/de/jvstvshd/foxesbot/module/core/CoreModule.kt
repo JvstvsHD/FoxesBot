@@ -11,6 +11,6 @@ class CoreModule(val config: Config, val dataSource: HikariDataSource) : Extensi
     override val bundle = "core"
 
     override suspend fun setup() {
-        commands(config)
+        commands()
     }
 }

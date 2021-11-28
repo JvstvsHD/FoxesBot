@@ -11,7 +11,7 @@ import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
 open class DefaultMusicPlayer(override val channel: BaseVoiceChannelBehavior, override val service: MusicService) :
     AbstractMusicPlayer(channel, service) {
     override var currentTrack: AudioTrack? = null
-    val lavaplayerManager: AudioPlayerManager = DefaultAudioPlayerManager()
+    private val lavaplayerManager: AudioPlayerManager = DefaultAudioPlayerManager()
 
     init {
         AudioSourceManagers.registerRemoteSources(lavaplayerManager)
@@ -24,11 +24,8 @@ open class DefaultMusicPlayer(override val channel: BaseVoiceChannelBehavior, ov
 
     @OptIn(KordVoice::class)
     suspend fun play0(url: String): AudioTrack {
-        // our lavaplayer audio player which will provide frames of audio
         val player = configurePlayer(lavaplayerManager)
-        // lavaplayer uses ytsearch: as an identifier to search for YouTube
         val track = lavaplayerManager.playTrack(url, player)
-        // here we actually connect to the voice channel
         connect(player)
         return track
     }

@@ -43,6 +43,6 @@ abstract class UpdateProvider(
                 }
             }
             return@Callable ""
-        }, executor);
+        }, executor)
     }
 }

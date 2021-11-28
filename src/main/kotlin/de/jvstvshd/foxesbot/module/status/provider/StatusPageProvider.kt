@@ -10,7 +10,7 @@ import java.net.URL
 
 class StatusPageProvider(private val url: String) : StatusProvider {
 
-    private val BOT_AVATAR_URL =  "https://images-ext-1.discordapp.net/external/Uh9OrjLTA8n4df4egsz-1xq_bCBYdw9Uj2KWAxB3rzo/https/cdn.discordapp.com/avatars/863088857901826058/f6ac726b665487c2a248f3150ccbf189.webp"
+    private val botAvatarUrl =  "https://images-ext-1.discordapp.net/external/Uh9OrjLTA8n4df4egsz-1xq_bCBYdw9Uj2KWAxB3rzo/https/cdn.discordapp.com/avatars/863088857901826058/f6ac726b665487c2a248f3150ccbf189.webp"
 
     override fun provide(): StatusData {
         val document = HttpUtil.getDocument(url)
@@ -20,12 +20,12 @@ class StatusPageProvider(private val url: String) : StatusProvider {
         }
         val e = document.head().select("link[href~=.*\\.ico]").first()
         var url = e?.attr("href")
-            ?: BOT_AVATAR_URL
+            ?: botAvatarUrl
         try {
             URL(url)
         } catch (e: MalformedURLException) {
             System.err.println("Malformed url: $url")
-            url = BOT_AVATAR_URL
+            url = botAvatarUrl
         }
 
         return StatusData(map, url)

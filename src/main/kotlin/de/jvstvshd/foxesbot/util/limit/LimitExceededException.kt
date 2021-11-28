@@ -1,5 +1,6 @@
 package de.jvstvshd.foxesbot.util.limit
 
+@Suppress("unused")
 class LimitExceededException : Exception {
     constructor() : super()
     constructor(message: String?) : super(message)

@@ -4,13 +4,12 @@ import com.kotlindiscord.kord.extensions.commands.application.slash.SlashCommand
 import com.kotlindiscord.kord.extensions.commands.chat.ChatCommand
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
-import de.jvstvshd.foxesbot.config.Config
 import de.jvstvshd.foxesbot.module.core.CoreModule
 import de.jvstvshd.foxesbot.util.KordUtil
 import dev.kord.core.supplier.EntitySupplyStrategy
 import dev.kord.rest.builder.message.EmbedBuilder
 
-suspend fun CoreModule.helpCommand(config: Config) = publicSlashCommand {
+suspend fun CoreModule.helpCommand() = publicSlashCommand {
     name = "help"
     description = translationsProvider.get("command.help.description", bundleName = "core")
     val kord = kord
@@ -32,19 +31,11 @@ suspend fun CoreModule.helpCommand(config: Config) = publicSlashCommand {
             builder.description = "äh ja was"
             val stringBuilder = StringBuilder()
             for (slashCommand in slashCommands) {
-               stringBuilder.append("**/${slashCommand.name}**: ${slashCommand.description}\n")
-               /* builder.field {
-                    name = "/" + slashCommand.name
-                    value = "hI!" + slashCommand.description
-                }*/
+                stringBuilder.append("**/${slashCommand.name}**: ${slashCommand.description}\n")
             }
             for (chatCommand in chatCommands) {
                 println(chatCommand.extension.name)
                 stringBuilder.append("**" + config.configData.baseData.prefix + chatCommand.name + "**: " + chatCommand.description + "\n")
-                /*builder.field {
-                    name = config.configData.baseData.prefix
-                    value = "Hi1" + chatCommand.description
-                }*/
             }
             builder.description = stringBuilder.toString()
             embeds.add(builder)

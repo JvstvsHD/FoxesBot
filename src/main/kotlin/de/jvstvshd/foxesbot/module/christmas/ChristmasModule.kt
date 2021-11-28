@@ -3,7 +3,6 @@ package de.jvstvshd.foxesbot.module.christmas
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.utils.runSuspended
-import com.kotlindiscord.kord.extensions.utils.scheduling.Scheduler
 import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.foxesbot.config.Config
 import de.jvstvshd.foxesbot.module.christmas.commands.*
@@ -18,7 +17,6 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.optional.optional
 import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
 import dev.kord.core.behavior.channel.createMessage
-import dev.kord.core.entity.channel.Channel
 import dev.kord.core.entity.channel.StageChannel
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.event.user.VoiceStateUpdateEvent
@@ -34,20 +32,17 @@ import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 
 class ChristmasModule(
-    private val executor: ScheduledExecutorService,
     val dataSource: HikariDataSource,
     val config: Config
 ) :
     Extension() {
 
     override val name = "christmas"
-    private val scheduler = Scheduler()
     private val lock = ReentrantReadWriteLock()
     val christmasTimes = mutableMapOf<Snowflake, MusicPlayer>()
     private val musicService = MusicService(dataSource)
@@ -174,18 +169,6 @@ class ChristmasModule(
         }
     }
 
-    suspend fun checkChannel(channel: Channel, name: String): Boolean =
-        runSuspended {
-            dataSource.connection.use { connection ->
-                connection.prepareStatement("SELECT FROM channel_barriers WHERE name = ? AND channel_id = ?;").use {
-                    it.setString(1, name)
-                    it.setLong(2, channel.toLong())
-                    return@runSuspended it.executeQuery().next()
-                }
-
-            }
-        }
-
     suspend fun getChannel(guildId: Long) = runSuspended {
         dataSource.connection.use { connection ->
             connection.prepareStatement("SELECT channel_id FROM channel_barriers WHERE name = ? AND guild_id = ?;")
@@ -200,9 +183,9 @@ class ChristmasModule(
         }
     }
 
+    @Suppress("GrazieInspection")
     suspend fun changeSnowMonster(guildId: Long, newHp: Int) = runSuspended {
         lock.writeLock().lock()
-        val value: Int
         dataSource.connection.use { connection ->
             connection.prepareStatement("INSERT INTO snow_monster (guild_id, hp) VALUES (?, ?) ON DUPLICATE KEY UPDATE hp = ?;")
                 .use {

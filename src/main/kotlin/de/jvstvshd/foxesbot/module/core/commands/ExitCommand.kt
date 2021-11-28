@@ -7,7 +7,7 @@ import de.jvstvshd.foxesbot.module.core.CoreModule
 import dev.kord.common.entity.Permission
 import kotlin.system.exitProcess
 
-suspend fun CoreModule.exitCommand() = publicSlashCommand() {
+suspend fun CoreModule.exitCommand() = publicSlashCommand {
     name = "exit"
     description = "Exits the bot."
     check {

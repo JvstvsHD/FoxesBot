@@ -14,7 +14,6 @@ import dev.kord.common.entity.PresenceStatus
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
 import java.io.File
-import java.util.concurrent.Executors
 
 class FoxesBot {
 
@@ -31,7 +30,7 @@ class FoxesBot {
                 add { UpdateTrackerModule(datasource) }
                 add { StatusModule(datasource, config) }
                 add { OfflineCheckerModule(config, datasource) }
-                add { ChristmasModule(Executors.newScheduledThreadPool(10), datasource, config) }
+                add { ChristmasModule(datasource, config) }
             }
 
             applicationCommands {

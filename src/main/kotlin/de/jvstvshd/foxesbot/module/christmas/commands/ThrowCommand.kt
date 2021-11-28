@@ -220,7 +220,7 @@ private suspend fun ChristmasModule.callEvent(
         }
         dataSource.connection.use { connection ->
             connection.prepareStatement("UPDATE snowballs SET snowballs = ? WHERE id = ?;").use {
-                it.setLong(2, (extra + memberHp).toLong())
+                it.setLong(2, (extra + memberHp))
                 it.setLong(1, member.toLong())
                 it.executeUpdate()
             }
