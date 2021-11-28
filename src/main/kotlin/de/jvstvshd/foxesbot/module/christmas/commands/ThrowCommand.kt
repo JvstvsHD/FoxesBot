@@ -22,7 +22,7 @@ import dev.kord.core.entity.channel.TextChannel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import java.text.DecimalFormat
 import java.time.Duration
 import java.time.LocalDateTime
@@ -33,14 +33,14 @@ suspend fun ChristmasModule.throwCommand() = ephemeralSlashCommand {
     name = "werfen"
     description = "Werfe deine Schneebälle"
     action {
-        GlobalScope.async(CoroutineExceptionHandler { _, throwable ->
+        GlobalScope.launch(CoroutineExceptionHandler { _, throwable ->
             throwable.printStackTrace()
         }) {
             if (onCooldown(member!!.toLong())) {
                 respond {
                     content = "Bitte verwende diesen Command nur alle 24 Minuten!"
                 }
-                return@async
+                return@launch
             }
             val executionChannel = this@throwCommand.getChannel(guild!!.toLong())
             if (executionChannel == null || executionChannel.toLong() != channel.toLong()) {
@@ -48,14 +48,14 @@ suspend fun ChristmasModule.throwCommand() = ephemeralSlashCommand {
                     content =
                         "Bitte führe den Command in " + if (executionChannel == null) "undefiniert" else executionChannel.mention + " aus"
                 }
-                return@async
+                return@launch
             }
             val snowballs = getSnowballs(member!!.toLong())
             if (snowballs <= 0) {
                 respond {
                     content = "Der Schnee ist bedauerlicherweise bereite getaut. Warte, bis es erneut schneit!"
                 }
-                return@async
+                return@launch
             }
             val throwing = ThreadLocalRandom.current().nextLong(1, snowballs + 1)
             respond {
@@ -71,7 +71,7 @@ suspend fun ChristmasModule.throwChatCommand() = chatCommand {
     name = "werfen"
     description = "Werfe deine Schneebälle"
     action {
-        GlobalScope.async(CoroutineExceptionHandler { _, throwable ->
+        GlobalScope.launch(CoroutineExceptionHandler { _, throwable ->
             throwable.printStackTrace()
         }) {
             if (onCooldown(member!!.toLong())) {
@@ -81,7 +81,7 @@ suspend fun ChristmasModule.throwChatCommand() = chatCommand {
                 message.reply {
                     content = "Bitte verwende diesen Command nur alle $formatted!"
                 }
-                return@async
+                return@launch
             }
             val executionChannel = this@throwChatCommand.getChannel(guild!!.toLong())
             if (executionChannel == null || executionChannel.toLong() != channel.toLong()) {
@@ -89,14 +89,14 @@ suspend fun ChristmasModule.throwChatCommand() = chatCommand {
                     content =
                         "Bitte führe den Command in " + if (executionChannel == null) "undefiniert" else executionChannel.mention + " aus"
                 }
-                return@async
+                return@launch
             }
             val snowballs = getSnowballs(member!!.toLong())
             if (snowballs <= 0) {
                 message.reply {
                     content = "Der Schnee ist bedauerlicherweise bereite getaut. Warte, bis es erneut schneit!"
                 }
-                return@async
+                return@launch
             }
             val throwing = ThreadLocalRandom.current().nextLong(1, snowballs + 1)
             message.respond(

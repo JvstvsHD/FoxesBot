@@ -18,10 +18,10 @@ import dev.kord.core.event.user.VoiceStateUpdateEvent
 import dev.kord.core.supplier.EntitySupplyStrategy
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
@@ -46,7 +46,7 @@ class OfflineCheckerModule(private val config: Config, val dataSource: HikariDat
         }
         event<ReadyEvent> {
             action {
-                GlobalScope.async {
+                GlobalScope.launch {
                     delay(5.seconds)
                     check(kord)
                 }

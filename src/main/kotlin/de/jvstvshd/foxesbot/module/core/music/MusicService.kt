@@ -33,7 +33,7 @@ class MusicService(private val dataSource: HikariDataSource) {
         runSuspended {
             dataSource.connection.use { connection ->
                 val query =
-                    if (topic == null) "SELECT name FROM music WHERE topic = ? AND state = ?" else "SELECT name FROM music WHERE state = ?;"
+                    if (topic != null) "SELECT name FROM music WHERE topic = ? AND state = ?" else "SELECT name FROM music WHERE state = ?;"
                 connection.prepareStatement(query).use {
                     if (topic == null) {
                         it.setString(1, state.name)

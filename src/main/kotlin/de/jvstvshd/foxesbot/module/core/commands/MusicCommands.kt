@@ -55,7 +55,7 @@ suspend fun CoreModule.musicCommand(name: String) = ephemeralSlashCommand(::Musi
         when (val action = arguments.action) {
             MusicArgs.MusicAction.ACTIVATE, MusicArgs.MusicAction.DEACTIVATE, MusicArgs.MusicAction.DELETE -> {
                 if (arguments.all) {
-                    for (nameElement in service.getNames(null)) {
+                    for (nameElement in service.getNames(arguments.topic)) {
                         changeState(nameElement, action, dataSource)
                     }
                 } else {

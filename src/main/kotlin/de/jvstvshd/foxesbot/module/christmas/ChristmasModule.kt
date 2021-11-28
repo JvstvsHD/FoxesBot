@@ -23,10 +23,13 @@ import dev.kord.core.entity.channel.StageChannel
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.event.user.VoiceStateUpdateEvent
 import dev.kord.rest.json.request.CurrentVoiceStateModifyRequest
-import kotlinx.coroutines.*
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDateTime
@@ -36,7 +39,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 
-class ChristmasModule(private val executor: ScheduledExecutorService, val dataSource: HikariDataSource, val config: Config) :
+class ChristmasModule(
+    private val executor: ScheduledExecutorService,
+    val dataSource: HikariDataSource,
+    val config: Config
+) :
     Extension() {
 
     override val name = "christmas"
@@ -81,21 +88,19 @@ class ChristmasModule(private val executor: ScheduledExecutorService, val dataSo
     @OptIn(ExperimentalTime::class, DelicateCoroutinesApi::class)
     private fun startTimer() {
         GlobalScope.launch {
-            async {
-                delay((60 - LocalTime.now().minute).minutes)
-                while (true) {
-                    val hour = LocalTime.now().hour
-                    if (hour == 6) {
-                        refill()
-                    } else if (hour in 18..20) {
-                        kord.guilds.collect { guild ->
-                            guild.channels.filter { it is StageChannel }.firstOrNull()?.let {
-                                christmasTime(it as StageChannel)
-                            }
+            delay((60 - LocalTime.now().minute).minutes)
+            while (true) {
+                val hour = LocalTime.now().hour
+                if (hour == 6) {
+                    refill()
+                } else if (hour in 18..20) {
+                    kord.guilds.collect { guild ->
+                        guild.channels.filter { it is StageChannel }.firstOrNull()?.let {
+                            christmasTime(it as StageChannel)
                         }
                     }
-                    delay(60.minutes)
                 }
+                delay(60.minutes)
             }
         }
     }

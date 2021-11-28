@@ -14,7 +14,7 @@ import dev.kord.common.entity.Permission
 import dev.kord.core.entity.channel.Channel
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 class SettingsArguments : Arguments() {
     val channelBarrierName by optionalString(
@@ -48,7 +48,7 @@ suspend fun CoreModule.settingsCommand() = publicSlashCommand(::SettingsArgument
                 }
                 return@action
             }
-            GlobalScope.async {
+            GlobalScope.launch {
                 this@settingsCommand.dataSource.connection.use { connection ->
                     connection.prepareStatement("INSERT INTO channel_barriers (name, channel_id, guild_id) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE channel_id = ?, guild_id = ?")
                         .use {

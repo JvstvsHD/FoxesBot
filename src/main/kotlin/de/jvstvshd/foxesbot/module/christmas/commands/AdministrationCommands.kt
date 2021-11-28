@@ -11,7 +11,7 @@ import de.jvstvshd.foxesbot.util.KordUtil.toLong
 import dev.kord.common.entity.Permission
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 open class AdministrationArgs : Arguments() {
     val set by optionalLong("set", "Absoluter Wert")
@@ -37,7 +37,7 @@ suspend fun ChristmasModule.snowballAdministrationCommand() = ephemeralSlashComm
         hasPermission(Permission.ManageGuild)
     }
     action {
-        GlobalScope.async {
+        GlobalScope.launch {
             if (arguments.user != null) {
                 val member = arguments.user!!
                 val query: String
@@ -60,7 +60,7 @@ suspend fun ChristmasModule.snowballAdministrationCommand() = ephemeralSlashComm
                             }
                         }
                     }
-                    return@async
+                    return@launch
                 }
                 dataSource.connection.use { connection ->
                     connection.prepareStatement(query)
@@ -71,7 +71,7 @@ suspend fun ChristmasModule.snowballAdministrationCommand() = ephemeralSlashComm
                             respond {
                                 content = "Es wurden ${it.executeUpdate()} Reihen in der Datenbank geändert."
                             }
-                            return@async
+                            return@launch
                         }
                 }
             } else {
@@ -93,7 +93,7 @@ suspend fun ChristmasModule.snowMonsterAdministrationCommand() =
             hasPermission(Permission.ManageGuild)
         }
         action {
-            GlobalScope.async {
+            GlobalScope.launch {
                 val query: String
                 val amount: Long
                 if (arguments.set != null) {
@@ -111,7 +111,7 @@ suspend fun ChristmasModule.snowMonsterAdministrationCommand() =
                                 content =
                                     "Die Anzahl der Leben dieses Schneemonsters betragen ${if (rs.next()) rs.getLong(1) else -1}."
                             }
-                            return@async
+                            return@launch
                         }
                     }
                 }
@@ -123,7 +123,7 @@ suspend fun ChristmasModule.snowMonsterAdministrationCommand() =
                         respond {
                             content = "Es wurden ${it.executeUpdate()} Reihen in der Datenbank geändert."
                         }
-                        return@async
+                        return@launch
                     }
                 }
             }
