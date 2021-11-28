@@ -12,6 +12,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import java.awt.Color
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
@@ -29,6 +30,7 @@ class OfflineChecker(
         service.modifyGuildMember(member.guildId, member.id) {
             voiceChannelId = null
         }
+        sendKickMessage()
     }
 
     @OptIn(ExperimentalTime::class, kotlinx.coroutines.DelicateCoroutinesApi::class)
@@ -58,7 +60,7 @@ class OfflineChecker(
     @OptIn(ExperimentalTime::class)
     suspend fun sendMessage() {
         try {
-            val msg = member.dm {
+            member.dm {
                 embed {
                     author = KordUtil.createAuthor(member.kord)
                     title = "Online-Status"
@@ -76,9 +78,32 @@ class OfflineChecker(
                     color = DISCORD_RED
                 }
             }
-            println(msg)
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    private suspend fun sendKickMessage() {
+        member.dm {
+            embed {
+                author = KordUtil.createAuthor(member.kord)
+                title = "Online-Status: Kick"
+                url = "https://discord.gg/K5rhddJtyW"
+                thumbnail {
+                    url =
+                        member.kord.getSelf(EntitySupplyStrategy.cacheWithCachingRestFallback).avatar?.url.toString()
+                }
+                description =
+                    "Da du deinen Online-Status auch nach wiederholter Aufforderung *nicht* auf Online/Abwesend/" +
+                            "Bitte nicht stören gesetzt hast, wurdest du nun vorübergehend von allen Voice-Aktivitäten" +
+                            " ausgeschlossen!"
+                footer {
+                    text =
+                        "Du bist nicht auf Unsichtbar gestellt? Stelle deinen Status kurz auf etwas anderes (nur nicht unsichtbar), danach sollte das Problem behoben sein!"
+                }
+                timestamp = Clock.System.now()
+                color = KordUtil.convertColor(Color.RED)
+            }
         }
     }
 

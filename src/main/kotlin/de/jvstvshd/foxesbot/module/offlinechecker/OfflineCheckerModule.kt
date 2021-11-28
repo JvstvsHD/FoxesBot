@@ -53,6 +53,8 @@ class OfflineCheckerModule(private val config: Config, val dataSource: HikariDat
         event<PresenceUpdateEvent> {
             action {
                 event.member.getPresenceOrNull()?.let {
+                    if (event.presence.status != PresenceStatus.Offline)
+                        return@action
                     checkMember0(event.getMember(), event.presence.status)
                 }
             }
@@ -76,23 +78,25 @@ class OfflineCheckerModule(private val config: Config, val dataSource: HikariDat
     private fun suppressed(member: Member, channel: Snowflake?): Boolean {
         if (channel != null) {
             dataSource.connection.use { connection ->
-                connection.prepareStatement("SELECT FROM WHERE id = ? AND suppressed = ? AND type = ?").use {
-                    it.setLong(1, channel.value.toLong())
-                    it.setBoolean(2, true)
-                    it.setString(3, "channel")
-                    if (it.executeQuery().next()) {
-                        return true
+                connection.prepareStatement("SELECT id FROM offline_checker WHERE id = ? AND suppressed = ? AND type = ?")
+                    .use {
+                        it.setLong(1, channel.value.toLong())
+                        it.setBoolean(2, true)
+                        it.setString(3, "channel")
+                        if (it.executeQuery().next()) {
+                            return true
+                        }
                     }
-                }
             }
         }
         dataSource.connection.use { connection ->
-            connection.prepareStatement("SELECT FROM WHERE id = ? AND suppressed = ? AND type = ?").use {
-                it.setLong(1, member.toLong())
-                it.setBoolean(2, true)
-                it.setString(3, "member")
-                return it.executeQuery().next()
-            }
+            connection.prepareStatement("SELECT id FROM offline_checker WHERE id = ? AND suppressed = ? AND type = ?;")
+                .use {
+                    it.setLong(1, member.toLong())
+                    it.setBoolean(2, true)
+                    it.setString(3, "member")
+                    return it.executeQuery().next()
+                }
         }
     }
 
@@ -104,7 +108,7 @@ class OfflineCheckerModule(private val config: Config, val dataSource: HikariDat
                     return
                 }
             }
-            if (member.getVoiceStateOrNull() == null)
+            if (member.getVoiceStateOrNull()?.channelId == null)
                 return
             getOrCreateOfflineChecker(member).start()
         }
