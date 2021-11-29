@@ -12,6 +12,7 @@ import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.supplier.EntitySupplyStrategy
 import dev.kord.rest.builder.message.EmbedBuilder
 import kotlinx.coroutines.runBlocking
+import org.jsoup.HttpStatusException
 import java.awt.Color
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
@@ -70,7 +71,13 @@ class GommeUpdateTracker(
     private suspend fun trackUpdates() {
         for (updateProvider in updateProviders) {
             val lastUrl = updateProvider.getLastUrl().get(5, TimeUnit.SECONDS)
-            val newUrl = updateProvider.provide()
+            val newUrl: GommeUpdateContainer
+            try {
+                newUrl = updateProvider.provide()
+            } catch (e: HttpStatusException) {
+                System.err.println("HTTP status code returned: ${e.statusCode}")
+                return
+            }
             if (newUrl.url != lastUrl) {
                 updateProvider.setLastUrl(newUrl.url)
                 val author: String = if (updateProvider is ChangelogProvider) {

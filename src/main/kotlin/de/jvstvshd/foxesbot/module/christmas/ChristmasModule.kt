@@ -21,13 +21,10 @@ import dev.kord.core.entity.channel.StageChannel
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.event.user.VoiceStateUpdateEvent
 import dev.kord.rest.json.request.CurrentVoiceStateModifyRequest
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDateTime
@@ -58,6 +55,16 @@ class ChristmasModule(
                 }
             }
         }
+        Runtime.getRuntime().addShutdownHook(Thread() {
+            for (christmasTime in christmasTimes) {
+                val channel = christmasTime.value.channel
+                runBlocking {
+                    if (channel is StageChannel) {
+                        channel.getStageInstanceOrNull()?.delete("Delete on exit")
+                    }
+                }
+            }
+        })
         startTimer()
         throwCommand()
         throwChatCommand()
@@ -83,19 +90,31 @@ class ChristmasModule(
     @OptIn(ExperimentalTime::class, DelicateCoroutinesApi::class)
     private fun startTimer() {
         GlobalScope.launch {
-            delay((60 - LocalTime.now().minute).minutes)
+            if (LocalTime.now().hour in 18..20) {
+                startChristmasTime()
+            }
+            val delay = (60 - LocalTime.now().hour)
+            println("delay = $delay")
+            println("hour: " + LocalTime.now().hour)
+            delay(delay.minutes)
             while (true) {
                 val hour = LocalTime.now().hour
+                println("hour = $hour")
                 if (hour == 6) {
                     refill()
                 } else if (hour in 18..20) {
-                    kord.guilds.collect { guild ->
-                        guild.channels.filter { it is StageChannel }.firstOrNull()?.let {
-                            christmasTime(it as StageChannel)
-                        }
-                    }
+                    println("Starting Christmas time....")
+                    startChristmasTime()
                 }
                 delay(60.minutes)
+            }
+        }
+    }
+
+    private suspend fun startChristmasTime() {
+        kord.guilds.collect { guild ->
+            guild.channels.filter { it is StageChannel }.firstOrNull()?.let {
+                christmasTime(it as StageChannel)
             }
         }
     }
