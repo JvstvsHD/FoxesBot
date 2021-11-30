@@ -25,6 +25,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
+import org.apache.logging.log4j.LogManager
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDateTime
@@ -43,6 +44,7 @@ class ChristmasModule(
     private val lock = ReentrantReadWriteLock()
     val christmasTimes = mutableMapOf<Snowflake, MusicPlayer>()
     private val musicService = MusicService(dataSource)
+    private val logger = LogManager.getLogger()
 
     @OptIn(ExperimentalTime::class)
     override suspend fun setup() {
@@ -94,16 +96,16 @@ class ChristmasModule(
                 startChristmasTime()
             }
             val delay = (60 - LocalTime.now().hour)
-            println("delay = $delay")
-            println("hour: " + LocalTime.now().hour)
+            logger.debug("delay = $delay")
+            logger.debug("hour: " + LocalTime.now().hour)
             delay(delay.minutes)
             while (true) {
                 val hour = LocalTime.now().hour
-                println("hour = $hour")
+                logger.debug("hour = $hour")
                 if (hour == 6) {
                     refill()
                 } else if (hour in 18..20) {
-                    println("Starting Christmas time....")
+                    logger.debug("Starting Christmas time....")
                     startChristmasTime()
                 }
                 delay(60.minutes)
