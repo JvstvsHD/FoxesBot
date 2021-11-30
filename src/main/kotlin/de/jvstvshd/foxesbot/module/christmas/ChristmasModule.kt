@@ -27,11 +27,11 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import org.apache.logging.log4j.LogManager
 import java.sql.Timestamp
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.concurrent.locks.ReentrantReadWriteLock
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 
 class ChristmasModule(
@@ -57,7 +57,7 @@ class ChristmasModule(
                 }
             }
         }
-        Runtime.getRuntime().addShutdownHook(Thread() {
+        Runtime.getRuntime().addShutdownHook(Thread {
             for (christmasTime in christmasTimes) {
                 val channel = christmasTime.value.channel
                 runBlocking {
@@ -89,14 +89,35 @@ class ChristmasModule(
         return player
     }
 
-    @OptIn(ExperimentalTime::class, DelicateCoroutinesApi::class)
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun startTimer() {
+        runTimer(18, { it in 18..20 }) {
+            logger.debug("Starting christmas time....")
+            startChristmasTime()
+        }
+        runTimer(6, { it == 6 }) {
+            logger.debug("Refilling snowballs")
+            refill()
+        }
+    }
+
+    /*@OptIn(ExperimentalTime::class, DelicateCoroutinesApi::class)
     private fun startTimer() {
         GlobalScope.launch {
-            if (LocalTime.now().hour in 18..20) {
+            val hour = LocalTime.now().hour
+            if (hour == 6) {
+                refill()
+            }
+            //delay(24 * 60 * 60 * 1000)
+            val tomorrow = LocalDateTime.now().plusDays(1).withHour(6)
+            val delay = Duration.between(LocalDateTime.now(), tomorrow).toMillis()
+            println("delay = $delay")
+            delay(delay)
+            *//*if (LocalTime.now().hour in 18..20) {
                 startChristmasTime()
             }
-            val delay = (60 - LocalTime.now().hour)
-            logger.debug("delay = $delay")
+            val delay =
+                logger.debug("delay = $delay")
             logger.debug("hour: " + LocalTime.now().hour)
             delay(delay.minutes)
             while (true) {
@@ -109,6 +130,31 @@ class ChristmasModule(
                     startChristmasTime()
                 }
                 delay(60.minutes)
+            }*//*
+        }
+        GlobalScope.launch {
+            val hour = LocalTime.now().hour
+            if (hour in 18..20) {
+                startChristmasTime()
+            }
+            val delay = Duration.between(LocalDateTime.now(), LocalDateTime.now().plusDays(1).withHour(18)).toMillis()
+            println("delay = $delay")
+            delay(delay)
+        }
+    }*/
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun runTimer(startHour: Int, predicate: suspend (Int) -> Boolean, callback: suspend () -> Unit) {
+        GlobalScope.launch {
+            val hour = LocalTime.now().hour
+            if (predicate(hour)) {
+                callback.invoke()
+            }
+            val tomorrow = LocalDateTime.now().plusDays(1).withHour(startHour).withMinute(0)
+            val delay = Duration.between(LocalDateTime.now(), tomorrow).toMillis()
+            while (true) {
+                delay(delay)
+                callback.invoke()
             }
         }
     }
@@ -137,6 +183,10 @@ class ChristmasModule(
 
     suspend fun refill() {
         kord.guilds.collect { guild ->
+            val lastTime = lastTime(guild.toLong(), "refill")
+            if ((lastTime != null) && lastTime.isBefore(LocalDateTime.now().plusDays(1).withHour(6))) {
+                return@collect
+            }
             guild.members.collect { member ->
                 dataSource.connection.use { connection ->
                     connection.prepareStatement("INSERT INTO snowballs (id, snowballs) VALUES (?, ?) ON DUPLICATE KEY UPDATE snowballs = ?;")

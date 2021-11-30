@@ -1,30 +1,42 @@
-import kotlinx.coroutines.*
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.junit.jupiter.api.Test
+import java.time.Duration
+import java.time.LocalDateTime
 import java.time.LocalTime
 import kotlin.time.ExperimentalTime
-import kotlin.time.seconds
 
 class TimerTest {
 
     @OptIn(DelicateCoroutinesApi::class, ExperimentalTime::class)
     @Test
     fun testTimer() {
-        runBlocking {
-            GlobalScope.launch {
-                val delay = (60 - LocalTime.now().second)
-                println("delay = $delay")
-                delay(delay.seconds)
-                while (true) {
-                    val hour = LocalTime.now().minute
-                    println("hour = $hour")
-                    if (hour == 6) {
-                        println("refill")
-                    } else if (hour in 18..20) {
-                        println("weihnachtstime")
-                    }
-                    delay(60.seconds)
-                }
-            }.join()
+        startTimer()
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun startTimer() {
+        runTimer(18, { it in 18..20 }) {
+            println("christmas time")
+        }
+        runTimer(6, { it == 6 }) {
+            println("refill")
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun runTimer(startHour: Int, predicate: suspend (Int) -> Boolean, callback: suspend () -> Unit) {
+        GlobalScope.launch {
+            val hour = LocalTime.now().hour
+            if (predicate(hour)) {
+                callback.invoke()
+            }
+            val tomorrow = LocalDateTime.now().plusDays(1).withHour(startHour).withMinute(0)
+            val delay = Duration.between(LocalDateTime.now(), tomorrow).toMillis()
+            delay(delay)
+            callback.invoke()
         }
     }
 }
