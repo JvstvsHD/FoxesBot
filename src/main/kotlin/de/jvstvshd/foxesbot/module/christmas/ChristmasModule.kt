@@ -52,6 +52,7 @@ class ChristmasModule(
             action {
                 if (event.state.userId == kord.selfId) {
                     if (event.state.channelId == null) {
+                        println("bot left channel")
                         christmasTimes[event.state.guildId]?.exit()
                     }
                 }
@@ -61,6 +62,7 @@ class ChristmasModule(
             for (christmasTime in christmasTimes) {
                 val channel = christmasTime.value.channel
                 runBlocking {
+                    christmasTime.value.exit()
                     if (channel is StageChannel) {
                         channel.getStageInstanceOrNull()?.delete("Delete on exit")
                     }

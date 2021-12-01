@@ -1,13 +1,18 @@
 package de.jvstvshd.foxesbot.module.christmas.commands
 
+import com.kotlindiscord.kord.extensions.DISCORD_FUCHSIA
 import com.kotlindiscord.kord.extensions.extensions.chatCommand
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.respond
 import de.jvstvshd.foxesbot.module.christmas.ChristmasModule
+import de.jvstvshd.foxesbot.util.KordUtil
 import de.jvstvshd.foxesbot.util.limit.CountBasedLimitation
 import dev.kord.common.annotation.KordVoice
 import dev.kord.common.entity.Snowflake
+import dev.kord.rest.builder.message.create.MessageCreateBuilder
+import dev.kord.rest.builder.message.create.embed
+import kotlinx.datetime.Clock
 
 suspend fun ChristmasModule.christmasMusicChatCommand(name: String) = chatCommand {
     this.name = name
@@ -30,10 +35,8 @@ suspend fun ChristmasModule.christmasMusicChatCommand(name: String) = chatComman
             val musicPlayer = createMusicPlayer(channel, CountBasedLimitation(2))
             //ChristmasMusicPlayer(channel as VoiceChannel, MusicService(dataSource), CountBasedLimitation(2))
             try {
-                val track = musicPlayer.playRandom("christmas")
-                message.respond {
-                    content = "Es wird gespielt: " + "[" + track.info.title + "](<" + track.info.uri + ">)"
-                }
+                musicPlayer.playRandom("christmas")
+                message.respond(useReply = true, pingInReply = false, getSong(guild!!.id))
             } catch (e: NoSuchElementException) {
                 message.respond {
                     content = "Es ist kein Element vorhanden, das abgespielt werden könnte."
@@ -66,10 +69,8 @@ suspend fun ChristmasModule.christmasMusicCommand(name: String) = publicSlashCom
             val musicPlayer = createMusicPlayer(channel, CountBasedLimitation(2))
             //ChristmasMusicPlayer(channel as VoiceChannel, MusicService(dataSource), CountBasedLimitation(2))
             try {
-                val track = musicPlayer.playRandom("christmas")
-                respond {
-                    content = "Es wird gespielt: " + "[" + track.info.title + "](<" + track.info.uri + ">)"
-                }
+                musicPlayer.playRandom("christmas")
+                respond(getSong(guild!!.id))
             } catch (e: NoSuchElementException) {
                 respond {
                     content = "Es ist kein Element vorhanden, das abgespielt werden könnte."
@@ -84,9 +85,7 @@ suspend fun ChristmasModule.songCommand() = publicSlashCommand {
     name = "song"
     description = "Zeigt an, welcher Song derzeit gespielt"
     action {
-        respond {
-            content = getSong(guild!!.id)
-        }
+        respond(getSong(guild!!.id))
     }
 }
 
@@ -94,16 +93,29 @@ suspend fun ChristmasModule.songChatCommand() = chatCommand {
     name = "song"
     description = "Zeigt an, welcher Song derzeit gespielt"
     action {
-        message.respond {
-            content = getSong(guild!!.id)
-        }
+        message.respond(useReply = true, pingInReply = false, getSong(guild!!.id))
     }
 }
 
-fun ChristmasModule.getSong(guildId: Snowflake): String {
-    val track = christmasTimes[guildId]?.currentTrack ?: return "Es wird derzeit kein Song gespielt"
-    return "\\[" + track.info.title + "\\]\\(" + track.info.uri + "\\)"
-}
+
+fun ChristmasModule.getSong(guildId: Snowflake): MessageCreateBuilder.() -> Unit =
+    {
+        embed {
+            val track = christmasTimes[guildId]?.currentTrack
+            if (track == null) {
+                title = "Es wird derzeit kein Song gespielt."
+            } else {
+                title = track.info.title
+                url = track.info.uri
+                thumbnail {
+                    url = "https://img.youtube.com/vi/${track.info.identifier}/0.jpg"
+                }
+                color = DISCORD_FUCHSIA
+            }
+            footer = KordUtil.createFooter("Weihnachtsmusik 2021")
+            timestamp = Clock.System.now()
+        }
+    }
 
 suspend fun ChristmasModule.christmasMusicCommands() {
     christmasMusicCommand("wm")
