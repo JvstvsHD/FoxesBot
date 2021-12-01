@@ -164,7 +164,7 @@ private suspend fun ChristmasModule.performThrow(
     }
     val extraSnowball: Boolean
     val finalAmount: Int
-    if (ThreadLocalRandom.current().nextDouble() <= 0.05) {
+    if (ThreadLocalRandom.current().nextDouble() <= 0.005) {
         extraSnowball = true
         finalAmount = amount + 1
     } else {
@@ -178,6 +178,7 @@ private suspend fun ChristmasModule.performThrow(
         }
     }
     val thrownAmount = if (newHp - newHp != amount) oldHp - newHp else amount
+    statisticService.log(ThrownSnowballs, member.id, finalAmount)
     if (extraSnowball) {
         return "Oho! Wo kommt denn der $finalAmount. Schneeball her?"
     }

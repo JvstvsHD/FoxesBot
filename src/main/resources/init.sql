@@ -36,3 +36,10 @@ CREATE TABLE IF NOT EXISTS music
     topic CHAR (255) NOT NULL,
     primary key (name)
     );
+CREATE TABLE IF NOT EXISTS christmas_stats
+    (
+    type CHAR (255) NOT NULL,
+    id BIGINT NOT NULL,
+    count INT NOT NULL,
+    primary key (id, type)
+    );

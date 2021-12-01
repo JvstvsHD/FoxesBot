@@ -45,6 +45,7 @@ class ChristmasModule(
     val christmasTimes = mutableMapOf<Snowflake, MusicPlayer>()
     private val musicService = MusicService(dataSource)
     private val logger = LogManager.getLogger()
+    val statisticService = StatisticService(dataSource)
 
     @OptIn(ExperimentalTime::class)
     override suspend fun setup() {
@@ -93,60 +94,23 @@ class ChristmasModule(
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun startTimer() {
-        runTimer(18, { it in 18..20 }) {
+        runTimer(18, { it in 18..20 }, "christmas time") {
             logger.debug("Starting christmas time....")
             startChristmasTime()
         }
-        runTimer(6, { it == 6 }) {
+        runTimer(6, { it == 6 }, "refill") {
             logger.debug("Refilling snowballs")
             refill()
         }
     }
 
-    /*@OptIn(ExperimentalTime::class, DelicateCoroutinesApi::class)
-    private fun startTimer() {
-        GlobalScope.launch {
-            val hour = LocalTime.now().hour
-            if (hour == 6) {
-                refill()
-            }
-            //delay(24 * 60 * 60 * 1000)
-            val tomorrow = LocalDateTime.now().plusDays(1).withHour(6)
-            val delay = Duration.between(LocalDateTime.now(), tomorrow).toMillis()
-            println("delay = $delay")
-            delay(delay)
-            *//*if (LocalTime.now().hour in 18..20) {
-                startChristmasTime()
-            }
-            val delay =
-                logger.debug("delay = $delay")
-            logger.debug("hour: " + LocalTime.now().hour)
-            delay(delay.minutes)
-            while (true) {
-                val hour = LocalTime.now().hour
-                logger.debug("hour = $hour")
-                if (hour == 6) {
-                    refill()
-                } else if (hour in 18..20) {
-                    logger.debug("Starting Christmas time....")
-                    startChristmasTime()
-                }
-                delay(60.minutes)
-            }*//*
-        }
-        GlobalScope.launch {
-            val hour = LocalTime.now().hour
-            if (hour in 18..20) {
-                startChristmasTime()
-            }
-            val delay = Duration.between(LocalDateTime.now(), LocalDateTime.now().plusDays(1).withHour(18)).toMillis()
-            println("delay = $delay")
-            delay(delay)
-        }
-    }*/
-
     @OptIn(DelicateCoroutinesApi::class)
-    private fun runTimer(startHour: Int, predicate: suspend (Int) -> Boolean, callback: suspend () -> Unit) {
+    private fun runTimer(
+        startHour: Int,
+        predicate: suspend (Int) -> Boolean,
+        name: String,
+        callback: suspend () -> Unit
+    ) {
         GlobalScope.launch {
             val hour = LocalTime.now().hour
             if (predicate(hour)) {
@@ -154,6 +118,7 @@ class ChristmasModule(
             }
             val tomorrow = LocalDateTime.now().plusDays(1).withHour(startHour).withMinute(0)
             val delay = Duration.between(LocalDateTime.now(), tomorrow).toMillis()
+            logger.debug("$name: $delay")
             while (true) {
                 delay(delay)
                 callback.invoke()
