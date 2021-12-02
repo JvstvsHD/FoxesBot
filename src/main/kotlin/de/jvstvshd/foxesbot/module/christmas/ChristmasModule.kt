@@ -17,6 +17,7 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.optional.optional
 import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
 import dev.kord.core.behavior.channel.createMessage
+import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.StageChannel
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.event.user.VoiceStateUpdateEvent
@@ -27,10 +28,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import org.apache.logging.log4j.LogManager
 import java.sql.Timestamp
-import java.time.Duration
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.LocalTime
+import java.time.*
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.time.ExperimentalTime
 
@@ -94,13 +92,27 @@ class ChristmasModule(
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun startTimer() {
-        runTimer(18, { it in 18..20 }, "christmas time") {
-            logger.debug("Starting christmas time....")
+        runTimer(18, { it in 18..20 }, "Christmastime") {
+            logger.debug("Starting Christmastime....")
             startChristmasTime()
         }
-        runTimer(6, { it == 6 }, "refill") {
+        runTimer(6, { it == 6 }, "refill", startTask = {
+            refillSnowballs()
+        }) {
             logger.debug("Refilling snowballs")
-            refill()
+            refillSnowballs()
+        }
+    }
+
+    private suspend fun refillSnowballs() {
+        val results = refill()
+        for (refillResult in results) {
+            if (refillResult.exception != null) {
+                val e = refillResult.exception
+                logger.info("Refill skipped for guild ${e.guild.name} with id ${e.guild.toLong()}: ${e.message} (${e.userMessage})")
+            } else {
+                logger.info("Refilled for guild ${refillResult.guild.name} with id ${refillResult.guild.toLong()}")
+            }
         }
     }
 
@@ -109,19 +121,42 @@ class ChristmasModule(
         startHour: Int,
         predicate: suspend (Int) -> Boolean,
         name: String,
+        startTask: (suspend () -> Unit)? = null,
         callback: suspend () -> Unit
     ) {
         GlobalScope.launch {
             val hour = LocalTime.now().hour
-            if (predicate(hour)) {
-                callback.invoke()
-            }
-            val tomorrow = LocalDateTime.now().plusDays(1).withHour(startHour).withMinute(0)
-            val delay = Duration.between(LocalDateTime.now(), tomorrow).toMillis()
+            val nextInvocation =
+                if (predicate(hour)) {
+                    try {
+                        callback.invoke()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    LocalDateTime.now().plusDays(1).withHour(startHour).withMinute(0)
+                } else {
+                    val date = LocalDateTime.now().withHour(startHour).withMinute(0)
+                    if (date.isBefore(LocalDateTime.now())) {
+                        date.plusDays(1)
+                    } else {
+                        date
+                    }
+                }
+            startTask?.invoke()
+
+            val delay = Duration.between(LocalDateTime.now(), nextInvocation).toMillis()
             logger.debug("$name: $delay")
+            if (delay < 0) {
+                logger.debug("Cancelling $name task - delay < 0")
+                cancel("delay may not be less than zero")
+            }
             while (true) {
                 delay(delay)
-                callback.invoke()
+                try {
+                    callback.invoke()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
     }
@@ -148,32 +183,59 @@ class ChristmasModule(
         )
     }
 
-    suspend fun refill() {
+    class RefillException(val userMessage: String, message: String?, val guild: Guild) : Exception(message)
+
+    private suspend fun refill(): List<RefillResult> {
+        val results = mutableListOf<RefillResult>()
         kord.guilds.collect { guild ->
-            val lastTime = lastTime(guild.toLong(), "refill")
-            if ((lastTime != null) && lastTime.isBefore(LocalDateTime.now().plusDays(1).withHour(6))) {
-                return@collect
-            }
-            guild.members.collect { member ->
-                dataSource.connection.use { connection ->
-                    connection.prepareStatement("INSERT INTO snowballs (id, snowballs) VALUES (?, ?) ON DUPLICATE KEY UPDATE snowballs = ?;")
-                        .use {
-                            try {
-                                it.setLong(1, member.toLong())
-                                it.setLong(2, config.configData.eventData.snowballLimit.toLong())
-                                it.setLong(3, config.configData.eventData.snowballLimit.toLong())
-                                it.executeUpdate()
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
+            results.add(refill0(guild))
+        }
+        return results
+    }
+
+    private suspend fun checkGuildRefill(guild: Guild): Boolean {
+        val lastTime = lastTime(guild.toLong(), "refill") ?: return true
+        if (lastTime.toLocalDate().equals(LocalDate.now())) {
+            throw RefillException("Cooldown - warte bis zum nächsten Tag", "on cooldown", guild)
+        }
+        if (LocalTime.now().hour < 6) {
+            throw RefillException("Warte bis 6 Uhr", "wait to 6 AM", guild)
+        }
+        return true
+    }
+
+    class RefillResult(val guild: Guild, val exception: RefillException? = null)
+
+    suspend fun refill0(guild: Guild): RefillResult {
+        try {
+            checkGuildRefill(guild)
+        } catch (e: RefillException) {
+            return RefillResult(guild, e)
+        }
+        guild.members.collect { member ->
+            dataSource.connection.use { connection ->
+                connection.prepareStatement("INSERT INTO snowballs (id, snowballs) VALUES (?, ?) ON DUPLICATE KEY UPDATE snowballs = ?;")
+                    .use {
+                        try {
+                            it.setLong(1, member.toLong())
+                            it.setLong(2, config.configData.eventData.snowballLimit.toLong())
+                            it.setLong(3, config.configData.eventData.snowballLimit.toLong())
+                            it.executeUpdate()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                         }
-                }
+                    }
             }
+        }
+        try {
             document(guild.toLong(), "refill")
             getChannel(guild.toLong())?.createMessage {
                 content = "Es hat geschneit :snowflake:"
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
+        return RefillResult(guild)
     }
 
     suspend fun document(id: Long, type: String) = runSuspended {

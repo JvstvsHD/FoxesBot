@@ -9,12 +9,17 @@ class StatisticService(private val dataSource: HikariDataSource) {
         dataSource.connection.use { connection ->
             connection.prepareStatement("INSERT INTO christmas_stats (type, id, count) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE count = count + ?;")
                 .use {
-                    it.setString(1, type.name)
+                    val amount =
+                        if (type is ThrownSnowballCount) {
+                            it.setString(1, type.name + "_" + count)
+                            1
+                        } else {
+                            it.setString(1, type.name)
+                            count
+                        }
                     it.setLong(2, id.value.toLong())
-                    it.setInt(3, count)
-                    it.setInt(4, count)
-                    /*it.setString(5, type.name)
-                    it.setLong(6, id.value.toLong())*/
+                    it.setInt(3, amount)
+                    it.setInt(4, amount)
                     it.executeUpdate()
                 }
         }

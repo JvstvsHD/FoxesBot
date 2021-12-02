@@ -18,5 +18,5 @@ abstract class TemporalBasedLimitation<T : TemporalAccessor>(open val end: T) : 
         return end.toString()
     }
 
-    override fun shouldLimit(): Boolean = false
+    override fun shouldLimit(): Boolean = limitExceeded()
 }

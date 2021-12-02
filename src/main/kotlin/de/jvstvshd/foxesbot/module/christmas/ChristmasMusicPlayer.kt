@@ -33,7 +33,6 @@ class ChristmasMusicPlayer(
     }
 
     private val queue = LimitedDeque<String>(limitation)
-    private lateinit var allSongs: MutableList<String>
 
     @OptIn(DelicateCoroutinesApi::class)
     override suspend fun play(url: String): AudioTrack =
@@ -45,7 +44,6 @@ class ChristmasMusicPlayer(
             if (event is TrackEndEvent) {
                 runBlocking {
                     try {
-                        println(queue.limitation.limit())
                         if (queue.limitation.shouldLimit()) {
                             exit()
                             return@runBlocking
