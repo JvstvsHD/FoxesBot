@@ -9,6 +9,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import de.jvstvshd.foxesbot.module.core.music.AbstractMusicPlayer
 import de.jvstvshd.foxesbot.module.core.music.MusicService
 import de.jvstvshd.foxesbot.util.collection.LimitedDeque
+import de.jvstvshd.foxesbot.util.limit.LimitExceededException
 import de.jvstvshd.foxesbot.util.limit.Limitation
 import de.jvstvshd.foxesbot.util.limit.UnlimitedLimitation
 import dev.kord.common.annotation.KordVoice
@@ -70,7 +71,16 @@ class ChristmasMusicPlayer(
         if (queue.isEmpty() || refillQueue) {
             refillQueue()
         }
-        val track = lavaplayerManager.playTrack(queue.poll(), player)
+        val track: AudioTrack
+        try {
+            track = lavaplayerManager.playTrack(queue.poll(), player)
+        } catch (e: LimitExceededException) {
+            exit()
+            throw e;
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw e;
+        }
         currentTrack = track
         connectIfNotConnected(player)
         return track

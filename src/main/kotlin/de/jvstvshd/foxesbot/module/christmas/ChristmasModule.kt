@@ -150,8 +150,10 @@ class ChristmasModule(
                 logger.debug("Cancelling $name task - delay < 0")
                 cancel("delay may not be less than zero")
             }
+            delay(delay)
+            callback.invoke()
             while (true) {
-                delay(delay)
+                delay(24 * 60 * 60 * 1000)
                 try {
                     callback.invoke()
                 } catch (e: Exception) {

@@ -28,6 +28,8 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.util.concurrent.ThreadLocalRandom
 
+private val logger = org.apache.logging.log4j.LogManager.getLogger()
+
 @OptIn(DelicateCoroutinesApi::class)
 suspend fun ChristmasModule.throwCommand() = ephemeralSlashCommand {
     name = "werfen"
@@ -171,14 +173,19 @@ private suspend fun ChristmasModule.performThrow(
         extraSnowball = false
         finalAmount = amount
     }
-    if (oldHp - (oldHp % 100.0) != newHp - (newHp % 100.0) && newHp <= 900) {
-        val result = callEvent(channel.asChannel(), newHp, config, member, memberHp)
-        if (result > 0) {
-            changeSnowMonster(member.getGuild().toLong(), newHp - result)
+    try {
+        if (oldHp - (oldHp % 100.0) != newHp - (newHp % 100.0) && newHp <= 900) {
+            val result = callEvent(channel.asChannel(), newHp, config, member, memberHp)
+            if (result > 0) {
+                changeSnowMonster(member.getGuild().toLong(), newHp - result)
+            }
         }
+    } catch (e: Exception) {
+        e.printStackTrace()
     }
-    val thrownAmount = if (newHp - newHp != amount) oldHp - newHp else amount
+    val thrownAmount = if (oldHp - newHp != finalAmount) oldHp - newHp else finalAmount
     statisticService.log(ThrownSnowballs, member.id, finalAmount)
+    statisticService.log(ThrownSnowballCount, member.id, finalAmount)
     if (extraSnowball) {
         return "Oho! Wo kommt denn der $finalAmount. Schneeball her?"
     }
@@ -190,7 +197,7 @@ private suspend fun ChristmasModule.performThrow(
         5 -> "Oha, das war aber ein harter Treffer, 5 HP auf einmal abgezogen!"
         6 -> "WOW! Du hast alle Deine 6 Schneebälle auf einmal geworfen!"
         in 7..Int.MAX_VALUE -> "Alles klar, $finalAmount Schneebälle?"
-        else -> "Wie konntest du denn $finalAmount Schneebälle werfen? Erzähle das doch unserem lieben Support einmal!"
+        else -> "Wie konntest du denn $finalAmount Schneebälle werfen? Erzähle das doch unserem lieben Support einmal! Danke"
     }
 }
 
@@ -211,10 +218,13 @@ private suspend fun ChristmasModule.callEvent(
         event.sendMessage(this)
         title = "event"
     }
+    logger.debug(event.javaClass.name)
     if (event is LimitExpansion) {
+        logger.debug("Limit expansion")
         config.configData.eventData.snowballLimit += 1
         config.save()
     } else if (event is SnowballGain) {
+        logger.debug("Snowball Gain")
         var extra = ThreadLocalRandom.current().nextLong(1, 4)
         if (memberHp + extra > config.configData.eventData.snowballLimit) {
             extra = config.configData.eventData.snowballLimit - memberHp
