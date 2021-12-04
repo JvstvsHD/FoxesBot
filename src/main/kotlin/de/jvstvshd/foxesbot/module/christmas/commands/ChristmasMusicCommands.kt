@@ -141,11 +141,11 @@ private fun ChristmasModule.buildEmbed(guildId: Snowflake, time: Boolean = true)
 
 private fun formatTime(original: Long): String {
     val minutes: Long
-    val seconds: Long = (original - original % 60)
-    if (original >= 60) {
-        minutes = (original - seconds) / 60
+    val seconds: Long = original % 60
+    minutes = if (original >= 60) {
+        (original - seconds) / 60
     } else {
-        minutes = 0
+        0
     }
     return "${formatTimeField(minutes)}:${formatTimeField(seconds)}"
 }
@@ -159,7 +159,7 @@ private fun formatTimeField(value: Long): String {
 
 fun ChristmasModule.getSong(guildId: Snowflake, time: Boolean = true): MessageCreateBuilder.() -> Unit =
     {
-        embed(buildEmbed(guildId, true))
+        embed(buildEmbed(guildId, time))
     }
 
 suspend fun ChristmasModule.christmasMusicCommands() {

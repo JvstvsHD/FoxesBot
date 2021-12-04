@@ -18,6 +18,7 @@ import dev.kord.core.entity.channel.StageChannel
 import dev.kord.core.supplier.EntitySupplyStrategy
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import org.apache.logging.log4j.LogManager
 
 class ChristmasMusicPlayer(
     override val channel: BaseVoiceChannelBehavior,
@@ -28,6 +29,7 @@ class ChristmasMusicPlayer(
 
     private val lavaplayerManager: AudioPlayerManager = DefaultAudioPlayerManager()
     override var currentTrack: AudioTrack? = null
+    private val logger = LogManager.getLogger()
 
     init {
         AudioSourceManagers.registerRemoteSources(lavaplayerManager)
@@ -76,10 +78,10 @@ class ChristmasMusicPlayer(
             track = lavaplayerManager.playTrack(queue.poll(), player)
         } catch (e: LimitExceededException) {
             exit()
-            throw e;
+            throw e
         } catch (e: Exception) {
             e.printStackTrace()
-            throw e;
+            throw e
         }
         currentTrack = track
         connectIfNotConnected(player)
@@ -96,8 +98,8 @@ class ChristmasMusicPlayer(
     }
 
     private suspend fun refillQueue() {
-        println("refilling queue...")
+        logger.debug("refilling queue...")
         queue.addAll(service.getUrls("christmas").shuffled())
-        println("queue was refilled to ${queue.size} items")
+        logger.debug("queue was refilled to ${queue.size} items")
     }
 }
