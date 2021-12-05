@@ -6,6 +6,8 @@ import com.kotlindiscord.kord.extensions.utils.runSuspended
 import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.foxesbot.config.Config
 import de.jvstvshd.foxesbot.module.christmas.commands.*
+import de.jvstvshd.foxesbot.module.christmas.music.ChristmasMusicPlayer
+import de.jvstvshd.foxesbot.module.christmas.statistic.StatisticService
 import de.jvstvshd.foxesbot.module.core.music.MusicPlayer
 import de.jvstvshd.foxesbot.module.core.music.MusicService
 import de.jvstvshd.foxesbot.util.KordUtil.toLong
@@ -173,6 +175,9 @@ class ChristmasModule(
 
     @OptIn(KordVoice::class)
     suspend fun christmasTime(channel: StageChannel) {
+        if (christmasTimes[channel.guildId] != null) {
+            return
+        }
         val player = createMusicPlayer(channel, LocalTimeBasedLimitation(LocalTime.of(20, 0)))
         player.exit()
         player.playRandom("christmas")

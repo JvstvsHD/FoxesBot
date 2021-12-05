@@ -1,4 +1,4 @@
-package de.jvstvshd.foxesbot.module.christmas
+package de.jvstvshd.foxesbot.module.christmas.statistic
 
 import com.zaxxer.hikari.HikariDataSource
 import dev.kord.common.entity.Snowflake

@@ -6,7 +6,7 @@ import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.respond
 import de.jvstvshd.foxesbot.module.christmas.ChristmasModule
-import de.jvstvshd.foxesbot.module.christmas.UserBotMoves
+import de.jvstvshd.foxesbot.module.christmas.statistic.UserBotMoves
 import de.jvstvshd.foxesbot.util.KordUtil
 import de.jvstvshd.foxesbot.util.limit.CountBasedLimitation
 import dev.kord.common.annotation.KordVoice

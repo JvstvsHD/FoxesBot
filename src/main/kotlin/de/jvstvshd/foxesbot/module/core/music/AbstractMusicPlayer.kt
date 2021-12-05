@@ -1,6 +1,7 @@
 package de.jvstvshd.foxesbot.module.core.music
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import dev.kord.common.annotation.KordVoice
 import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
 import dev.kord.voice.AudioFrame
@@ -24,13 +25,17 @@ abstract class AbstractMusicPlayer(override val channel: BaseVoiceChannelBehavio
         }
 
     @OptIn(KordVoice::class)
-    override suspend fun exit() {
+    override suspend fun exit(): AudioTrack? {
         println("exit for channel: ${channel.id}")
-        if (connection != null) {
-            connection?.shutdown()
-            exit0()
-        }
+        val track =
+            if (connection != null) {
+                connection?.shutdown()
+                exit0()
+            } else {
+                currentTrack
+            }
+        return track
     }
 
-    open suspend fun exit0() {}
+    open suspend fun exit0(): AudioTrack? = null
 }

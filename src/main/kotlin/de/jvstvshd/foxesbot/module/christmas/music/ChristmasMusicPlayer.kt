@@ -1,4 +1,4 @@
-package de.jvstvshd.foxesbot.module.christmas
+package de.jvstvshd.foxesbot.module.christmas.music
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
@@ -6,6 +6,7 @@ import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.player.event.TrackEndEvent
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import de.jvstvshd.foxesbot.module.christmas.ChristmasModule
 import de.jvstvshd.foxesbot.module.core.music.AbstractMusicPlayer
 import de.jvstvshd.foxesbot.module.core.music.MusicService
 import de.jvstvshd.foxesbot.util.collection.LimitedDeque
@@ -61,28 +62,25 @@ class ChristmasMusicPlayer(
         return player
     }
 
-    override suspend fun exit0() {
+    override suspend fun exit0(): AudioTrack? {
         module.christmasTimes.remove(channel.guildId)
         lavaplayerManager.shutdown()
         if (channel is StageChannel) {
             channel.getStageInstance().delete("Beendet.")
         }
+        return currentTrack
     }
 
     private suspend fun playNext(player: AudioPlayer, refillQueue: Boolean = false): AudioTrack {
         if (queue.isEmpty() || refillQueue) {
             refillQueue()
         }
-        val track: AudioTrack
-        try {
-            track = lavaplayerManager.playTrack(queue.poll(), player)
-        } catch (e: LimitExceededException) {
-            exit()
-            throw e
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw e
-        }
+        val track: AudioTrack =
+            try {
+                lavaplayerManager.playTrack(queue.poll(), player)
+            } catch (e: LimitExceededException) {
+                exit()!!
+            }
         currentTrack = track
         connectIfNotConnected(player)
         return track

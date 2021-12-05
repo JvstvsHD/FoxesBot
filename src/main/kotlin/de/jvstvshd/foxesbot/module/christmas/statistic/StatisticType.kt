@@ -1,4 +1,4 @@
-package de.jvstvshd.foxesbot.module.christmas
+package de.jvstvshd.foxesbot.module.christmas.statistic
 
 object UserBotMoves : StatisticType("user_bot_moves")
 

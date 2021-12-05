@@ -12,6 +12,8 @@ import com.kotlindiscord.kord.extensions.utils.respond
 import com.kotlindiscord.kord.extensions.utils.runSuspended
 import de.jvstvshd.foxesbot.config.Config
 import de.jvstvshd.foxesbot.module.christmas.*
+import de.jvstvshd.foxesbot.module.christmas.statistic.ThrownSnowballCount
+import de.jvstvshd.foxesbot.module.christmas.statistic.ThrownSnowballs
 import de.jvstvshd.foxesbot.util.KordUtil
 import de.jvstvshd.foxesbot.util.KordUtil.toLong
 import dev.kord.common.Color
@@ -19,6 +21,7 @@ import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.behavior.reply
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.channel.TextChannel
+import dev.kord.rest.builder.message.create.embed
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -55,7 +58,12 @@ suspend fun ChristmasModule.throwCommand() = ephemeralSlashCommand {
             val snowballs = getSnowballs(member!!.toLong())
             if (snowballs <= 0) {
                 respond {
-                    content = "Der Schnee ist bedauerlicherweise bereite getaut. Warte, bis es erneut schneit!"
+                    embed {
+                        title = "Der Schnee ist getaut."
+                        description =
+                            "Warte, bis es erneut schneit.\n**UND DAS IST ERST MORGEN**\n(Was man dazu noch sagen könnte: Wer lesen kann ist klar im Vorteil.)"
+                        footer = KordUtil.createFooter("Morgen. 6 Uhr. Nicht früher.")
+                    }
                 }
                 return@launch
             }
@@ -96,7 +104,12 @@ suspend fun ChristmasModule.throwChatCommand() = chatCommand {
             val snowballs = getSnowballs(member!!.toLong())
             if (snowballs <= 0) {
                 message.reply {
-                    content = "Der Schnee ist bedauerlicherweise bereite getaut. Warte, bis es erneut schneit!"
+                    embed {
+                        title = "Der Schnee ist getaut."
+                        description =
+                            "Warte, bis es erneut schneit.\n**UND DAS IST ERST MORGEN**\n(Was man dazu noch sagen könnte: Wer lesen kann ist klar im Vorteil.)"
+                        footer = KordUtil.createFooter("Morgen. 6 Uhr. Nicht früher.")
+                    }
                 }
                 return@launch
             }
