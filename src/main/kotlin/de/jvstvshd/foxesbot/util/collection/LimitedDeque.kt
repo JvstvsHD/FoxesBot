@@ -28,4 +28,6 @@ class LimitedDeque<E>(val limitation: Limitation) : LimitedQueue<E>, ArrayDeque<
         checkAccess()
         return super.pollLast()
     }
+
+    fun pollUnchecked(): E = poll()
 }

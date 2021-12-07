@@ -88,7 +88,9 @@ class ChristmasModule(
         ).also {
             christmasTimes[channel.guildId] = it
         }
-        player.exit()
+        //if ((player as ChristmasMusicPlayer).started) {
+            player.exit()
+        //}
         return player
     }
 

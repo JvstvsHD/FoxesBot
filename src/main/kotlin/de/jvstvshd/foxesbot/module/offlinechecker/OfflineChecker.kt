@@ -69,7 +69,7 @@ class OfflineChecker(
                         url =
                             member.kord.getSelf(EntitySupplyStrategy.cacheWithCachingRestFallback).avatar?.url.toString()
                     }
-                    description = "Bitte setzte deinen Online-Status auf etwas anderes als offline/unsichtbar!"
+                    description = "Bitte setze deinen Online-Status auf etwas anderes als offline/unsichtbar!"
                     footer {
                         text =
                             "Du bist nicht auf Unsichtbar gestellt? Stelle deinen Status kurz auf etwas anderes (nur nicht unsichtbar), danach sollte das Problem behoben sein!"

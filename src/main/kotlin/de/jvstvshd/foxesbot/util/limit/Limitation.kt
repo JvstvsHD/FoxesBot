@@ -11,4 +11,5 @@ interface Limitation {
     fun limit(): String
 
     fun shouldLimit(): Boolean
+
 }

@@ -31,6 +31,9 @@ class ChristmasMusicPlayer(
     private val lavaplayerManager: AudioPlayerManager = DefaultAudioPlayerManager()
     override var currentTrack: AudioTrack? = null
     private val logger = LogManager.getLogger()
+    private var exitProcessStarted = false
+    private var lastPlayer: AudioPlayer? = null
+    var started = false
 
     init {
         AudioSourceManagers.registerRemoteSources(lavaplayerManager)
@@ -39,18 +42,24 @@ class ChristmasMusicPlayer(
     private val queue = LimitedDeque<String>(limitation)
 
     @OptIn(DelicateCoroutinesApi::class)
-    override suspend fun play(url: String): AudioTrack =
-        playNext(configurePlayer(), true)
+    override suspend fun play(url: String): AudioTrack {
+        started = true
+        return playNext(configurePlayer(), true)
+    }
 
     private fun configurePlayer(): AudioPlayer {
         val player = lavaplayerManager.createPlayer()
+        lastPlayer = player
         player.addListener { event ->
             if (event is TrackEndEvent) {
                 runBlocking {
+                    logger.debug("stopping ${event.track.info.title}")
                     try {
                         if (queue.limitation.shouldLimit()) {
+                            if (exitProcessStarted) {
+                                return@runBlocking
+                            }
                             exit()
-                            return@runBlocking
                         }
                         playNext(player!!)
                     } catch (e: Exception) {
@@ -62,7 +71,39 @@ class ChristmasMusicPlayer(
         return player
     }
 
-    override suspend fun exit0(): AudioTrack? {
+    @OptIn(DelicateCoroutinesApi::class)
+    override suspend fun exit(): AudioTrack? {
+        lastPlayer?.stopTrack()
+        currentTrack?.stop()
+        if (!started) {
+            return null
+        }
+        queue.limitation.limitNow()
+        println("exit...")
+        val player = lavaplayerManager.createPlayer()
+        lastPlayer = player
+        player.addListener { event ->
+            runBlocking {
+                if (event is TrackEndEvent) {
+                    super.exit()
+                    return@runBlocking
+                }
+            }
+        }
+        currentTrack =
+            play0(
+                "https://cdn.discordapp.com/attachments/654335565369442304/917471577480769606/2021-12-06_18-43-27.mp4",
+                //"https://youtu.be/C9YYBvxb0Tc",
+                player
+            )
+        return currentTrack
+    }
+
+    override suspend fun provideAudio(player: AudioPlayer?): ByteArray? {
+        return lastPlayer?.provide()?.data
+    }
+
+    override suspend fun exit0(player: AudioPlayer?): AudioTrack? {
         module.christmasTimes.remove(channel.guildId)
         lavaplayerManager.shutdown()
         if (channel is StageChannel) {
@@ -77,14 +118,18 @@ class ChristmasMusicPlayer(
         }
         val track: AudioTrack =
             try {
-                lavaplayerManager.playTrack(queue.poll(), player)
+                val url = queue.poll()
+                play0(url, player)
             } catch (e: LimitExceededException) {
+                e.printStackTrace()
                 exit()!!
             }
         currentTrack = track
         connectIfNotConnected(player)
         return track
     }
+
+    private suspend fun play0(url: String, player: AudioPlayer) = lavaplayerManager.playTrack(url, player)
 
     @OptIn(KordVoice::class)
     private suspend fun connectIfNotConnected(player: AudioPlayer) {

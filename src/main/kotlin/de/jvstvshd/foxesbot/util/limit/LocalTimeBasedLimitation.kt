@@ -4,7 +4,7 @@ import java.time.LocalTime
 
 class LocalTimeBasedLimitation(override val end: LocalTime) : TemporalBasedLimitation<LocalTime>(end) {
 
-    override fun limitExceeded(): Boolean =
+    override fun limitExceeded0(): Boolean =
         end.isBefore(now())
 
 

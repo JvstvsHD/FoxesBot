@@ -16,7 +16,9 @@ import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.MessageCreateBuilder
 import dev.kord.rest.builder.message.create.embed
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
+import kotlin.coroutines.suspendCoroutine
 
 suspend fun ChristmasModule.christmasMusicChatCommand(name: String) = chatCommand {
     this.name = name
@@ -36,7 +38,12 @@ suspend fun ChristmasModule.christmasMusicChatCommand(name: String) = chatComman
                 }
                 return@action
             }
-            message.respond(useReply = true, pingInReply = false, playSuspended(channel, member!!))
+            message.respond(useReply = true, pingInReply = false, suspendCoroutine {
+                @Suppress("UnusedLambdaExpressionBody")
+                runBlocking {
+                    play(channel, member!!)
+                }
+            })
         }
     }
 }
@@ -73,6 +80,7 @@ private suspend fun ChristmasModule.play(
     try {
         musicPlayer.playRandom("christmas")
         statisticService.log(UserBotMoves, member.id, 1)
+        musicPlayer.exit()
         return getSong(channel.guildId, false)
     } catch (e: NoSuchElementException) {
         return {
@@ -89,7 +97,10 @@ private suspend fun ChristmasModule.playSuspended(
     try {
         musicPlayer.playRandom("christmas")
         statisticService.log(UserBotMoves, member.id, 1)
-        return getSongSuspended(channel.guildId, false)
+        return suspendCoroutine {
+            @Suppress("UnusedLambdaExpressionBody")
+            getSong(channel.guildId, false)
+        }
     } catch (e: NoSuchElementException) {
         return {
             content = "Es ist kein Element vorhanden, das abgespielt werden könnte."
@@ -109,15 +120,14 @@ suspend fun ChristmasModule.songChatCommand() = chatCommand {
     name = "song"
     description = "Zeigt an, welcher Song derzeit gespielt"
     action {
-        message.respond(useReply = true, pingInReply = false, getSongSuspended(guild!!.id))
+        message.respond(
+            useReply = true,
+            pingInReply = false,
+            suspendCoroutine {
+                @Suppress("UnusedLambdaExpressionBody")
+                getSong(guild!!.id)
+            })
     }
-}
-
-fun ChristmasModule.getSongSuspended(
-    guildId: Snowflake,
-    time: Boolean = true
-): suspend MessageCreateBuilder.() -> Unit = {
-    embed(buildEmbed(guildId, time))
 }
 
 private fun ChristmasModule.buildEmbed(guildId: Snowflake, time: Boolean = true): EmbedBuilder.() -> Unit = {
@@ -132,7 +142,7 @@ private fun ChristmasModule.buildEmbed(guildId: Snowflake, time: Boolean = true)
         }
         color = DISCORD_FUCHSIA
         if (time) {
-            description = "${formatTime(track.position / 1000)}s/${formatTime(track.info.length / 1000)}"
+            description = "${formatTime(track.position / 1000)}/${formatTime(track.info.length / 1000)}"
         }
     }
     footer = KordUtil.createFooter("Weihnachtsmusik 2021")

@@ -4,6 +4,7 @@ import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
+import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingInt
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
@@ -28,6 +29,10 @@ open class MusicArgs : Arguments() {
 
 class ActivationArgs : MusicArgs() {
     val activated by defaultingBoolean("aktiviert", "aktiveren (True)/deaktivieren (False) ", true)
+}
+
+class ListArgs : Arguments() {
+    val page by defaultingInt("page", "Seite (20 Elemente pro Seite)", 1)
 }
 
 @OptIn(KordVoice::class)
@@ -107,6 +112,15 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
                 content = "Es wurden $affectedRows Elemente gelöscht."
             }
             return@action
+        }
+    }
+    ephemeralSubCommand(::ListArgs) {
+        name = "list"
+        description = "Listet alle Titel auf (Seite = n; von (n - 1) * 10 bis n * 10"
+        action {
+            respond {
+                content = "Coming Soon™"
+            }
         }
     }
 }
