@@ -116,8 +116,11 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
     }
     ephemeralSubCommand(::ListArgs) {
         name = "list"
-        description = "Listet alle Titel auf (Seite = n; von (n - 1) * 10 bis n * 10"
+        description = "Listet alle Titel auf (Seite = n; von (n - 1) · 15 bis n · 15"
         action {
+            dataSource.connection.use { connection ->
+                connection.prepareStatement("SELECT * FROM music WHERE ")
+            }
             respond {
                 content = "Coming Soon™"
             }

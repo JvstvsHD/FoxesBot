@@ -55,6 +55,7 @@ class ChristmasMusicPlayer(
                 runBlocking {
                     logger.debug("stopping ${event.track.info.title}")
                     try {
+                        logger.debug("limit: ${queue.limitation.limit()}, current: ${queue.limitation.toString()}")
                         if (queue.limitation.shouldLimit()) {
                             if (exitProcessStarted) {
                                 return@runBlocking

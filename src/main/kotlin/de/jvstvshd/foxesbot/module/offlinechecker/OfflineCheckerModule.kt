@@ -53,9 +53,7 @@ class OfflineCheckerModule(private val config: Config, val dataSource: HikariDat
         event<PresenceUpdateEvent> {
             action {
                 event.member.getPresenceOrNull()?.let {
-                    if (event.presence.status != PresenceStatus.Offline)
-                        return@action
-                    checkMember0(event.getMember(), event.presence.status)
+                    checkMember0(event.getMember(), it.status)
                 }
             }
         }

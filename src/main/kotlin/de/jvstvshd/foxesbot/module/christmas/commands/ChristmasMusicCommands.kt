@@ -5,10 +5,11 @@ import com.kotlindiscord.kord.extensions.extensions.chatCommand
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.respond
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import de.jvstvshd.foxesbot.module.christmas.ChristmasModule
 import de.jvstvshd.foxesbot.module.christmas.statistic.UserBotMoves
 import de.jvstvshd.foxesbot.util.KordUtil
-import de.jvstvshd.foxesbot.util.limit.CountBasedLimitation
+import de.jvstvshd.foxesbot.util.limit.LongBasedLimitation
 import dev.kord.common.annotation.KordVoice
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.MemberBehavior
@@ -76,31 +77,12 @@ private suspend fun ChristmasModule.play(
     channel: BaseVoiceChannelBehavior,
     member: MemberBehavior
 ): MessageCreateBuilder.() -> Unit {
-    val musicPlayer = createMusicPlayer(channel, CountBasedLimitation(2))
+    val musicPlayer = createMusicPlayer(channel, LongBasedLimitation(2))
     try {
-        musicPlayer.playRandom("christmas")
-        statisticService.log(UserBotMoves, member.id, 1)
         musicPlayer.exit()
-        return getSong(channel.guildId, false)
-    } catch (e: NoSuchElementException) {
-        return {
-            content = "Es ist kein Element vorhanden, das abgespielt werden könnte."
-        }
-    }
-}
-
-private suspend fun ChristmasModule.playSuspended(
-    channel: BaseVoiceChannelBehavior,
-    member: MemberBehavior
-): suspend MessageCreateBuilder.() -> Unit {
-    val musicPlayer = createMusicPlayer(channel, CountBasedLimitation(2))
-    try {
-        musicPlayer.playRandom("christmas")
+        val track = musicPlayer.playRandom("christmas")
         statisticService.log(UserBotMoves, member.id, 1)
-        return suspendCoroutine {
-            @Suppress("UnusedLambdaExpressionBody")
-            getSong(channel.guildId, false)
-        }
+        return getSong(track, false)
     } catch (e: NoSuchElementException) {
         return {
             content = "Es ist kein Element vorhanden, das abgespielt werden könnte."
@@ -149,6 +131,24 @@ private fun ChristmasModule.buildEmbed(guildId: Snowflake, time: Boolean = true)
     timestamp = Clock.System.now()
 }
 
+private fun ChristmasModule.buildEmbed(track: AudioTrack?, time: Boolean = true): EmbedBuilder.() -> Unit = {
+    if (track == null) {
+        title = "Es wird derzeit kein Song gespielt."
+    } else {
+        title = track.info.title
+        url = track.info.uri
+        thumbnail {
+            url = "https://img.youtube.com/vi/${track.info.identifier}/0.jpg"
+        }
+        color = DISCORD_FUCHSIA
+        if (time) {
+            description = "${formatTime(track.position / 1000)}/${formatTime(track.info.length / 1000)}"
+        }
+    }
+    footer = KordUtil.createFooter("Weihnachtsmusik 2021")
+    timestamp = Clock.System.now()
+}
+
 private fun formatTime(original: Long): String {
     val minutes: Long
     val seconds: Long = original % 60
@@ -167,10 +167,13 @@ private fun formatTimeField(value: Long): String {
     return value.toString()
 }
 
-fun ChristmasModule.getSong(guildId: Snowflake, time: Boolean = true): MessageCreateBuilder.() -> Unit =
+fun ChristmasModule.getSong(track: AudioTrack?, time: Boolean = true): MessageCreateBuilder.() -> Unit =
     {
-        embed(buildEmbed(guildId, time))
+        embed(buildEmbed(track, time))
     }
+
+fun ChristmasModule.getSong(guildId: Snowflake, time: Boolean = true): MessageCreateBuilder.() -> Unit =
+    getSong(christmasTimes[guildId]?.currentTrack)
 
 suspend fun ChristmasModule.christmasMusicCommands() {
     christmasMusicCommand("wm")

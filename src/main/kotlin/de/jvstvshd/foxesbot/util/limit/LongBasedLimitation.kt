@@ -1,6 +1,7 @@
 package de.jvstvshd.foxesbot.util.limit
 
-class CountBasedLimitation(@Suppress("MemberVisibilityCanBePrivate") val maxCount: Long) : Limitation {
+class LongBasedLimitation(@Suppress("MemberVisibilityCanBePrivate") override val maxCount: Long) :
+    NumberBasedLimitation<Long>(maxCount, 0L) {
 
     init {
         if (maxCount < 0) {
@@ -8,13 +9,7 @@ class CountBasedLimitation(@Suppress("MemberVisibilityCanBePrivate") val maxCoun
         }
     }
 
-    var count: Long = 0
-
     override fun limitExceeded(): Boolean = count > maxCount
-
-    override fun limitNow() {
-        count = maxCount
-    }
 
     override fun access() {
         count++

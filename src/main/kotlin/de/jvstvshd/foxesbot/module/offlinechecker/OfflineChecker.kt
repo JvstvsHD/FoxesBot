@@ -4,6 +4,7 @@ import com.kotlindiscord.kord.extensions.DISCORD_RED
 import com.kotlindiscord.kord.extensions.utils.dm
 import de.jvstvshd.foxesbot.config.data.ConfigData
 import de.jvstvshd.foxesbot.util.KordUtil
+import dev.kord.common.entity.PresenceStatus
 import dev.kord.core.entity.Member
 import dev.kord.core.supplier.EntitySupplyStrategy
 import dev.kord.rest.builder.message.create.embed
@@ -39,7 +40,6 @@ class OfflineChecker(
             if (running)
                 return
         }
-
         job = GlobalScope.launch {
             while (job != null) {
                 count++
@@ -51,11 +51,17 @@ class OfflineChecker(
                     job?.cancel()
                     return@launch
                 }
+                if (!offline()) {
+                    job?.cancel()
+                    return@launch
+                }
                 sendMessage()
                 delay(configData.offlineCheckerData.periodInSeconds.seconds)
             }
         }
     }
+
+    private suspend fun offline(): Boolean = member.getPresenceOrNull()?.status == PresenceStatus.Offline
 
     @OptIn(ExperimentalTime::class)
     suspend fun sendMessage() {
