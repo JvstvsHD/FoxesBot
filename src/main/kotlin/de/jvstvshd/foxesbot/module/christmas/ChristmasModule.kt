@@ -7,6 +7,7 @@ import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.foxesbot.config.Config
 import de.jvstvshd.foxesbot.module.christmas.commands.*
 import de.jvstvshd.foxesbot.module.christmas.music.ChristmasMusicPlayer
+import de.jvstvshd.foxesbot.module.christmas.music.ChristmasTimePlayer
 import de.jvstvshd.foxesbot.module.christmas.statistic.StatisticService
 import de.jvstvshd.foxesbot.module.core.music.MusicPlayer
 import de.jvstvshd.foxesbot.module.core.music.MusicService
@@ -89,7 +90,7 @@ class ChristmasModule(
             christmasTimes[channel.guildId] = it
         }
         //if ((player as ChristmasMusicPlayer).started) {
-            player.exit()
+        player.exit()
         //}
         return player
     }
@@ -180,7 +181,12 @@ class ChristmasModule(
         if (christmasTimes[channel.guildId] != null) {
             return
         }
-        val player = createMusicPlayer(channel, LocalTimeBasedLimitation(LocalTime.of(20, 0)))
+        val player = christmasTimes[channel.guildId] ?: ChristmasTimePlayer(
+            channel,
+            musicService,
+            this,
+            LocalTimeBasedLimitation(LocalTime.of(20, 0))
+        )
         player.exit()
         player.playRandom("christmas")
         if (channel.getStageInstanceOrNull() == null) {
