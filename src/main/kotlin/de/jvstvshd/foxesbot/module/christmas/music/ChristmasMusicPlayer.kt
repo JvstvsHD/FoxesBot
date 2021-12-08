@@ -77,7 +77,7 @@ open class ChristmasMusicPlayer(
         module.christmasTimes.remove(channel.guildId)
         lavaplayerManager.shutdown()
         if (channel is StageChannel) {
-            channel.getStageInstance().delete("Beendet.")
+            (channel as StageChannel).getStageInstance().delete("Beendet.")
         }
         return currentTrack
     }
