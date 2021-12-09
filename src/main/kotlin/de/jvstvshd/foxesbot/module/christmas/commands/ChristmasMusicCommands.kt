@@ -14,12 +14,11 @@ import dev.kord.common.annotation.KordVoice
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.MemberBehavior
 import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
+import dev.kord.core.behavior.reply
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.MessageCreateBuilder
 import dev.kord.rest.builder.message.create.embed
-import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
-import kotlin.coroutines.suspendCoroutine
 
 suspend fun ChristmasModule.christmasMusicChatCommand(name: String) = chatCommand {
     this.name = name
@@ -39,12 +38,7 @@ suspend fun ChristmasModule.christmasMusicChatCommand(name: String) = chatComman
                 }
                 return@action
             }
-            message.respond(useReply = true, pingInReply = false, suspendCoroutine {
-                @Suppress("UnusedLambdaExpressionBody")
-                runBlocking {
-                    play(channel, member!!)
-                }
-            })
+            message.reply(play(channel, member!!))
         }
     }
 }
@@ -102,13 +96,7 @@ suspend fun ChristmasModule.songChatCommand() = chatCommand {
     name = "song"
     description = "Zeigt an, welcher Song derzeit gespielt"
     action {
-        message.respond(
-            useReply = true,
-            pingInReply = false,
-            suspendCoroutine {
-                @Suppress("UnusedLambdaExpressionBody")
-                getSong(guild!!.id)
-            })
+        message.reply(getSong(guild!!.id))
     }
 }
 
