@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "de.jvstvshd.foxesbot"
-version = "1.1.8"
+version = "1.1.9"
 
 val log4jVersion = "2.14.1"
 

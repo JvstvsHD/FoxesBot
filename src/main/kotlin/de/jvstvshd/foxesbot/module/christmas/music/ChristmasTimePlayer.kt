@@ -31,9 +31,10 @@ class ChristmasTimePlayer(
                             if (exitProcessStarted) {
                                 return@runBlocking
                             }
-                            exit()
+                            this@ChristmasTimePlayer.exit()
+                        } else {
+                            playNext(player!!)
                         }
-                        playNext(player!!)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -45,13 +46,14 @@ class ChristmasTimePlayer(
 
     @OptIn(DelicateCoroutinesApi::class)
     override suspend fun exit(): AudioTrack? {
+        exitProcessStarted = true
         lastPlayer?.stopTrack()
         currentTrack?.stop()
         if (!started) {
             return null
         }
         queue.limitation.limitNow()
-        println("exit...")
+        logger.debug("Exit process started...")
         val player = lavaplayerManager.createPlayer()
         lastPlayer = player
         player.addListener { event ->

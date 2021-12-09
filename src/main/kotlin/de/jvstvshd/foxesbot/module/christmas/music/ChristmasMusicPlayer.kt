@@ -58,8 +58,9 @@ open class ChristmasMusicPlayer(
                         logger.debug("limit: ${queue.limitation.limit()}, current: ${queue.limitation.toString()}")
                         if (queue.limitation.shouldLimit()) {
                             exit()
+                        } else {
+                            playNext(player!!)
                         }
-                        playNext(player!!)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }

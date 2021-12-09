@@ -8,7 +8,6 @@ import de.jvstvshd.foxesbot.module.christmas.ChristmasModule
 import de.jvstvshd.foxesbot.module.core.CoreModule
 import de.jvstvshd.foxesbot.module.offlinechecker.OfflineCheckerModule
 import de.jvstvshd.foxesbot.module.status.StatusModule
-import de.jvstvshd.foxesbot.module.updatetracker.UpdateTrackerModule
 import de.jvstvshd.foxesbot.util.KordUtil.toSnowflake
 import dev.kord.common.entity.PresenceStatus
 import dev.kord.gateway.Intent
@@ -27,7 +26,6 @@ class FoxesBot {
         val bot = ExtensibleBot(config.configData.baseData.token) {
             extensions {
                 add { CoreModule(config, datasource) }
-                add { UpdateTrackerModule(datasource) }
                 add { StatusModule(datasource, config) }
                 add { OfflineCheckerModule(config, datasource) }
                 add { ChristmasModule(datasource, config) }
