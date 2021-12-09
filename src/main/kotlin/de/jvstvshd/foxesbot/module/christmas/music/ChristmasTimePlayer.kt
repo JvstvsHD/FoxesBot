@@ -18,7 +18,7 @@ class ChristmasTimePlayer(
     limitation: Limitation = UnlimitedLimitation()
 ) : ChristmasMusicPlayer(channel, service, module, limitation) {
 
-    private fun configurePlayer(): AudioPlayer {
+    override fun configurePlayer(): AudioPlayer {
         val player = lavaplayerManager.createPlayer()
         lastPlayer = player
         player.addListener { event ->
@@ -33,7 +33,7 @@ class ChristmasTimePlayer(
                             }
                             this@ChristmasTimePlayer.exit()
                         } else {
-                            playNext(player!!)
+                            currentTrack = playNext(player!!)
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()

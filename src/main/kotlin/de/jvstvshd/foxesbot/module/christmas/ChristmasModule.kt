@@ -98,6 +98,7 @@ class ChristmasModule(
     @OptIn(DelicateCoroutinesApi::class)
     private fun startTimer() {
         runTimer(18, { it in 18..20 }, "Christmastime") {
+            delay(5000)
             logger.debug("Starting Christmastime....")
             startChristmasTime()
         }
@@ -186,7 +187,9 @@ class ChristmasModule(
             musicService,
             this,
             LocalTimeBasedLimitation(LocalTime.of(20, 0))
-        )
+        ).also {
+            christmasTimes[channel.guildId] = it
+        }
         player.exit()
         player.playRandom("christmas")
         if (channel.getStageInstanceOrNull() == null) {

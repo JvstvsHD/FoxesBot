@@ -47,7 +47,7 @@ open class ChristmasMusicPlayer(
         return playNext(configurePlayer(), true)
     }
 
-    private fun configurePlayer(): AudioPlayer {
+    open fun configurePlayer(): AudioPlayer {
         val player = lavaplayerManager.createPlayer()
         lastPlayer = player
         player.addListener { event ->

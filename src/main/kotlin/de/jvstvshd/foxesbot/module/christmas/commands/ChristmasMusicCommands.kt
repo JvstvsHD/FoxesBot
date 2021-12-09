@@ -100,26 +100,7 @@ suspend fun ChristmasModule.songChatCommand() = chatCommand {
     }
 }
 
-private fun ChristmasModule.buildEmbed(guildId: Snowflake, time: Boolean = true): EmbedBuilder.() -> Unit = {
-    val track = christmasTimes[guildId]?.currentTrack
-    if (track == null) {
-        title = "Es wird derzeit kein Song gespielt."
-    } else {
-        title = track.info.title
-        url = track.info.uri
-        thumbnail {
-            url = "https://img.youtube.com/vi/${track.info.identifier}/0.jpg"
-        }
-        color = DISCORD_FUCHSIA
-        if (time) {
-            description = "${formatTime(track.position / 1000)}/${formatTime(track.info.length / 1000)}"
-        }
-    }
-    footer = KordUtil.createFooter("Weihnachtsmusik 2021")
-    timestamp = Clock.System.now()
-}
-
-private fun ChristmasModule.buildEmbed(track: AudioTrack?, time: Boolean = true): EmbedBuilder.() -> Unit = {
+private fun buildEmbed(track: AudioTrack?, time: Boolean = true): EmbedBuilder.() -> Unit = {
     if (track == null) {
         title = "Es wird derzeit kein Song gespielt."
     } else {
@@ -155,13 +136,15 @@ private fun formatTimeField(value: Long): String {
     return value.toString()
 }
 
-fun ChristmasModule.getSong(track: AudioTrack?, time: Boolean = true): MessageCreateBuilder.() -> Unit =
+fun getSong(track: AudioTrack?, time: Boolean = true): MessageCreateBuilder.() -> Unit =
     {
         embed(buildEmbed(track, time))
     }
 
-fun ChristmasModule.getSong(guildId: Snowflake, time: Boolean = true): MessageCreateBuilder.() -> Unit =
-    getSong(christmasTimes[guildId]?.currentTrack)
+fun ChristmasModule.getSong(guildId: Snowflake, time: Boolean = true): MessageCreateBuilder.() -> Unit {
+    println(christmasTimes[guildId])
+    return getSong(christmasTimes[guildId]?.currentTrack)
+}
 
 suspend fun ChristmasModule.christmasMusicCommands() {
     christmasMusicCommand("wm")
