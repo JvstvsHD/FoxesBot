@@ -190,7 +190,7 @@ private suspend fun ChristmasModule.performThrow(
         if (oldHp - (oldHp % 100.0) != newHp - (newHp % 100.0) && newHp <= 900) {
             val result = callEvent(channel.asChannel(), newHp, config, member, memberHp)
             if (result > 0) {
-                changeSnowMonster(member.getGuild().toLong(), newHp - result)
+                changeSnowMonster(member.getGuild().toLong(), result)
             }
         }
     } catch (e: Exception) {
@@ -253,7 +253,7 @@ private suspend fun ChristmasModule.callEvent(
     if (result.type == Type.HP) {
         return result.newHp
     }
-    return 0
+    return -1
 }
 
 private fun getColor(hp: Int): Color {

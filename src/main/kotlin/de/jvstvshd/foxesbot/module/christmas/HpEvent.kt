@@ -18,14 +18,14 @@ object BigDegeneration : HpEvent(0.07) {
 }
 
 object SmallRegeneration : HpEvent(0.15) {
-    override fun execute(startHp: Int): EventResult = EventResult(Type.HP, startHp - 23)
+    override fun execute(startHp: Int): EventResult = EventResult(Type.HP, startHp + 23)
     override fun sendMessage(builder: EmbedBuilder) {
         builder.description = "Kleine Regeneration"
     }
 }
 
 object SmallDegeneration : HpEvent(0.1) {
-    override fun execute(startHp: Int): EventResult = EventResult(Type.HP, startHp - 7)
+    override fun execute(startHp: Int): EventResult = EventResult(Type.HP, startHp + 7)
     override fun sendMessage(builder: EmbedBuilder) {
         builder.description = "Kleine Degeneration"
     }
