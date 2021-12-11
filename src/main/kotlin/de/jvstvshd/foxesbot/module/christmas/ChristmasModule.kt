@@ -43,7 +43,7 @@ class ChristmasModule(
 
     override val name = "christmas"
     private val lock = ReentrantReadWriteLock()
-    val christmasTimes = mutableMapOf<Snowflake, MusicPlayer>()
+    val musicPlayers = mutableMapOf<Snowflake, MusicPlayer>()
     private val musicService = MusicService(dataSource)
     private val logger = LogManager.getLogger()
     val statisticService = StatisticService(dataSource)
@@ -54,14 +54,14 @@ class ChristmasModule(
             action {
                 if (event.state.userId == kord.selfId) {
                     if (event.state.channelId == null) {
-                        println("bot left channel")
-                        christmasTimes[event.state.guildId]?.exit()
+                        dev.kord.common.entity.kordLogger.debug("bot left channel")
+                        musicPlayers[event.state.guildId]?.exit()
                     }
                 }
             }
         }
         Runtime.getRuntime().addShutdownHook(Thread {
-            for (christmasTime in christmasTimes) {
+            for (christmasTime in musicPlayers) {
                 val channel = christmasTime.value.channel
                 runBlocking {
                     christmasTime.value.exit()
@@ -81,17 +81,15 @@ class ChristmasModule(
     }
 
     suspend fun createMusicPlayer(channel: BaseVoiceChannelBehavior, limitation: Limitation): MusicPlayer {
-        val player = christmasTimes[channel.guildId] ?: ChristmasMusicPlayer(
+        val player = musicPlayers[channel.guildId] ?: ChristmasMusicPlayer(
             channel,
             musicService,
             this,
             limitation
         ).also {
-            christmasTimes[channel.guildId] = it
+            musicPlayers[channel.guildId] = it
         }
-        //if ((player as ChristmasMusicPlayer).started) {
         player.exit()
-        //}
         return player
     }
 
@@ -179,16 +177,20 @@ class ChristmasModule(
 
     @OptIn(KordVoice::class)
     suspend fun christmasTime(channel: StageChannel) {
-        if (christmasTimes[channel.guildId] != null) {
-            return
+        if (musicPlayers[channel.guildId] != null) {
+            if (musicPlayers[channel.guildId] is ChristmasMusicPlayer) {
+                return
+            } else {
+                musicPlayers.remove(channel.guildId)
+            }
         }
-        val player = christmasTimes[channel.guildId] ?: ChristmasTimePlayer(
+        val player = musicPlayers[channel.guildId] ?: ChristmasTimePlayer(
             channel,
             musicService,
             this,
             LocalTimeBasedLimitation(LocalTime.of(20, 0))
         ).also {
-            christmasTimes[channel.guildId] = it
+            musicPlayers[channel.guildId] = it
         }
         player.exit()
         player.playRandom("christmas")

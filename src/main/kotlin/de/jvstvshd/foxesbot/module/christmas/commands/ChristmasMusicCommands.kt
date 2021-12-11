@@ -142,8 +142,8 @@ fun getSong(track: AudioTrack?, time: Boolean = true): MessageCreateBuilder.() -
     }
 
 fun ChristmasModule.getSong(guildId: Snowflake, time: Boolean = true): MessageCreateBuilder.() -> Unit {
-    println(christmasTimes[guildId])
-    return getSong(christmasTimes[guildId]?.currentTrack)
+    println(musicPlayers[guildId])
+    return getSong(musicPlayers[guildId]?.currentTrack)
 }
 
 suspend fun ChristmasModule.christmasMusicCommands() {

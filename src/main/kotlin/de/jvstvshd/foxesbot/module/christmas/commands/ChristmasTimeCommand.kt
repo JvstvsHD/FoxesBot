@@ -22,7 +22,7 @@ suspend fun ChristmasModule.christmasTimeCommand() = publicSlashCommand {
             hasPermission(Permission.ManageChannels)
         }
         action {
-            val player = christmasTimes[guild!!.id]
+            val player = musicPlayers[guild!!.id]
             if (player == null) {
                 respond {
                     content = "Es wird derzeit keine Musik gespielt"

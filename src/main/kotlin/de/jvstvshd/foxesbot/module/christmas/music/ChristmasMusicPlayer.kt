@@ -73,7 +73,7 @@ open class ChristmasMusicPlayer(
     }
 
     override suspend fun exit0(player: AudioPlayer?): AudioTrack? {
-        module.christmasTimes.remove(channel.guildId)
+        module.musicPlayers.remove(channel.guildId)
         lavaplayerManager.shutdown()
         if (channel is StageChannel) {
             (channel as StageChannel).getStageInstance().delete("Beendet.")
