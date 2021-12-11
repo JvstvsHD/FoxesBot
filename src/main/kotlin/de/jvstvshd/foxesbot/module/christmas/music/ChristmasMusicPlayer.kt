@@ -90,7 +90,7 @@ open class ChristmasMusicPlayer(
                 val url = queue.poll()
                 play0(url, player)
             } catch (e: LimitExceededException) {
-                e.printStackTrace()
+                kordLogger.error("Limit ${queue.limitation.limit()} was exceeded.")
                 exit()!!
             }
         currentTrack = track

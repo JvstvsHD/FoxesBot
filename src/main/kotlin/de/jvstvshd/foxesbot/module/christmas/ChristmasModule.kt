@@ -95,7 +95,10 @@ class ChristmasModule(
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun startTimer() {
-        runTimer(18, { it in 18..20 }, "Christmastime") {
+        runTimer(18, { it in 18..20 }, "Christmastime", startUpCheck = {
+            val now = LocalTime.now()
+            return@runTimer now.hour == 20 && now.minute < 0
+        }) {
             delay(5000)
             logger.debug("Starting Christmastime....")
             startChristmasTime()
@@ -125,13 +128,14 @@ class ChristmasModule(
         startHour: Int,
         predicate: suspend (Int) -> Boolean,
         name: String,
+        startUpCheck: suspend () -> Boolean = { true },
         startTask: (suspend () -> Unit)? = null,
         callback: suspend () -> Unit
     ) {
         GlobalScope.launch {
             val hour = LocalTime.now().hour
             val nextInvocation =
-                if (predicate(hour)) {
+                if (predicate(hour) && startUpCheck()) {
                     try {
                         callback.invoke()
                     } catch (e: Exception) {
