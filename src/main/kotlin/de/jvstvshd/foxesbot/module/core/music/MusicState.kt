@@ -1,8 +1,8 @@
 package de.jvstvshd.foxesbot.module.core.music
 
-
-enum class MusicState(val playable: Boolean) {
-    ACTIVATED(true),
-    DEACTIVATED(false),
-    DELETED(false)
+enum class MusicState(val playable: Boolean, val readableName: String) {
+    ACTIVATED(true, "aktiviert"),
+    DEACTIVATED(false, "deaktiviert"),
+    DELETED(false, "gelöscht (wtf?!)"),
+    UNKNOWN(false, "unbekannt (WARUM???)")
 }
