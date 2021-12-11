@@ -30,7 +30,7 @@ suspend fun ChristmasModule.christmasTimeCommand() = publicSlashCommand {
                 return@action
 
             }
-            println(player.exit())
+            println(player.exit(true))
             respond {
                 content = "Die Verbindung wurde erfolgreich getrennt."
             }

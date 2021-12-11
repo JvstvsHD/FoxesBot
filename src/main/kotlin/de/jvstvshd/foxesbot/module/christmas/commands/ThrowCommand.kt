@@ -61,7 +61,7 @@ suspend fun ChristmasModule.throwCommand() = ephemeralSlashCommand {
                     embed {
                         title = "Der Schnee ist getaut."
                         description =
-                            "Warte, bis es erneut schneit.\n**UND DAS IST ERST MORGEN**\n(Was man dazu noch sagen könnte: Wer lesen kann ist klar im Vorteil.)"
+                            "Warte, bis es erneut schneit. [Das ist erst morgen um 6 Uhr.](https://discord.com/channels/719295031621451907/907682138277703690/915608929445244950)"
                         footer = KordUtil.createFooter("Morgen. 6 Uhr. Nicht früher.")
                     }
                 }
@@ -107,7 +107,7 @@ suspend fun ChristmasModule.throwChatCommand() = chatCommand {
                     embed {
                         title = "Der Schnee ist getaut."
                         description =
-                            "Warte, bis es erneut schneit.\n**UND DAS IST ERST MORGEN**\n(Was man dazu noch sagen könnte: Wer lesen kann ist klar im Vorteil.)"
+                            "Warte, bis es erneut schneit. [Das ist erst morgen um 6 Uhr.](https://discord.com/channels/719295031621451907/907682138277703690/915608929445244950)"
                         footer = KordUtil.createFooter("Morgen. 6 Uhr. Nicht früher.")
                     }
                 }

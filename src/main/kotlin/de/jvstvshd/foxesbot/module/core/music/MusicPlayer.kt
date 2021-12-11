@@ -20,7 +20,7 @@ interface MusicPlayer {
 
     suspend fun play(url: String): AudioTrack
 
-    suspend fun exit(): AudioTrack?
+    suspend fun exit(force: Boolean = false): AudioTrack?
 
     @OptIn(KordVoice::class)
     suspend fun connect(player: AudioPlayer): VoiceConnection

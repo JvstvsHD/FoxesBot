@@ -8,6 +8,7 @@ import de.jvstvshd.foxesbot.module.core.music.MusicService
 import de.jvstvshd.foxesbot.util.limit.Limitation
 import de.jvstvshd.foxesbot.util.limit.UnlimitedLimitation
 import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
+import dev.kord.core.kordLogger
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.runBlocking
 
@@ -18,15 +19,17 @@ class ChristmasTimePlayer(
     limitation: Limitation = UnlimitedLimitation()
 ) : ChristmasMusicPlayer(channel, service, module, limitation) {
 
+    private var exitProcessStarted = false
+
     override fun configurePlayer(): AudioPlayer {
         val player = lavaplayerManager.createPlayer()
         lastPlayer = player
         player.addListener { event ->
             if (event is TrackEndEvent) {
                 runBlocking {
-                    logger.debug("stopping ${event.track.info.title}")
+                    kordLogger.debug("stopping ${event.track.info.title}")
                     try {
-                        logger.debug("limit: ${queue.limitation.limit()}, current: ${queue.limitation.toString()}")
+                        kordLogger.debug("limit: ${queue.limitation.limit()}, current: ${queue.limitation.toString()}, limit: ${queue.limitation.shouldLimit()}")
                         if (queue.limitation.shouldLimit()) {
                             if (exitProcessStarted) {
                                 return@runBlocking
@@ -45,21 +48,22 @@ class ChristmasTimePlayer(
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    override suspend fun exit(): AudioTrack? {
-        exitProcessStarted = true
+    override suspend fun exit(force: Boolean): AudioTrack? {
         lastPlayer?.stopTrack()
         currentTrack?.stop()
-        if (!started) {
+        kordLogger.debug("started: $started")
+        if (!started && !force) {
             return null
         }
+        exitProcessStarted = true
         queue.limitation.limitNow()
-        logger.debug("Exit process started...")
+        kordLogger.debug("Exit process started...")
         val player = lavaplayerManager.createPlayer()
         lastPlayer = player
         player.addListener { event ->
             runBlocking {
                 if (event is TrackEndEvent) {
-                    super.exit()
+                    super.exit(false)
                     return@runBlocking
                 }
             }

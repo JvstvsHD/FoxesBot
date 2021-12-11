@@ -5,6 +5,9 @@ import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import de.jvstvshd.foxesbot.module.core.CoreModule
 import dev.kord.common.entity.Permission
+import dev.kord.core.kordLogger
+import kotlinx.coroutines.runBlocking
+import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
 suspend fun CoreModule.exitCommand() = publicSlashCommand {
@@ -13,13 +16,40 @@ suspend fun CoreModule.exitCommand() = publicSlashCommand {
     check {
         hasPermission(Permission.ManageGuild)
     }
-    val kord = kord
     action {
         respond {
             content = translate("commands.exit.message")
         }
-        println("Shutdown initiated")
-        kord.shutdown()
+        kordLogger.debug("Shutdown initiated")
+        this@exitCommand.kord.shutdown()
+        exitProcess(0)
+    }
+}
+
+suspend fun CoreModule.restartCommand() = publicSlashCommand {
+    name = "restart"
+    description = "Startet den Bot neu"
+    check {
+        hasPermission(Permission.ManageGuild)
+    }
+    action {
+        respond {
+            content = "Der Bot startet neu... Dies kann einen Moment dauern."
+        }
+        kordLogger.debug("Restart initiated")
+        this@restartCommand.kord.shutdown()
+        Runtime.getRuntime().addShutdownHook(thread(start = false, isDaemon = true, name = "Foxes Bot Restart Thread") {
+            if (System.getProperty("os.name").lowercase().contains("win")) {
+                runBlocking {
+                    respond {
+                        content = "OS: Windows: Bot kann nicht neugestartet werden."
+                    }
+                }
+                kordLogger.warn("Cannot restart bot on windows.")
+                exitProcess(0)
+            }
+            Runtime.getRuntime().exec("sh start.sh")
+        })
         exitProcess(0)
     }
 }

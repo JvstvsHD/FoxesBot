@@ -32,7 +32,7 @@ abstract class AbstractMusicPlayer(override val channel: BaseVoiceChannelBehavio
     }
 
     @OptIn(KordVoice::class)
-    override suspend fun exit(): AudioTrack? {
+    override suspend fun exit(force: Boolean): AudioTrack? {
         println("exit for channel: ${channel.id}")
         val track =
             if (connection != null) {

@@ -16,10 +16,10 @@ import de.jvstvshd.foxesbot.util.limit.UnlimitedLimitation
 import dev.kord.common.annotation.KordVoice
 import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
 import dev.kord.core.entity.channel.StageChannel
+import dev.kord.core.kordLogger
 import dev.kord.core.supplier.EntitySupplyStrategy
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import org.apache.logging.log4j.LogManager
 
 open class ChristmasMusicPlayer(
     override val channel: BaseVoiceChannelBehavior,
@@ -30,8 +30,6 @@ open class ChristmasMusicPlayer(
 
     val lavaplayerManager: AudioPlayerManager = DefaultAudioPlayerManager()
     override var currentTrack: AudioTrack? = null
-    val logger = LogManager.getLogger()
-    var exitProcessStarted = false
     var lastPlayer: AudioPlayer? = null
     var started = false
 
@@ -53,9 +51,9 @@ open class ChristmasMusicPlayer(
         player.addListener { event ->
             if (event is TrackEndEvent) {
                 runBlocking {
-                    logger.debug("stopping ${event.track.info.title}")
+                    kordLogger.debug("stopping ${event.track.info.title}")
                     try {
-                        logger.debug("limit: ${queue.limitation.limit()}, current: ${queue.limitation.toString()}")
+                        kordLogger.debug("limit: ${queue.limitation.limit()}, current: ${queue.limitation.toString()}")
                         if (queue.limitation.shouldLimit()) {
                             exit()
                         } else {
@@ -112,8 +110,8 @@ open class ChristmasMusicPlayer(
     }
 
     private suspend fun refillQueue() {
-        logger.debug("refilling queue...")
+        kordLogger.debug("refilling queue...")
         queue.addAll(service.getUrls("christmas").shuffled())
-        logger.debug("queue was refilled to ${queue.size} items")
+        kordLogger.debug("queue was refilled to ${queue.size} items")
     }
 }
