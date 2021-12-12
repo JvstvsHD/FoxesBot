@@ -3,12 +3,13 @@ package de.jvstvshd.foxesbot.module.core.commands
 import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
+import com.kotlindiscord.kord.extensions.commands.application.slash.publicSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingInt
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
-import com.kotlindiscord.kord.extensions.types.publicRespondingPaginator
 import com.kotlindiscord.kord.extensions.types.respond
+import com.kotlindiscord.kord.extensions.types.respondingPaginator
 import com.kotlindiscord.kord.extensions.utils.runSuspended
 import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.foxesbot.module.core.CoreModule
@@ -124,7 +125,7 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
             return@action
         }
     }
-    ephemeralSubCommand(::ListArgs) {
+    publicSubCommand(::ListArgs) {
         name = "list"
         description = "Listet alle Titel auf (Seite = n; von (n - 1) · 15 bis n · 15"
         check {
@@ -165,7 +166,7 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
                 listOf(MusicTrack("Ein Fehler ist aufgetreten.", "", MusicState.UNKNOWN, "Fehler"))
             }
             val chunked = tracks.chunked(15)
-            publicRespondingPaginator {
+            respondingPaginator {
                 for ((page, trackList) in chunked.withIndex()) {
                     page {
                         title = "Music Tracks - Seite ${page + 1}"
