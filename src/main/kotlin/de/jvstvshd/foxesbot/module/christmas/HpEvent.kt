@@ -4,28 +4,28 @@ import dev.kord.rest.builder.message.EmbedBuilder
 import java.util.*
 
 object BigRegeneration : HpEvent(0.08) {
-    override fun execute(startHp: Int): EventResult = EventResult(Type.HP, startHp - 48)
+    override fun execute(startHp: Int): EventResult = EventResult(Type.HP, startHp + 48)
     override fun sendMessage(builder: EmbedBuilder) {
         builder.description = "Große Regeneration"
     }
 }
 
 object BigDegeneration : HpEvent(0.07) {
-    override fun execute(startHp: Int): EventResult = EventResult(Type.HP, startHp - 14)
+    override fun execute(startHp: Int): EventResult = EventResult(Type.HP, startHp + 14)
     override fun sendMessage(builder: EmbedBuilder) {
         builder.description = "Große Degeneration"
     }
 }
 
 object SmallRegeneration : HpEvent(0.15) {
-    override fun execute(startHp: Int): EventResult = EventResult(Type.HP, startHp + 23)
+    override fun execute(startHp: Int): EventResult = EventResult(Type.HP, startHp - 23)
     override fun sendMessage(builder: EmbedBuilder) {
         builder.description = "Kleine Regeneration"
     }
 }
 
 object SmallDegeneration : HpEvent(0.1) {
-    override fun execute(startHp: Int): EventResult = EventResult(Type.HP, startHp + 7)
+    override fun execute(startHp: Int): EventResult = EventResult(Type.HP, startHp - 7)
     override fun sendMessage(builder: EmbedBuilder) {
         builder.description = "Kleine Degeneration"
     }
