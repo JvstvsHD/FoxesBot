@@ -1,6 +1,8 @@
 package de.jvstvshd.foxesbot.module.christmas.commands
 
 import com.kotlindiscord.kord.extensions.DISCORD_FUCHSIA
+import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingInt
 import com.kotlindiscord.kord.extensions.extensions.chatCommand
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
@@ -9,7 +11,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import de.jvstvshd.foxesbot.module.christmas.ChristmasModule
 import de.jvstvshd.foxesbot.module.christmas.statistic.UserBotMoves
 import de.jvstvshd.foxesbot.util.KordUtil
-import de.jvstvshd.foxesbot.util.limit.LongBasedLimitation
+import de.jvstvshd.foxesbot.util.limit.IntBasedLimitation
 import dev.kord.common.annotation.KordVoice
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.MemberBehavior
@@ -19,8 +21,13 @@ import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.MessageCreateBuilder
 import dev.kord.rest.builder.message.create.embed
 import kotlinx.datetime.Clock
+import java.awt.Color
 
-suspend fun ChristmasModule.christmasMusicChatCommand(name: String) = chatCommand {
+class ChristmasMusicArgs : Arguments() {
+    val songs by defaultingInt("songs", "Anzahl der Songs", 2)
+}
+
+suspend fun ChristmasModule.christmasMusicChatCommand(name: String) = chatCommand(::ChristmasMusicArgs) {
     this.name = name
     description = "Spielt Weihnachtsmusik"
     action {
@@ -38,13 +45,14 @@ suspend fun ChristmasModule.christmasMusicChatCommand(name: String) = chatComman
                 }
                 return@action
             }
-            message.reply(play(channel, member!!))
+            println(arguments.songs)
+            message.reply(play(channel, member!!, arguments.songs))
         }
     }
 }
 
 @OptIn(KordVoice::class)
-suspend fun ChristmasModule.christmasMusicCommand(name: String) = publicSlashCommand {
+suspend fun ChristmasModule.christmasMusicCommand(name: String) = publicSlashCommand(::ChristmasMusicArgs) {
     this.name = name
     description = "Spielt Weihnachtsmusik"
     action {
@@ -62,16 +70,30 @@ suspend fun ChristmasModule.christmasMusicCommand(name: String) = publicSlashCom
                 }
                 return@action
             }
-            respond(play(channel, member!!))
+            respond(play(channel, member!!, arguments.songs))
         }
     }
 }
 
 private suspend fun ChristmasModule.play(
     channel: BaseVoiceChannelBehavior,
-    member: MemberBehavior
+    member: MemberBehavior,
+    limit: Int
 ): MessageCreateBuilder.() -> Unit {
-    val musicPlayer = createMusicPlayer(channel, LongBasedLimitation(2))
+    if (limit > 10) {
+        return {
+            embed {
+                title = "Fehler"
+                description = "Es sind derzeit max. 10 Songs am Stück erlaubt. Deine Angabe: $limit"
+                footer {
+                    text = "Weihnachtsmusik 2021"
+                }
+                timestamp = Clock.System.now()
+                color = KordUtil.convertColor(Color.RED)
+            }
+        }
+    }
+    val musicPlayer = createMusicPlayer(channel, IntBasedLimitation(limit))
     try {
         musicPlayer.exit()
         val track = musicPlayer.playRandom("christmas")
@@ -141,10 +163,8 @@ fun getSong(track: AudioTrack?, time: Boolean = true): MessageCreateBuilder.() -
         embed(buildEmbed(track, time))
     }
 
-fun ChristmasModule.getSong(guildId: Snowflake, time: Boolean = true): MessageCreateBuilder.() -> Unit {
-    println(musicPlayers[guildId])
-    return getSong(musicPlayers[guildId]?.currentTrack)
-}
+fun ChristmasModule.getSong(guildId: Snowflake, time: Boolean = true): MessageCreateBuilder.() -> Unit =
+    getSong(musicPlayers[guildId]?.currentTrack, time)
 
 suspend fun ChristmasModule.christmasMusicCommands() {
     christmasMusicCommand("wm")
