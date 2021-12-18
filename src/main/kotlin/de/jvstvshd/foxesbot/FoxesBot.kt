@@ -6,6 +6,7 @@ import de.jvstvshd.foxesbot.config.Config
 import de.jvstvshd.foxesbot.io.Database
 import de.jvstvshd.foxesbot.module.christmas.ChristmasModule
 import de.jvstvshd.foxesbot.module.core.CoreModule
+import de.jvstvshd.foxesbot.module.music.MusicModule
 import de.jvstvshd.foxesbot.module.offlinechecker.OfflineCheckerModule
 import de.jvstvshd.foxesbot.module.status.StatusModule
 import de.jvstvshd.foxesbot.util.KordUtil.toSnowflake
@@ -29,6 +30,8 @@ class FoxesBot {
                 add { StatusModule(datasource, config) }
                 add { OfflineCheckerModule(config, datasource) }
                 add { ChristmasModule(datasource, config) }
+                add { MusicModule(datasource) }
+
             }
 
             applicationCommands {

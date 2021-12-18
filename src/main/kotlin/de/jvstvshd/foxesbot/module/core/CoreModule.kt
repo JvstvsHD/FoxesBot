@@ -4,7 +4,7 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.foxesbot.config.Config
 import de.jvstvshd.foxesbot.module.core.commands.commands
-import de.jvstvshd.foxesbot.module.core.music.MusicService
+import de.jvstvshd.foxesbot.module.music.MusicService
 
 class CoreModule(val config: Config, val dataSource: HikariDataSource) : Extension() {
 

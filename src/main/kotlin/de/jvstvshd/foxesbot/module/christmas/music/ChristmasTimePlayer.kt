@@ -3,8 +3,7 @@ package de.jvstvshd.foxesbot.module.christmas.music
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
 import com.sedmelluq.discord.lavaplayer.player.event.TrackEndEvent
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
-import de.jvstvshd.foxesbot.module.christmas.ChristmasModule
-import de.jvstvshd.foxesbot.module.core.music.MusicService
+import de.jvstvshd.foxesbot.module.music.MusicService
 import de.jvstvshd.foxesbot.util.limit.Limitation
 import de.jvstvshd.foxesbot.util.limit.UnlimitedLimitation
 import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
@@ -15,9 +14,8 @@ import kotlinx.coroutines.runBlocking
 class ChristmasTimePlayer(
     override val channel: BaseVoiceChannelBehavior,
     override val service: MusicService,
-    module: ChristmasModule,
     limitation: Limitation = UnlimitedLimitation()
-) : ChristmasMusicPlayer(channel, service, module, limitation) {
+) : ChristmasMusicPlayer(channel, service, limitation) {
 
     private var exitProcessStarted = false
 
@@ -29,7 +27,7 @@ class ChristmasTimePlayer(
                 runBlocking {
                     kordLogger.debug("stopping ${event.track.info.title}")
                     try {
-                        kordLogger.debug("limit: ${queue.limitation.limit()}, current: ${queue.limitation.toString()}, limit: ${queue.limitation.shouldLimit()}")
+                        kordLogger.debug("limit: ${queue.limitation.limit()}, current: ${queue.limitation}, limit: ${queue.limitation.shouldLimit()}")
                         if (queue.limitation.shouldLimit()) {
                             if (exitProcessStarted) {
                                 return@runBlocking

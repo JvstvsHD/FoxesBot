@@ -1,4 +1,4 @@
-package de.jvstvshd.foxesbot.module.core.commands
+package de.jvstvshd.foxesbot.module.music.commands
 
 import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.commands.Arguments
@@ -12,9 +12,9 @@ import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.types.respondingPaginator
 import com.kotlindiscord.kord.extensions.utils.runSuspended
 import com.zaxxer.hikari.HikariDataSource
-import de.jvstvshd.foxesbot.module.core.CoreModule
-import de.jvstvshd.foxesbot.module.core.music.MusicState
-import de.jvstvshd.foxesbot.module.core.music.MusicTrack
+import de.jvstvshd.foxesbot.module.music.MusicModule
+import de.jvstvshd.foxesbot.module.music.MusicState
+import de.jvstvshd.foxesbot.module.music.MusicTrackInfo
 import dev.kord.common.annotation.KordVoice
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.kordLogger
@@ -41,7 +41,7 @@ class ListArgs : Arguments() {
 }
 
 @OptIn(KordVoice::class)
-suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand(::MusicArgs) {
+suspend fun MusicModule.musicCommand(commandName: String) = ephemeralSlashCommand(::MusicArgs) {
     name = commandName
     description = "Verwaltet Musik-Elemente"
     ephemeralSubCommand(::MusicArgs) {
@@ -133,7 +133,7 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
         }
         action {
             val query = "SELECT * FROM music" + if (arguments.topic != null) " WHERE topic = ?" else ""
-            val tracks: List<MusicTrack> = try {
+            val tracks: List<MusicTrackInfo> = try {
                 dataSource.connection.use { connection ->
                     val rs = connection.prepareStatement(query).use { ps ->
                         arguments.topic?.let {
@@ -141,7 +141,7 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
                         }
                         return@use ps.executeQuery()
                     }
-                    val list = mutableListOf<MusicTrack>()
+                    val list = mutableListOf<MusicTrackInfo>()
                     while (rs.next()) {
                         val stateName = rs.getString(3).uppercase()
                         val state: MusicState = try {
@@ -151,7 +151,7 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
                             MusicState.UNKNOWN
                         }
                         list.add(
-                            MusicTrack(
+                            MusicTrackInfo(
                                 rs.getString(1),
                                 rs.getString(2),
                                 state,
@@ -163,7 +163,7 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                listOf(MusicTrack("Ein Fehler ist aufgetreten.", "", MusicState.UNKNOWN, "Fehler"))
+                listOf(MusicTrackInfo("Ein Fehler ist aufgetreten.", "", MusicState.UNKNOWN, "Fehler"))
             }
             val chunked = tracks.chunked(15)
             respondingPaginator {
@@ -206,7 +206,3 @@ private suspend fun addTitle(name: String, url: String, dataSource: HikariDataSo
             }
         }
     }
-
-suspend fun CoreModule.musicCommands() {
-    musicCommand("music")
-}

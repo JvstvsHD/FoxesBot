@@ -6,9 +6,9 @@ import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.player.event.TrackEndEvent
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
-import de.jvstvshd.foxesbot.module.christmas.ChristmasModule
-import de.jvstvshd.foxesbot.module.core.music.AbstractMusicPlayer
-import de.jvstvshd.foxesbot.module.core.music.MusicService
+import de.jvstvshd.foxesbot.module.music.MusicService
+import de.jvstvshd.foxesbot.module.music.player.AbstractMusicPlayer
+import de.jvstvshd.foxesbot.module.music.player.musicPlayers
 import de.jvstvshd.foxesbot.util.collection.LimitedDeque
 import de.jvstvshd.foxesbot.util.limit.LimitExceededException
 import de.jvstvshd.foxesbot.util.limit.Limitation
@@ -24,7 +24,6 @@ import kotlinx.coroutines.runBlocking
 open class ChristmasMusicPlayer(
     override val channel: BaseVoiceChannelBehavior,
     override val service: MusicService,
-    private val module: ChristmasModule,
     limitation: Limitation = UnlimitedLimitation()
 ) : AbstractMusicPlayer(channel, service) {
 
@@ -53,7 +52,7 @@ open class ChristmasMusicPlayer(
                 runBlocking {
                     kordLogger.debug("stopping ${event.track.info.title}")
                     try {
-                        kordLogger.debug("limit: ${queue.limitation.limit()}, current: ${queue.limitation.toString()}")
+                        kordLogger.debug("limit: ${queue.limitation.limit()}, current: ${queue.limitation}")
                         if (queue.limitation.shouldLimit()) {
                             exit()
                         } else {
@@ -73,7 +72,7 @@ open class ChristmasMusicPlayer(
     }
 
     override suspend fun exit0(player: AudioPlayer?): AudioTrack? {
-        module.musicPlayers.remove(channel.guildId)
+        musicPlayers.remove(channel.guildId)
         lavaplayerManager.shutdown()
         if (channel is StageChannel) {
             (channel as StageChannel).getStageInstance().delete("Beendet.")

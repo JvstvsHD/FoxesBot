@@ -7,6 +7,5 @@ suspend fun CoreModule.commands() {
     exitCommand()
     helpCommand()
     settingsCommand()
-    musicCommands()
     restartCommand()
 }

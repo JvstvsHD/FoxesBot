@@ -6,19 +6,15 @@ import com.kotlindiscord.kord.extensions.utils.runSuspended
 import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.foxesbot.config.Config
 import de.jvstvshd.foxesbot.module.christmas.commands.*
-import de.jvstvshd.foxesbot.module.christmas.music.ChristmasMusicPlayer
-import de.jvstvshd.foxesbot.module.christmas.music.ChristmasTimePlayer
+import de.jvstvshd.foxesbot.module.christmas.music.ChristmasTimePlayerGenerator
 import de.jvstvshd.foxesbot.module.christmas.statistic.StatisticService
-import de.jvstvshd.foxesbot.module.core.music.MusicPlayer
-import de.jvstvshd.foxesbot.module.core.music.MusicService
+import de.jvstvshd.foxesbot.module.music.MusicService
+import de.jvstvshd.foxesbot.module.music.player.musicPlayers
 import de.jvstvshd.foxesbot.util.KordUtil.toLong
 import de.jvstvshd.foxesbot.util.KordUtil.toSnowflake
-import de.jvstvshd.foxesbot.util.limit.Limitation
 import de.jvstvshd.foxesbot.util.limit.LocalTimeBasedLimitation
 import dev.kord.common.annotation.KordVoice
-import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.optional.optional
-import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.StageChannel
@@ -43,8 +39,7 @@ class ChristmasModule(
 
     override val name = "christmas"
     private val lock = ReentrantReadWriteLock()
-    val musicPlayers = mutableMapOf<Snowflake, MusicPlayer>()
-    private val musicService = MusicService(dataSource)
+    val musicService = MusicService(dataSource)
     private val logger = LogManager.getLogger()
     val statisticService = StatisticService(dataSource)
 
@@ -60,17 +55,6 @@ class ChristmasModule(
                 }
             }
         }
-        Runtime.getRuntime().addShutdownHook(Thread {
-            for (christmasTime in musicPlayers) {
-                val channel = christmasTime.value.channel
-                runBlocking {
-                    christmasTime.value.exit()
-                    if (channel is StageChannel) {
-                        channel.getStageInstanceOrNull()?.delete("Delete on exit")
-                    }
-                }
-            }
-        })
         startTimer()
         throwCommand()
         throwChatCommand()
@@ -78,19 +62,6 @@ class ChristmasModule(
         christmasMusicCommands()
         christmasTimeCommand()
         refillCommand()
-    }
-
-    suspend fun createMusicPlayer(channel: BaseVoiceChannelBehavior, limitation: Limitation): MusicPlayer {
-        val player = musicPlayers[channel.guildId] ?: ChristmasMusicPlayer(
-            channel,
-            musicService,
-            this,
-            limitation
-        ).also {
-            musicPlayers[channel.guildId] = it
-        }
-        player.exit()
-        return player
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -181,22 +152,14 @@ class ChristmasModule(
 
     @OptIn(KordVoice::class)
     suspend fun christmasTime(channel: StageChannel) {
-        if (musicPlayers[channel.guildId] != null) {
-            if (musicPlayers[channel.guildId] is ChristmasMusicPlayer) {
-                return
-            } else {
-                musicPlayers.remove(channel.guildId)
-            }
-        }
-        val player = musicPlayers[channel.guildId] ?: ChristmasTimePlayer(
+        val player = ChristmasTimePlayerGenerator(
             channel,
             musicService,
-            this,
             LocalTimeBasedLimitation(LocalTime.of(20, 0))
-        ).also {
-            musicPlayers[channel.guildId] = it
+        ).createMusicPlayer()
+        if (player.initialized) {
+            player.exit()
         }
-        player.exit()
         player.playRandom("christmas")
         if (channel.getStageInstanceOrNull() == null) {
             channel.createStageInstance("Weihnachtsmusik")

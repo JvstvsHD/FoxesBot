@@ -5,6 +5,8 @@ import com.kotlindiscord.kord.extensions.commands.application.slash.publicSubCom
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import de.jvstvshd.foxesbot.module.christmas.ChristmasModule
+import de.jvstvshd.foxesbot.module.christmas.music.ChristmasTimePlayer
+import de.jvstvshd.foxesbot.module.music.player.musicPlayers
 import dev.kord.common.annotation.KordVoice
 import dev.kord.common.entity.Permission
 import dev.kord.core.entity.channel.StageChannel
@@ -23,9 +25,9 @@ suspend fun ChristmasModule.christmasTimeCommand() = publicSlashCommand {
         }
         action {
             val player = musicPlayers[guild!!.id]
-            if (player == null) {
+            if (player == null || player !is ChristmasTimePlayer) {
                 respond {
-                    content = "Es wird derzeit keine Musik gespielt"
+                    content = "Es wird derzeit keine Musik per ChristmasTime gespielt"
                 }
                 return@action
 
@@ -44,13 +46,6 @@ suspend fun ChristmasModule.christmasTimeCommand() = publicSlashCommand {
             hasPermission(Permission.ManageChannels)
         }
         action {
-            val voiceState = this@publicSlashCommand.kord.getSelf().asMember(guild!!.id).getVoiceStateOrNull()
-            if (voiceState?.channelId != null) {
-                respond {
-                    content = "Der Bot ist bereits mit einem Channel verbunden!"
-                }
-                return@action
-            }
             val channel = guild!!.channels.filter { it is StageChannel }.first()
                 .asChannel() as StageChannel
             christmasTime(channel)

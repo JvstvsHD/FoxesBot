@@ -1,4 +1,4 @@
-package de.jvstvshd.foxesbot.module.core.music
+package de.jvstvshd.foxesbot.module.music
 
 enum class MusicState(val playable: Boolean, val readableName: String) {
     ACTIVATED(true, "aktiviert"),

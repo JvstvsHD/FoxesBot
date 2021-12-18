@@ -37,7 +37,7 @@ class OfflineCheckerModule(private val config: Config, val dataSource: HikariDat
             action {
                 val member: Member = event.state.getMemberOrNull() ?: event.kord.getUser(
                     event.state.userId,
-                    EntitySupplyStrategy.rest
+                    EntitySupplyStrategy.cacheWithCachingRestFallback
                 )!!.asMember(event.state.guildId)
                 checkMember(member)
             }

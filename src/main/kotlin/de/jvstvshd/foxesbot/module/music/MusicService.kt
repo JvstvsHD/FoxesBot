@@ -1,9 +1,27 @@
-package de.jvstvshd.foxesbot.module.core.music
+package de.jvstvshd.foxesbot.module.music
 
 import com.kotlindiscord.kord.extensions.utils.runSuspended
 import com.zaxxer.hikari.HikariDataSource
+import kotlinx.coroutines.runBlocking
 
 class MusicService(private val dataSource: HikariDataSource) {
+
+    suspend fun retrieveMusicTracks(topic: String? = null, state: MusicState? = null): List<MusicTrackInfo> = runBlocking {
+        val query = "SELECT * FROM music" + if (topic == null) ";" else " WHERE topic = ?;"
+        val list = mutableListOf<MusicTrackInfo>()
+        dataSource.connection.use { connection ->
+            connection.prepareStatement(query).use {
+                topic?.let { topic ->
+                    it.setString(1, topic)
+                }
+                val rs = it.executeQuery()
+                while (rs.next()) {
+
+                }
+            }
+        }
+        return@runBlocking list
+    }
 
     suspend fun getUrls(topic: String?) = getUrls(topic, MusicState.ACTIVATED)
 
