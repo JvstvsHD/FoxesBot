@@ -16,8 +16,12 @@ import de.jvstvshd.foxesbot.module.christmas.statistic.ThrownSnowballCount
 import de.jvstvshd.foxesbot.module.christmas.statistic.ThrownSnowballs
 import de.jvstvshd.foxesbot.util.KordUtil
 import de.jvstvshd.foxesbot.util.KordUtil.toLong
+import de.jvstvshd.foxesbot.util.KordUtil.toSnowflake
 import dev.kord.common.Color
+import dev.kord.common.entity.Permission
+import dev.kord.common.entity.Permissions
 import dev.kord.core.behavior.channel.createEmbed
+import dev.kord.core.behavior.channel.editRolePermission
 import dev.kord.core.behavior.reply
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.channel.TextChannel
@@ -200,7 +204,37 @@ private suspend fun ChristmasModule.performThrow(
         documentUse(member.toLong())
     }
     if (newHp <= 0) {
-        return "Herzlichen Glückwunsch, ${member.mention}, du hast dem Schneemonster endgültig alle Leben abgezogen!"
+        var winners = ""
+        dataSource.connection.use { connection ->
+            connection.prepareStatement("SELECT id FROM christmas_stats WHERE type = ? ORDER BY count DESC LIMIT ?;")
+                .use {
+                    it.setString(1, "thrown_snowballs")
+                    it.setInt(2, 3)
+                    val rs = it.executeQuery()
+                    var count = 1
+                    while (rs.next()) {
+                        winners += "<@${rs.getLong(1)}>"
+                        if (count < 2) {
+                            winners += ", "
+                        } else if (count == 2) {
+                            winners += " und "
+                        }
+                        count++
+                    }
+                }
+        }
+        val guild = member.guild
+        val fightChannel = guild.getChannel(907682138277703690.toSnowflake()) as TextChannel
+        fightChannel.editRolePermission(720189868059394118.toSnowflake()) {
+            denied = Permissions(Permission.SendMessages)
+        }
+        val hutChannel = guild.getChannel(921757760121630751.toSnowflake()) as TextChannel
+        hutChannel.editRolePermission(720189868059394118.toSnowflake()) {
+            allowed = Permissions(Permission.ViewChannel)
+        }
+        return "Glückwunsch, ihr habt das Schneemonster besiegt!\n" +
+                "Ein großer Dank geht an $winners und natürlich an alle Anderen, die mitgeholfen haben!\n" +
+                "Jetzt ist der Weg zur Hütte frei...\n"
     } else {
         channel.createEmbed {
             description =
