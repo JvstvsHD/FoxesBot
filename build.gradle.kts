@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.6.0"
+    kotlin("jvm") version "1.6.10"
     java
     application
 }
@@ -9,7 +9,7 @@ plugins {
 group = "de.jvstvshd.foxesbot"
 version = "1.1.17"
 
-val log4jVersion = "2.15.0"
+val log4jVersion = "2.17.0"
 
 repositories {
     mavenCentral()
