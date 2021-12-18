@@ -26,8 +26,14 @@ val noSongInfo: EmbedBuilder.() -> Unit = {
     timestamp = Clock.System.now()
 }
 
-fun MusicPlayer?.trackInfo(time: Boolean): EmbedBuilder.() -> Unit =
-    this?.trackInfo0(time) ?: noSongInfo
+fun MusicPlayer?.trackInfo(time: Boolean, footerText: String? = null): EmbedBuilder.() -> Unit {
+    return if (footerText == null) {
+        this?.trackInfo0(time) ?: noSongInfo
+    } else {
+        this?.trackInfo0(time, footerText) ?: noSongInfo
+    }
+
+}
 
 interface MusicPlayer {
 
@@ -83,5 +89,5 @@ interface MusicPlayer {
         return MusicTrackInfo(track.info.title, track.info.uri, MusicState.ACTIVATED, topic, track)
     }
 
-    fun trackInfo0(time: Boolean): EmbedBuilder.() -> Unit
+    fun trackInfo0(time: Boolean, footerText: String = "Chilling Foxes Musik"): EmbedBuilder.() -> Unit
 }

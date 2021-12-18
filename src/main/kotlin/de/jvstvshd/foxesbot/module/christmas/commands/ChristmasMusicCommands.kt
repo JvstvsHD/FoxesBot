@@ -95,7 +95,7 @@ private suspend fun ChristmasModule.play(
     }
     val musicPlayer =
         ChristmasMusicPlayerGenerator(channel, musicService, IntBasedLimitation(limit)).createMusicPlayer()
-    if (musicPlayer.initialized) {
+    if (musicPlayer.started) {
         musicPlayer.exit()
     }
     try {
@@ -109,24 +109,8 @@ private suspend fun ChristmasModule.play(
     }
 }
 
-suspend fun ChristmasModule.songCommand() = publicSlashCommand {
-    name = "song"
-    description = "Zeigt an, welcher Song derzeit gespielt"
-    action {
-        respond(getSong(guild!!.id))
-    }
-}
-
-suspend fun ChristmasModule.songChatCommand() = chatCommand {
-    name = "song"
-    description = "Zeigt an, welcher Song derzeit gespielt"
-    action {
-        message.reply(getSong(guild!!.id))
-    }
-}
-
 fun getSong(guildId: Snowflake, time: Boolean = true): MessageCreateBuilder.() -> Unit = {
-    embed(musicPlayers[guildId].trackInfo(time))
+    embed(musicPlayers[guildId].trackInfo(time, "Weihnachtsmusik 2021"))
 }
 
 suspend fun ChristmasModule.christmasMusicCommands() {
@@ -134,7 +118,5 @@ suspend fun ChristmasModule.christmasMusicCommands() {
     christmasMusicCommand("weihnachtsmusik")
     christmasMusicChatCommand("wm")
     christmasMusicChatCommand("weihnachtsmusik")
-    songChatCommand()
-    songCommand()
 }
 

@@ -46,6 +46,10 @@ suspend fun ChristmasModule.christmasTimeCommand() = publicSlashCommand {
             hasPermission(Permission.ManageChannels)
         }
         action {
+            musicPlayers[guild!!.id]?.let {
+                it.exit(true)
+                musicPlayers.remove(it.channel.guildId)
+            }
             val channel = guild!!.channels.filter { it is StageChannel }.first()
                 .asChannel() as StageChannel
             christmasTime(channel)

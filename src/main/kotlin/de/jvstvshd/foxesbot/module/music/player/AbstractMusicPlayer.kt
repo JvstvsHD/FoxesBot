@@ -5,7 +5,6 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager
 import de.jvstvshd.foxesbot.module.music.MusicService
 import de.jvstvshd.foxesbot.module.music.MusicTrackInfo
-import de.jvstvshd.foxesbot.util.KordUtil
 import dev.kord.common.annotation.KordVoice
 import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
 import dev.kord.rest.builder.message.EmbedBuilder
@@ -29,15 +28,19 @@ abstract class AbstractMusicPlayer(override val channel: BaseVoiceChannelBehavio
         }
     }
 
-    override fun trackInfo0(time: Boolean): EmbedBuilder.() -> Unit =
+    override fun trackInfo0(time: Boolean, footerText: String): EmbedBuilder.() -> Unit =
         if (trackInfo == de.jvstvshd.foxesbot.module.music.noSongInfo || trackInfo.currentTrack == null) {
             noSongInfo
         } else {
-            getTrackInfo(time, trackInfo)
+            getTrackInfo(time, trackInfo, footerText)
         }
 
 
-    private fun getTrackInfo(time: Boolean, info: MusicTrackInfo): EmbedBuilder.() -> Unit = {
+    private fun getTrackInfo(
+        time: Boolean,
+        info: MusicTrackInfo,
+        footerText: String
+    ): EmbedBuilder.() -> Unit = {
         val track = info.currentTrack!!
         title = track.info.title
         url = track.info.uri
@@ -54,7 +57,9 @@ abstract class AbstractMusicPlayer(override val channel: BaseVoiceChannelBehavio
         }
         color = DISCORD_FUCHSIA
 
-        footer = KordUtil.createFooter("Weihnachtsmusik 2021")
+        footer {
+            text = footerText
+        }
         timestamp = Clock.System.now()
     }
 
@@ -90,14 +95,8 @@ abstract class AbstractMusicPlayer(override val channel: BaseVoiceChannelBehavio
     @OptIn(KordVoice::class)
     override suspend fun exit(force: Boolean): MusicTrackInfo {
         println("exit for channel: ${channel.id}")
-        val track =
-            if (connection != null) {
-                connection?.shutdown()
-                exit0()
-            } else {
-                trackInfo
-            }
-        return track
+        connection?.shutdown()
+        return exit0()
     }
 
     open suspend fun exit0(player: AudioPlayer? = null): MusicTrackInfo = de.jvstvshd.foxesbot.module.music.noSongInfo
