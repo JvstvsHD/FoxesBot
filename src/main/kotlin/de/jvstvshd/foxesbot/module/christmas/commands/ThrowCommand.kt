@@ -6,7 +6,7 @@ import com.kotlindiscord.kord.extensions.DISCORD_GREEN
 import com.kotlindiscord.kord.extensions.DISCORD_RED
 import com.kotlindiscord.kord.extensions.DISCORD_YELLOW
 import com.kotlindiscord.kord.extensions.extensions.chatCommand
-import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
+import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.respond
 import com.kotlindiscord.kord.extensions.utils.runSuspended
@@ -34,7 +34,7 @@ import java.util.concurrent.ThreadLocalRandom
 private val logger = org.apache.logging.log4j.LogManager.getLogger()
 
 @OptIn(DelicateCoroutinesApi::class)
-suspend fun ChristmasModule.throwCommand() = ephemeralSlashCommand {
+suspend fun ChristmasModule.throwCommand() = publicSlashCommand {
     name = "werfen"
     description = "Werfe deine Schneebälle"
     action {
@@ -149,6 +149,9 @@ private suspend fun ChristmasModule.throwSnowballs(
             }
     }
     val oldHp = getSnowMonsterHp(member.guild.toLong())
+    if (oldHp <= 0) {
+        return "Das Schneemonster ist bereits besiegt worden."
+    }
     val newHp = calculateNewHp(amount, oldHp)
     return performThrow(
         oldHp,
@@ -168,15 +171,8 @@ private suspend fun ChristmasModule.performThrow(
     channel: TextChannel,
     memberHp: Long
 ): String {
-    if (oldHp != newHp) {
-        changeSnowMonster(member.guild.toLong(), newHp)
-        documentUse(member.toLong())
-    }
-    channel.createEmbed {
-        description =
-            "Das Schneemonster hat nun nur noch $newHp/1000 (${DecimalFormat("#.#").format((newHp / 1000.0) * 100)}%) HP"
-        color = getColor(newHp)
-    }
+
+
     val extraSnowball: Boolean
     val finalAmount: Int
     if (ThreadLocalRandom.current().nextDouble() <= 0.005) {
@@ -186,6 +182,9 @@ private suspend fun ChristmasModule.performThrow(
         extraSnowball = false
         finalAmount = amount
     }
+    val thrownAmount = if (oldHp - newHp != finalAmount) oldHp - newHp else finalAmount
+    statisticService.log(ThrownSnowballs, member.id, finalAmount)
+    statisticService.log(ThrownSnowballCount, member.id, finalAmount)
     try {
         if (oldHp - (oldHp % 100.0) != newHp - (newHp % 100.0) && newHp <= 900) {
             val result = callEvent(channel.asChannel(), newHp, config, member, memberHp)
@@ -196,9 +195,19 @@ private suspend fun ChristmasModule.performThrow(
     } catch (e: Exception) {
         e.printStackTrace()
     }
-    val thrownAmount = if (oldHp - newHp != finalAmount) oldHp - newHp else finalAmount
-    statisticService.log(ThrownSnowballs, member.id, finalAmount)
-    statisticService.log(ThrownSnowballCount, member.id, finalAmount)
+    if (oldHp != newHp) {
+        changeSnowMonster(member.guild.toLong(), oldHp - thrownAmount)
+        documentUse(member.toLong())
+    }
+    if (newHp <= 0) {
+        return "Herzlichen Glückwunsch, ${member.mention}, du hast dem Schneemonster endgültig alle Leben abgezogen!"
+    } else {
+        channel.createEmbed {
+            description =
+                "Das Schneemonster hat nun nur noch $newHp/1000 (${DecimalFormat("#.#").format((newHp / 1000.0) * 100)}%) HP"
+            color = getColor(newHp)
+        }
+    }
     if (extraSnowball) {
         return "Oho! Wo kommt denn der $finalAmount. Schneeball her?"
     }
