@@ -2,6 +2,8 @@ package de.jvstvshd.foxesbot.module.music
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 
+val noSongInfo = MusicTrackInfo("Kein Song", "https://www.youtube.com/", MusicState.UNKNOWN, "nothing")
+
 data class MusicTrackInfo(
     val name: String,
     val url: String,

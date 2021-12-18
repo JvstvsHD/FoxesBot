@@ -2,8 +2,9 @@ package de.jvstvshd.foxesbot.module.christmas.music
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
 import com.sedmelluq.discord.lavaplayer.player.event.TrackEndEvent
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import de.jvstvshd.foxesbot.module.music.MusicService
+import de.jvstvshd.foxesbot.module.music.MusicTrackInfo
+import de.jvstvshd.foxesbot.module.music.noSongInfo
 import de.jvstvshd.foxesbot.util.limit.Limitation
 import de.jvstvshd.foxesbot.util.limit.UnlimitedLimitation
 import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
@@ -34,7 +35,7 @@ class ChristmasTimePlayer(
                             }
                             this@ChristmasTimePlayer.exit()
                         } else {
-                            currentTrack = playNext(player!!)
+                            trackInfo = playNext(player!!)
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -46,12 +47,12 @@ class ChristmasTimePlayer(
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    override suspend fun exit(force: Boolean): AudioTrack? {
+    override suspend fun exit(force: Boolean): MusicTrackInfo {
         lastPlayer?.stopTrack()
-        currentTrack?.stop()
+        trackInfo.currentTrack?.stop()
         kordLogger.debug("started: $started")
         if (!started && !force) {
-            return null
+            return noSongInfo
         }
         exitProcessStarted = true
         queue.limitation.limitNow()
@@ -66,13 +67,13 @@ class ChristmasTimePlayer(
                 }
             }
         }
-        currentTrack =
+        trackInfo =
             play0(
                 "https://cdn.discordapp.com/attachments/654335565369442304/917471577480769606/2021-12-06_18-43-27.mp4",
                 //"https://youtu.be/C9YYBvxb0Tc",
                 player
             )
-        return currentTrack
+        return trackInfo
     }
 
     override suspend fun provideAudio(player: AudioPlayer?): ByteArray? {

@@ -4,14 +4,14 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import de.jvstvshd.foxesbot.module.music.MusicService
+import de.jvstvshd.foxesbot.module.music.MusicTrackInfo
 import dev.kord.common.annotation.KordVoice
 import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
 
 open class DefaultMusicPlayer(override val channel: BaseVoiceChannelBehavior, override val service: MusicService) :
     AbstractMusicPlayer(channel, service) {
-    override var currentTrack: AudioTrack? = null
+    override var trackInfo: MusicTrackInfo = de.jvstvshd.foxesbot.module.music.noSongInfo
     private val lavaplayerManager: AudioPlayerManager = DefaultAudioPlayerManager()
 
     init {
@@ -19,12 +19,12 @@ open class DefaultMusicPlayer(override val channel: BaseVoiceChannelBehavior, ov
     }
 
     @OptIn(KordVoice::class)
-    override suspend fun play(url: String): AudioTrack {
+    override suspend fun play(url: String): MusicTrackInfo {
         return play0(url)
     }
 
     @OptIn(KordVoice::class)
-    suspend fun play0(url: String): AudioTrack {
+    suspend fun play0(url: String): MusicTrackInfo {
         val player = configurePlayer(lavaplayerManager)
         val track = lavaplayerManager.playTrack(url, player)
         connect(player)

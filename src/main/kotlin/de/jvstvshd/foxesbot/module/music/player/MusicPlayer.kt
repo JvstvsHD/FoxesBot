@@ -7,6 +7,8 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import de.jvstvshd.foxesbot.module.music.MusicService
+import de.jvstvshd.foxesbot.module.music.MusicState
+import de.jvstvshd.foxesbot.module.music.MusicTrackInfo
 import de.jvstvshd.foxesbot.util.KordUtil
 import dev.kord.common.annotation.KordVoice
 import dev.kord.common.entity.Snowflake
@@ -29,15 +31,15 @@ fun MusicPlayer?.trackInfo(time: Boolean): EmbedBuilder.() -> Unit =
 
 interface MusicPlayer {
 
-    var currentTrack: AudioTrack?
+    var trackInfo: MusicTrackInfo
     val channel: BaseVoiceChannelBehavior
     val service: MusicService
 
     fun init()
 
-    suspend fun play(url: String): AudioTrack
+    suspend fun play(url: String): MusicTrackInfo
 
-    suspend fun exit(force: Boolean = false): AudioTrack?
+    suspend fun exit(force: Boolean = false): MusicTrackInfo
 
     @OptIn(KordVoice::class)
     suspend fun connect(player: AudioPlayer): VoiceConnection
@@ -45,12 +47,16 @@ interface MusicPlayer {
     @OptIn(KordVoice::class)
     suspend fun openConnection(player: AudioPlayer): VoiceConnection
 
-    suspend fun playRandom(list: List<String>): AudioTrack = play(list.random())
+    suspend fun playRandom(list: List<String>): MusicTrackInfo = play(list.random())
 
-    suspend fun playRandom(topic: String): AudioTrack =
+    suspend fun playRandom(topic: String): MusicTrackInfo =
         playRandom(service.getUrls(topic))
 
-    suspend fun AudioPlayerManager.playTrack(query: String, player: AudioPlayer): AudioTrack {
+    suspend fun AudioPlayerManager.playTrack(
+        query: String,
+        player: AudioPlayer,
+        topic: String = "unknown"
+    ): MusicTrackInfo {
         val track = suspendCoroutine<AudioTrack> {
             this.loadItem(query, object : AudioLoadResultHandler {
 
@@ -74,7 +80,7 @@ interface MusicPlayer {
 
         player.playTrack(track)
 
-        return track
+        return MusicTrackInfo(track.info.title, track.info.uri, MusicState.ACTIVATED, topic, track)
     }
 
     fun trackInfo0(time: Boolean): EmbedBuilder.() -> Unit

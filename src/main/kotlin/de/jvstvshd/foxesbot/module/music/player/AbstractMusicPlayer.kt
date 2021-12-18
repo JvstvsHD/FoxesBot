@@ -3,8 +3,8 @@ package de.jvstvshd.foxesbot.module.music.player
 import com.kotlindiscord.kord.extensions.DISCORD_FUCHSIA
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import de.jvstvshd.foxesbot.module.music.MusicService
+import de.jvstvshd.foxesbot.module.music.MusicTrackInfo
 import de.jvstvshd.foxesbot.util.KordUtil
 import dev.kord.common.annotation.KordVoice
 import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
@@ -30,14 +30,15 @@ abstract class AbstractMusicPlayer(override val channel: BaseVoiceChannelBehavio
     }
 
     override fun trackInfo0(time: Boolean): EmbedBuilder.() -> Unit =
-        if (currentTrack == null) {
+        if (trackInfo == de.jvstvshd.foxesbot.module.music.noSongInfo || trackInfo.currentTrack == null) {
             noSongInfo
         } else {
-            getTrackInfo(time, currentTrack!!)
+            getTrackInfo(time, trackInfo)
         }
 
 
-    private fun getTrackInfo(time: Boolean, track: AudioTrack): EmbedBuilder.() -> Unit = {
+    private fun getTrackInfo(time: Boolean, info: MusicTrackInfo): EmbedBuilder.() -> Unit = {
+        val track = info.currentTrack!!
         title = track.info.title
         url = track.info.uri
         track.let {
@@ -87,19 +88,19 @@ abstract class AbstractMusicPlayer(override val channel: BaseVoiceChannelBehavio
     }
 
     @OptIn(KordVoice::class)
-    override suspend fun exit(force: Boolean): AudioTrack? {
+    override suspend fun exit(force: Boolean): MusicTrackInfo {
         println("exit for channel: ${channel.id}")
         val track =
             if (connection != null) {
                 connection?.shutdown()
                 exit0()
             } else {
-                currentTrack
+                trackInfo
             }
         return track
     }
 
-    open suspend fun exit0(player: AudioPlayer? = null): AudioTrack? = null
+    open suspend fun exit0(player: AudioPlayer? = null): MusicTrackInfo = de.jvstvshd.foxesbot.module.music.noSongInfo
 
     private fun formatTime(original: Long): String {
         val minutes: Long

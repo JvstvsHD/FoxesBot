@@ -5,8 +5,9 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.player.event.TrackEndEvent
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import de.jvstvshd.foxesbot.module.music.MusicService
+import de.jvstvshd.foxesbot.module.music.MusicTrackInfo
+import de.jvstvshd.foxesbot.module.music.noSongInfo
 import de.jvstvshd.foxesbot.module.music.player.AbstractMusicPlayer
 import de.jvstvshd.foxesbot.module.music.player.musicPlayers
 import de.jvstvshd.foxesbot.util.collection.LimitedDeque
@@ -28,7 +29,7 @@ open class ChristmasMusicPlayer(
 ) : AbstractMusicPlayer(channel, service) {
 
     val lavaplayerManager: AudioPlayerManager = DefaultAudioPlayerManager()
-    override var currentTrack: AudioTrack? = null
+    override var trackInfo: MusicTrackInfo = noSongInfo
     var lastPlayer: AudioPlayer? = null
     var started = false
 
@@ -39,7 +40,7 @@ open class ChristmasMusicPlayer(
     val queue = LimitedDeque<String>(limitation)
 
     @OptIn(DelicateCoroutinesApi::class)
-    override suspend fun play(url: String): AudioTrack {
+    override suspend fun play(url: String): MusicTrackInfo {
         started = true
         return playNext(configurePlayer(), true)
     }
@@ -71,28 +72,28 @@ open class ChristmasMusicPlayer(
         return lastPlayer?.provide()?.data
     }
 
-    override suspend fun exit0(player: AudioPlayer?): AudioTrack? {
+    override suspend fun exit0(player: AudioPlayer?): MusicTrackInfo {
         musicPlayers.remove(channel.guildId)
         lavaplayerManager.shutdown()
         if (channel is StageChannel) {
             (channel as StageChannel).getStageInstance().delete("Beendet.")
         }
-        return currentTrack
+        return trackInfo
     }
 
-    suspend fun playNext(player: AudioPlayer, refillQueue: Boolean = false): AudioTrack {
+    suspend fun playNext(player: AudioPlayer, refillQueue: Boolean = false): MusicTrackInfo {
         if (queue.isEmpty() || refillQueue) {
             refillQueue()
         }
-        val track: AudioTrack =
+        val track =
             try {
                 val url = queue.poll()
                 play0(url, player)
             } catch (e: LimitExceededException) {
                 kordLogger.error("Limit ${queue.limitation.limit()} was exceeded.")
-                exit()!!
+                exit()
             }
-        currentTrack = track
+        trackInfo = track
         connectIfNotConnected(player)
         return track
     }
