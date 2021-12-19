@@ -78,6 +78,7 @@ class ChristmasModule(
         christmasMusicCommands()
         christmasTimeCommand()
         refillCommand()
+        winCommand()
     }
 
     suspend fun createMusicPlayer(channel: BaseVoiceChannelBehavior, limitation: Limitation): MusicPlayer {

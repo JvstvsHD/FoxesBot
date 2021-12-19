@@ -8,7 +8,13 @@ import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import de.jvstvshd.foxesbot.module.christmas.ChristmasModule
 import de.jvstvshd.foxesbot.util.KordUtil.toLong
+import de.jvstvshd.foxesbot.util.KordUtil.toSnowflake
 import dev.kord.common.entity.Permission
+import dev.kord.common.entity.Permissions
+import dev.kord.core.behavior.channel.createMessage
+import dev.kord.core.behavior.channel.editRolePermission
+import dev.kord.core.entity.channel.TextChannel
+import dev.kord.core.supplier.EntitySupplyStrategy
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -124,6 +130,52 @@ suspend fun ChristmasModule.snowMonsterAdministrationCommand() =
                 }
             }
         }
-
     }
 
+suspend fun ChristmasModule.winCommand() = ephemeralSlashCommand {
+    name = "win"
+    description = "WIN!"
+    action {
+        var winners = ""
+        dataSource.connection.use { connection ->
+            connection.prepareStatement("SELECT id FROM christmas_stats WHERE type = ? ORDER BY count DESC LIMIT ?;")
+                .use {
+                    it.setString(1, "thrown_snowballs")
+                    it.setInt(2, 3)
+                    val rs = it.executeQuery()
+                    var count = 1
+                    while (rs.next()) {
+                        winners += this@winCommand.kord.getUser(
+                            rs.getLong(1).toSnowflake(),
+                            EntitySupplyStrategy.cacheWithCachingRestFallback
+                        )?.mention ?: "Unbekannter User :c"
+                        if (count < 2) {
+                            winners += ", "
+                        } else if (count == 2) {
+                            winners += " und "
+                        }
+                        count++
+                    }
+                }
+        }
+        val guild = member!!.guild
+        val fightChannel = guild.getChannel(907682138277703690.toSnowflake()) as TextChannel
+        fightChannel.editRolePermission(720189868059394118.toSnowflake()) {
+            denied = Permissions(Permission.SendMessages)
+        }
+        val hutChannel = guild.getChannel(921757760121630751.toSnowflake()) as TextChannel
+        hutChannel.editRolePermission(720189868059394118.toSnowflake()) {
+            allowed = Permissions(Permission.ViewChannel)
+        }
+        fightChannel.createMessage {
+            content = "Glückwunsch, ihr habt das Schneemonster besiegt!\n" +
+                    "Ein großer Dank geht an $winners und natürlich an alle Anderen, die mitgeholfen haben!\n" +
+                    "Jetzt ist der Weg zur Hütte frei...\n"
+        }
+        fightChannel.createMessage("https://cdn.discordapp.com/attachments/654335565369442304/921867947515994192/Snowman.png")
+        hutChannel.createMessage {
+            content = "https://cdn.discordapp.com/attachments/654335565369442304/921867947515994192/Snowman.png"
+        }
+        //https://cdn.discordapp.com/attachments/654335565369442304/921867947515994192/Snowman.png
+    }
+}
