@@ -124,6 +124,4 @@ suspend fun ChristmasModule.snowMonsterAdministrationCommand() =
                 }
             }
         }
-
     }
-
