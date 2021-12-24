@@ -121,7 +121,11 @@ class ChristmasModule(
                         date
                     }
                 }
-            startTask?.invoke()
+            try {
+                startTask?.invoke()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
 
             val delay = Duration.between(LocalDateTime.now(), nextInvocation).toMillis()
             logger.debug("$name: $delay")
@@ -130,7 +134,11 @@ class ChristmasModule(
                 cancel("delay may not be less than zero")
             }
             delay(delay)
-            callback.invoke()
+            try {
+                callback.invoke()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
             while (true) {
                 delay(24 * 60 * 60 * 1000)
                 try {
