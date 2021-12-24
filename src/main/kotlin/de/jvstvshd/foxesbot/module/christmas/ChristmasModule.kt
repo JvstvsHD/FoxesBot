@@ -211,6 +211,7 @@ class ChristmasModule(
     class RefillException(val userMessage: String, message: String?, val guild: Guild) : Exception(message)
 
     private suspend fun refill(): List<RefillResult> {
+        return listOf()
         val results = mutableListOf<RefillResult>()
         kord.guilds.collect { guild ->
             results.add(refill0(guild))
