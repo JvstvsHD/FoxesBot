@@ -4,7 +4,6 @@ import com.kotlindiscord.kord.extensions.ExtensibleBot
 import com.kotlindiscord.kord.extensions.i18n.SupportedLocales
 import de.jvstvshd.foxesbot.config.Config
 import de.jvstvshd.foxesbot.io.Database
-import de.jvstvshd.foxesbot.module.christmas.ChristmasModule
 import de.jvstvshd.foxesbot.module.core.CoreModule
 import de.jvstvshd.foxesbot.module.offlinechecker.OfflineCheckerModule
 import de.jvstvshd.foxesbot.module.status.StatusModule
@@ -28,7 +27,6 @@ class FoxesBot {
                 add { CoreModule(config, datasource) }
                 add { StatusModule(datasource, config) }
                 add { OfflineCheckerModule(config, datasource) }
-                add { ChristmasModule(datasource, config) }
             }
 
             applicationCommands {
