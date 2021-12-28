@@ -135,11 +135,11 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
             val query = "SELECT * FROM music" + if (arguments.topic != null) " WHERE topic = ?" else ""
             val tracks: List<MusicTrack> = try {
                 dataSource.connection.use { connection ->
-                    val rs = connection.prepareStatement(query).use { ps ->
+                    val rs = connection.prepareStatement(query).use inner@{ ps ->
                         arguments.topic?.let {
                             ps.setString(1, it)
                         }
-                        return@use ps.executeQuery()
+                        return@inner ps.executeQuery()
                     }
                     val list = mutableListOf<MusicTrack>()
                     while (rs.next()) {

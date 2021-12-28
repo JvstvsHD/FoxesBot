@@ -18,8 +18,8 @@ import dev.kord.core.supplier.EntitySupplyStrategy
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
@@ -60,15 +60,15 @@ class OfflineCheckerModule(private val config: Config, val dataSource: HikariDat
     }
 
     private suspend fun check(kord: Kord) {
-        kord.guilds.collect { guild ->
-            checkGuild(guild)
+        kord.guilds.onEach {
+            checkGuild(it)
         }
     }
 
     private suspend fun checkGuild(guild: Guild) {
-        guild.members.filter { member -> member.getVoiceStateOrNull() != null }.collect { member ->
+        guild.members.filter { member -> member.getVoiceStateOrNull() != null }.onEach { member ->
             if (member.getVoiceStateOrNull()?.channelId == null)
-                return@collect
+                return@onEach
             checkMember(member)
         }
     }
