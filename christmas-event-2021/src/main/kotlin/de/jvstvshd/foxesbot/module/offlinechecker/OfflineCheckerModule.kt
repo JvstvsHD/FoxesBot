@@ -18,7 +18,6 @@ import dev.kord.core.supplier.EntitySupplyStrategy
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds

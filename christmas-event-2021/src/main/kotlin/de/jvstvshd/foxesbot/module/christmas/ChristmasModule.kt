@@ -26,7 +26,6 @@ import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.event.user.VoiceStateUpdateEvent
 import dev.kord.rest.json.request.CurrentVoiceStateModifyRequest
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import org.apache.logging.log4j.LogManager
