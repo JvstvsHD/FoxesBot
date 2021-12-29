@@ -1,5 +1,6 @@
 package de.jvstvshd.foxesbot.module.core.commands
 
+import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChannel
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalLong
@@ -30,7 +31,9 @@ class SettingsArguments : Arguments() {
 suspend fun CoreModule.settingsCommand() = publicSlashCommand(::SettingsArguments) {
     name = "settings"
     description = "Einstellungen"
-    requireBotPermissions(Permission.ManageGuild)
+    check {
+        hasPermission(Permission.ManageGuild)
+    }
     action {
         if (arguments.channelBarrierChannel != null || arguments.channelBarrierName != null) {
             if (arguments.channelBarrierName == null || arguments.channelBarrierChannel == null) {

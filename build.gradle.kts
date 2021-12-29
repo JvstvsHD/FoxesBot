@@ -24,11 +24,12 @@ repositories {
 
 dependencies {
     //kotlin
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.5.2-native-mt")
-    implementation("io.github.qbosst:kordex-hybrid-commands:1.0.3-SNAPSHOT")
+    //implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.5.2-native-mt")
+    //implementation("io.github.qbosst:kordex-hybrid-commands:1.0.3-SNAPSHOT")
 
     //discord
     implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.1-SNAPSHOT")
+    //implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.1-20211218.123243-29")
     implementation("com.sedmelluq:lavaplayer:1.3.78")
 
     //logging
@@ -39,12 +40,12 @@ dependencies {
     //database
     implementation("org.mariadb.jdbc:mariadb-java-client:2.7.4")
     implementation("com.zaxxer:HikariCP:5.0.0")
-    implementation("org.mybatis:mybatis:3.5.7")
+    implementation("org.mybatis:mybatis:3.5.8")
 
     //(de)serialization
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.0")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.1")
 
     //some other stuff
     implementation("org.kohsuke:github-api:1.301")
@@ -68,6 +69,7 @@ tasks {
         }
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
         from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+        exclude("org/apache/logging/log4j&core/lookup/JndiLookup.class")
     }
 
     compileKotlin {

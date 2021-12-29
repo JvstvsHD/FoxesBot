@@ -24,12 +24,9 @@ abstract class AbstractMusicPlayer(override val channel: BaseVoiceChannelBehavio
             audioProvider { AudioFrame.fromData(provideAudio(player)) }
         }
 
-    open suspend fun provideAudio(player: AudioPlayer? = null): ByteArray? {
-        if (player != null) {
-            return player.provide()?.data
-        }
-        return null
-    }
+    open suspend fun provideAudio(player: AudioPlayer? = null): ByteArray? =
+        player?.provide()?.data
+
 
     @OptIn(KordVoice::class)
     override suspend fun exit(force: Boolean): AudioTrack? {
