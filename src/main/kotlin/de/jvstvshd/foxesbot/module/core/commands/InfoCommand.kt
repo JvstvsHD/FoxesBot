@@ -15,7 +15,7 @@ suspend fun CoreModule.infoCommand() = publicSlashCommand {
                 title = "FoxesBot"
                 url = "https://discord.gg/K5rhddJtyW"
                 author = KordUtil.createAuthor("JvstvsHD", "https://github.com/JvstvsHD", "https://avatars.githubusercontent.com/u/79066214?v=4")
-                description = "Dieser Bot dient als Bot für den Chilling Foxes Discord und wird hauptsächlich als Event Bot genutzt."
+                description = "Dieser Bot dient als Bot für den Chilling Foxes Discord und wird hauptsächlich als Event Bot genutzt. Für Infos über die Commands, benutzt /help. Weitere Hilfe gibt's im Support"
             }
         }
     }
