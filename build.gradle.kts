@@ -9,7 +9,7 @@ plugins {
 group = "de.jvstvshd.foxesbot"
 version = "1.1.21"
 
-val log4jVersion = "2.17.0"
+val log4jVersion = "2.17.1"
 
 repositories {
     mavenCentral()
