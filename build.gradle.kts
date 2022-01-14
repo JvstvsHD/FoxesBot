@@ -39,7 +39,7 @@ dependencies {
 
     //database
     implementation("org.mariadb.jdbc:mariadb-java-client:2.7.4")
-    implementation("com.zaxxer:HikariCP:5.0.0")
+    implementation("com.zaxxer:HikariCP:5.0.1")
     implementation("org.mybatis:mybatis:3.5.9")
 
     //(de)serialization
