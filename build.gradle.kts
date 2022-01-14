@@ -40,7 +40,7 @@ dependencies {
     //database
     implementation("org.mariadb.jdbc:mariadb-java-client:2.7.4")
     implementation("com.zaxxer:HikariCP:5.0.0")
-    implementation("org.mybatis:mybatis:3.5.8")
+    implementation("org.mybatis:mybatis:3.5.9")
 
     //(de)serialization
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1")
