@@ -6,7 +6,7 @@ plugins {
     application
 }
 
-group = "de.jvstvshd.foxesbot"
+group = "de.jvstvshd.chillingfoxes"
 version = "1.1.21"
 
 val log4jVersion = "2.17.1"
