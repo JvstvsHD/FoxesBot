@@ -54,7 +54,7 @@ class FoxesBot {
 
             presence {
                 status = PresenceStatus.Online
-                playing("Weihnachtsmusik")
+                playing("mit neuen Ideen & deinem Leben")
             }
             i18n {
                 defaultLocale = SupportedLocales.GERMAN
