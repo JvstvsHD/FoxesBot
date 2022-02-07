@@ -18,13 +18,22 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class SettingsArguments : Arguments() {
-    val channelBarrierName by optionalString(
-        "channel_barrier_name",
-        "Name für eine Barriere für z.B. Nachrichten oder Commands für bestimmte Channel"
-    )
-    val channelBarrierChannel by optionalChannel("channel_barrier_channel", "Channel für die Channel-Barriere")
-    val extra by optionalString("extra", "Extra")
-    val throwCooldown by optionalLong("cooldown", "Cooldown zwischen Würfen")
+    val channelBarrierName by optionalString {
+        name = "channel_barrier_name"
+        description = "Name für eine Barriere für z.B. Nachrichten oder Commands für bestimmte Channel"
+    }
+    val channelBarrierChannel by optionalChannel {
+        name = "channel_barrier_channel"
+        description = "Channel für die Channel-Barriere"
+    }
+    val extra by optionalString {
+        name = "extra"
+        description = "Extra"
+    }
+    val throwCooldown by optionalLong {
+        name = "cooldown"
+        description = "Cooldown zwischen Würfen"
+    }
 }
 
 @OptIn(DelicateCoroutinesApi::class)

@@ -17,27 +17,47 @@ import de.jvstvshd.chillingfoxes.foxesbot.module.core.music.MusicState
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.music.MusicTrack
 import dev.kord.common.annotation.KordVoice
 import dev.kord.common.entity.Permission
-import dev.kord.common.entity.kordLogger
+import dev.kord.core.kordLogger
 import org.apache.commons.lang3.exception.ExceptionUtils
 
 open class MusicArgs : Arguments() {
-    open val name by optionalString("name", "Name des Titels")
-    val url by optionalString("url", "URL/Link zum Song/Playlist")
-    val topic by optionalString("thema", "Thema/Bereich/Topic des Lieds (optional)")
-    val all by defaultingBoolean(
-        "all",
-        "alle Titel (nur bei Reaktivieren, Aktivieren & Deaktivieren)",
+    open val name by optionalString {
+        name = "name"
+        description = "Name des Titels"
+    }
+    val url by optionalString {
+        name = "url"
+        description = "URL/Link zum Song/Playlist"
+    }
+    val topic by optionalString {
+        name = "thema"
+        description = "Thema/Bereich/Topic des Lieds (optional)"
+    }
+    val all by defaultingBoolean {
+        name = "all"
+        description = "alle Titel (nur bei Reaktivieren, Aktivieren & Deaktivieren)"
         defaultValue = false
-    )
+    }
 }
 
 class ActivationArgs : MusicArgs() {
-    val activated by defaultingBoolean("aktiviert", "aktiveren (True)/deaktivieren (False) ", true)
+    val activated by defaultingBoolean {
+        name = "aktiviert"
+        description = "aktiveren (True)/deaktivieren (False) "
+        defaultValue = true
+    }
 }
 
 class ListArgs : Arguments() {
-    val page by defaultingInt("page", "Seite (20 Elemente pro Seite)", 1)
-    val topic by optionalString("thema", "Thema bzw. Bereich der abzufragenden Elemente")
+    val page by defaultingInt {
+        name = "page"
+        description = "Seite (20 Elemente pro Seite)"
+        defaultValue = 1
+    }
+    val topic by optionalString {
+        name = "thema"
+        description = "Thema bzw. Bereich der abzufragenden Elemente"
+    }
 }
 
 @OptIn(KordVoice::class)
@@ -132,7 +152,7 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
             hasPermission(Permission.ManageGuild)
         }
         action {
-            val query = "SELECT * FROM music" + if (arguments.topic != null) " WHERE topic = ?" else ""
+            val query = "SELECT * FROM music " + if (arguments.topic != null) "WHERE topic = ?" else ""
             val tracks: List<MusicTrack> = try {
                 dataSource.connection.use { connection ->
                     val rs = connection.prepareStatement(query).use inner@{ ps ->
