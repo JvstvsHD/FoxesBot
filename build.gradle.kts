@@ -28,14 +28,14 @@ dependencies {
     //implementation("io.github.qbosst:kordex-hybrid-commands:1.0.3-SNAPSHOT")
 
     //discord
-    implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.1-SNAPSHOT")
+    implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.2-SNAPSHOT")
     //implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.1-20211218.123243-29")
     implementation("com.sedmelluq:lavaplayer:1.3.78")
 
     //logging
     implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
-    implementation("org.slf4j:slf4j-api:1.7.32")
+    implementation("org.slf4j:slf4j-api:1.7.35")
 
     //database
     implementation("org.mariadb.jdbc:mariadb-java-client:2.7.4")
@@ -63,7 +63,7 @@ tasks.getByName<Test>("test") {
 tasks {
     jar {
         manifest {
-            attributes["Main-Class"] = "de.jvstvshd.foxesbot.LauncherKt"
+            attributes["Main-Class"] = "de.jvstvshd.chillingfoxes.foxesbot.LauncherKt"
             attributes["Multi-Release"] = true
 
         }
