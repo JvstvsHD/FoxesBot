@@ -43,8 +43,11 @@ dependencies {
     implementation("org.mybatis:mybatis:3.5.9")
 
     //(de)serialization
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.2")
+    //2.13.2 causes some problems
+    @Suppress("GradlePackageUpdate")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
+    @Suppress("GradlePackageUpdate")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.1")
 
     //some other stuff
