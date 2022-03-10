@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm") version "1.6.10"
     java
     application
+    kotlin("plugin.serialization") version ("1.6.10")
 }
 
 group = "de.jvstvshd.chillingfoxes"
@@ -29,7 +30,6 @@ dependencies {
 
     //discord
     implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.2-SNAPSHOT")
-    //implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.1-20211218.123243-29")
     implementation("com.sedmelluq:lavaplayer:1.3.78")
 
     //logging
