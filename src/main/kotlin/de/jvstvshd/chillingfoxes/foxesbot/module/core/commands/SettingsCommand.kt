@@ -3,7 +3,6 @@ package de.jvstvshd.chillingfoxes.foxesbot.module.core.commands
 import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChannel
-import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalLong
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
@@ -29,10 +28,6 @@ class SettingsArguments : Arguments() {
     val extra by optionalString {
         name = "extra"
         description = "Extra"
-    }
-    val throwCooldown by optionalLong {
-        name = "cooldown"
-        description = "Cooldown zwischen Würfen"
     }
 }
 
@@ -87,25 +82,16 @@ suspend fun CoreModule.settingsCommand() = publicSlashCommand(::SettingsArgument
                 "save_config" -> {
                     this@settingsCommand.config.save()
                     respondEphemeral {
-                        ephemeral = true
                         content = "Config wurde gespeichert!"
                     }
                 }
                 else -> {
                     respondEphemeral {
-                        ephemeral = true
                         content = "Invalides Extra!"
                     }
                 }
             }
             return@action
-        }
-        if (arguments.throwCooldown != null) {
-            config.configData.eventData.throwCooldown = arguments.throwCooldown!!
-            config.save()
-            respond {
-                content = "Die Einstellungen wurden erfolgreich aktualisiert."
-            }
         }
     }
 }
