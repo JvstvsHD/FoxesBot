@@ -1,5 +1,6 @@
 package de.jvstvshd.chillingfoxes.foxesbot.config.data
 
+@kotlinx.serialization.Serializable
 data class BaseData(
     val token: String = "",
     val testGuildId: Long? = null,

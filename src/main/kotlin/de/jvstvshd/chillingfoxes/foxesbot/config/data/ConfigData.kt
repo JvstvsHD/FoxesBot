@@ -1,5 +1,6 @@
 package de.jvstvshd.chillingfoxes.foxesbot.config.data
 
+@kotlinx.serialization.Serializable
 data class ConfigData(
     val dataBaseData: DataBaseData = DataBaseData(),
     val baseData: BaseData = BaseData(),
