@@ -23,7 +23,7 @@ class Config(private val path: Path = Path.of("config.json")) {
     @OptIn(ExperimentalSerializationApi::class)
     fun load() {
         create()
-        configData = json.decodeFromStream(path.inputStream());
+        configData = json.decodeFromStream(path.inputStream())
     }
 
     private fun create() {
