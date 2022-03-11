@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "de.jvstvshd.chillingfoxes"
-version = "1.1.21"
+version = "1.2.0-beta.1"
 
 val log4jVersion = "2.17.1"
 

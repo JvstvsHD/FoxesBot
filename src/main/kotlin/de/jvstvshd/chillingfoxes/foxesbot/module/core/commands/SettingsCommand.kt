@@ -9,7 +9,6 @@ import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.types.respondEphemeral
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
 import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.toLong
-import dev.kord.common.entity.ChannelType
 import dev.kord.common.entity.Permission
 import dev.kord.core.entity.channel.Channel
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -48,13 +47,6 @@ suspend fun CoreModule.settingsCommand() = publicSlashCommand(::SettingsArgument
             }
             val channel = arguments.channelBarrierChannel as Channel
             val name = (arguments.channelBarrierName as String).lowercase()
-            println(channel.type)
-            if (channel.type != ChannelType.GuildText) {
-                respondEphemeral {
-                    content = translate("command.settings.channel_barrier.channel")
-                }
-                return@action
-            }
             GlobalScope.launch {
                 this@settingsCommand.dataSource.connection.use { connection ->
                     connection.prepareStatement("INSERT INTO channel_barriers (name, channel_id, guild_id) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE channel_id = ?, guild_id = ?")

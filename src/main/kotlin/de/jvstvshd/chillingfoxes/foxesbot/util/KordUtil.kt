@@ -7,6 +7,20 @@ import dev.kord.core.Kord
 import dev.kord.core.entity.Entity
 import dev.kord.core.supplier.EntitySupplyStrategy
 import dev.kord.rest.builder.message.EmbedBuilder
+import java.time.format.DateTimeFormatter
+
+const val WEBSITE = "https://chillingfoxes.jvstvshd.de"
+
+suspend fun EmbedBuilder.selfAuthor(kord: Kord) {
+    author {
+        val self = kord.getSelf()
+        icon = self.avatar?.url
+        name = self.username
+        url = "https://chillingfoxes.jvstvshd.de/"
+    }
+}
+
+val standardDateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
 
 object KordUtil {
 
