@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "de.jvstvshd.chillingfoxes"
-version = "1.2.0-beta.1"
+version = "1.2.0-beta.2"
 
 val log4jVersion = "2.17.1"
 
@@ -63,7 +63,7 @@ tasks {
 
         }
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
-        from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+        //from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
         exclude("org/apache/logging/log4j&core/lookup/JndiLookup.class")
     }
 
