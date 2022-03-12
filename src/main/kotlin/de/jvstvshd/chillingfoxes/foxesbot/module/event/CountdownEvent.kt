@@ -1,5 +1,6 @@
 package de.jvstvshd.chillingfoxes.foxesbot.module.event
 
+import com.kotlindiscord.kord.extensions.commands.application.slash.converters.ChoiceEnum
 import com.kotlindiscord.kord.extensions.utils.dm
 import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.chillingfoxes.foxesbot.config.data.ConfigData
@@ -243,9 +244,10 @@ data class CountdownEventData(
 }
 
 @Serializable
-open class CountdownResetState(val value: Int) {
-    object HundredsResetState : CountdownResetState(100)
-    object TensResetState : CountdownResetState(10)
+enum class CountdownResetState(val value: Int, override val readableName: String) : ChoiceEnum {
+
+    HUNDREDS_RESET_STATE(100, "Letzter Hunderter"),
+    TENS_RESET_STATE(10, "Letzter Zehner");
 }
 
 @Serializable
