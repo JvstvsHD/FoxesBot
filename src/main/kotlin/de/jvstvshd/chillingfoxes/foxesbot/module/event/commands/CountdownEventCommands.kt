@@ -2,6 +2,7 @@ package de.jvstvshd.chillingfoxes.foxesbot.module.event.commands
 
 import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.enumChoice
 import com.kotlindiscord.kord.extensions.commands.converters.impl.channel
 import com.kotlindiscord.kord.extensions.commands.converters.impl.long
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
@@ -48,6 +49,14 @@ class CountdownArgs : Arguments() {
     }
 }
 
+class CountdownEventResetArgs : Arguments() {
+    val type by enumChoice<CountdownResetState> {
+        name = "typ"
+        typeName = "typeName"
+        description = "auf was der Countdown im Falle eines Fails zurückgesetzt werden soll"
+    }
+}
+
 suspend fun EventModule.countdownStartCommand() = publicSlashCommand(::CountdownArgs) {
     name = "countdown"
     description = "Startet ein Countdown-Event im angegebenen Channel"
@@ -88,6 +97,21 @@ suspend fun EventModule.countdownStartCommand() = publicSlashCommand(::Countdown
         event.start()
         respond {
             content = "Ein Countdown-Event, beginnend ab $startValue, wurde in ${channel.mention} gestartet."
+        }
+    }
+}
+
+suspend fun EventModule.countdownEventResetStateCommand() = publicSlashCommand(::CountdownEventResetArgs) {
+    name = "countdownreset"
+    description = "Setzt die Art des Wertes, auf den der Countdown im Falle eines Fails zurückgesetzt werden soll"
+    check {
+        hasPermission(Permission.ManageGuild)
+    }
+    action {
+        config.configData.eventData.countdownResetState = arguments.type
+        config.save()
+        respond {
+            content = "Der Reset Typ wurde erfolgreich auf ${arguments.type.readableName} gesetzt!"
         }
     }
 }

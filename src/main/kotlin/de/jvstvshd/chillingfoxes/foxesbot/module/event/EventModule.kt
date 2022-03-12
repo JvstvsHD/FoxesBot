@@ -4,6 +4,7 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.event
 import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.chillingfoxes.foxesbot.config.Config
+import de.jvstvshd.chillingfoxes.foxesbot.module.event.commands.countdownEventResetStateCommand
 import de.jvstvshd.chillingfoxes.foxesbot.module.event.commands.countdownStartCommand
 import dev.kord.core.event.message.MessageCreateEvent
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -22,6 +23,7 @@ class EventModule(val dataSource: HikariDataSource, val config: Config) : Extens
     override suspend fun setup() {
         loadCountdownEvents()
         countdownStartCommand()
+        countdownEventResetStateCommand()
         event<MessageCreateEvent> {
             action {
                 if (event.member?.isBot == true) {
