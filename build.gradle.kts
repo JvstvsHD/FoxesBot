@@ -63,7 +63,7 @@ tasks {
 
         }
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
-        //from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+        from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
         exclude("org/apache/logging/log4j&core/lookup/JndiLookup.class")
     }
 

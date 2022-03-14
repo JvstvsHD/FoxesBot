@@ -79,6 +79,7 @@ class CountdownEvent(
         if (message.author?.toLong() == data.lastUser) {
             message.delete()
             message.author?.dm("Du musst warten, bis jemand anderes eine Nachricht schreibt.")
+            return
         }
         message.author?.toLong()?.let {
             data.lastUser = it
@@ -102,6 +103,7 @@ class CountdownEvent(
         failMessage?.let {
             message.delete()
             fail(it)
+            return
         }
         synchronized(data.count) {
             setCount(transmitted)
@@ -146,10 +148,13 @@ class CountdownEvent(
     }
 
     private fun reset(): Long {
-        val resetValue = configData.eventData.countdownResetState.value
-        val residual = data.count % resetValue
-        val a = resetValue - residual
-        return (residual + a).also {
+        val modulo = configData.eventData.countdownResetState.value.toLong()
+        var missing = modulo - (data.count % modulo)
+        if (missing == modulo) {
+            missing = 0;
+        }
+        val resetValue = missing + data.count
+        return (resetValue).also {
             setCount(it)
         }
     }
@@ -212,7 +217,6 @@ class CountdownEvent(
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun removeFromDatabase() {
-        //GlobalScope.launch {
         dataSource.connection.use { connection ->
             connection.prepareStatement("DELETE FROM event_data WHERE guild_id = ? AND channel_id = ? AND type = ?")
                 .use { preparedStatement ->
@@ -222,7 +226,6 @@ class CountdownEvent(
                     preparedStatement.executeUpdate()
                 }
         }
-        //}
     }
 }
 

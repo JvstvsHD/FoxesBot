@@ -16,7 +16,6 @@ class Config(private val path: Path = Path.of("config.json")) {
 
     private val json: Json = Json {
         prettyPrint = true
-        ignoreUnknownKeys = true
     }
     lateinit var configData: ConfigData
 
