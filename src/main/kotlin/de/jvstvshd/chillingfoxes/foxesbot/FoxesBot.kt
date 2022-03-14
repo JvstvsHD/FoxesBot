@@ -67,6 +67,7 @@ class FoxesBot {
             }
             kord {
                 defaultStrategy = EntitySupplyStrategy.cacheWithCachingRestFallback
+                enableShutdownHook = true
             }
         }
         bot.start()

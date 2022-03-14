@@ -6,7 +6,9 @@ import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.chillingfoxes.foxesbot.config.Config
 import de.jvstvshd.chillingfoxes.foxesbot.module.event.commands.countdownEventResetStateCommand
 import de.jvstvshd.chillingfoxes.foxesbot.module.event.commands.countdownStartCommand
+import de.jvstvshd.chillingfoxes.foxesbot.util.ShutdownTask
 import dev.kord.core.event.message.MessageCreateEvent
+import dev.kord.core.kordLogger
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -17,7 +19,7 @@ const val COUNTDOWN_EVENT_NAME = "countdown_event"
 val countdownEvents = mutableListOf<CountdownEvent>()
 
 
-class EventModule(val dataSource: HikariDataSource, val config: Config) : Extension() {
+class EventModule(val dataSource: HikariDataSource, val config: Config) : Extension(), ShutdownTask {
     override val name: String = "event"
 
     override suspend fun setup() {
@@ -57,9 +59,24 @@ class EventModule(val dataSource: HikariDataSource, val config: Config) : Extens
                         }
                     }
             }
-            for (countdownEvent in countdownEvents) {
+            kordLogger.info("loaded ${countdownEvents.size} countdown events from database")
+            for ((index, countdownEvent) in countdownEvents.withIndex()) {
+                kordLogger.info("CD Event #$index: ${countdownEvent.data.channel.asChannel().name} in guild ${countdownEvent.data.channel.guild.asGuild().name}")
                 countdownEvent.unlock()
             }
+        }
+    }
+
+    override suspend fun unload() {
+        println("unload")
+        for (countdownEvent in countdownEvents) {
+            countdownEvent.save()
+        }
+    }
+
+    override fun onShutdown() {
+        for (countdownEvent in countdownEvents) {
+            countdownEvent.save()
         }
     }
 }

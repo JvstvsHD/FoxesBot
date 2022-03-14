@@ -43,17 +43,12 @@ class CountdownEvent(
 ) {
 
     private var locked = true
+    private var shouldBeSaved = false
 
     private fun serialize() = Json.encodeToString(data)
 
-    init {
-        Runtime.getRuntime().addShutdownHook(Thread {
-            save()
-        })
-    }
-
-    private fun save() {
-        if (data.count == 0L)
+    fun save() {
+        if (data.count == 0L || !shouldBeSaved)
             return
         dataSource.connection.use { connection ->
             connection.prepareStatement(
@@ -69,6 +64,7 @@ class CountdownEvent(
                 statement.executeUpdate()
             }
         }
+        shouldBeSaved = false
     }
 
     suspend fun countdown(message: Message) {
@@ -107,6 +103,7 @@ class CountdownEvent(
         }
         synchronized(data.count) {
             setCount(transmitted)
+            shouldBeSaved = true
         }
         if (data.count == 0L) {
             locked = true
