@@ -15,6 +15,7 @@ import dev.kord.core.behavior.channel.TextChannelBehavior
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.entity.Message
 import dev.kord.core.entity.channel.TextChannel
+import dev.kord.core.kordLogger
 import dev.kord.rest.builder.message.create.embed
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.flow.onEach
@@ -43,13 +44,16 @@ class CountdownEvent(
 ) {
 
     private var locked = true
-    private var shouldBeSaved = false
+    private var shouldBeSaved = true
 
     private fun serialize() = Json.encodeToString(data)
 
-    fun save() {
-        if (data.count == 0L || !shouldBeSaved)
+    suspend fun save() {
+        kordLogger.info("attempting to save countdown event for channel ${data.channel.asChannel().name} in guild ${data.channel.guild.asGuild().name}")
+        if (data.count == 0L || !shouldBeSaved) {
+            kordLogger.info("skipping saving for ${data.channel.asChannel().name}. shouldBeSaved: $shouldBeSaved")
             return
+        }
         dataSource.connection.use { connection ->
             connection.prepareStatement(
                 "INSERT INTO foxes_bot.event_data (guild_id, channel_id, type, data) VALUES (?, ?, ?, ?) " +
@@ -62,6 +66,7 @@ class CountdownEvent(
                 statement.setString(4, content)
                 statement.setString(5, content)
                 statement.executeUpdate()
+                kordLogger.info("saved for ${data.channel.asChannel().name}")
             }
         }
         shouldBeSaved = false

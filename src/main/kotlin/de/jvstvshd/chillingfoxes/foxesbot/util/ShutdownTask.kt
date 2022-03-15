@@ -2,5 +2,5 @@ package de.jvstvshd.chillingfoxes.foxesbot.util
 
 interface ShutdownTask {
 
-    fun onShutdown()
+    suspend fun onShutdown()
 }

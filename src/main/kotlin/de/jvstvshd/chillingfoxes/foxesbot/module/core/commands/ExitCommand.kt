@@ -8,9 +8,13 @@ import de.jvstvshd.chillingfoxes.foxesbot.util.ShutdownTask
 import dev.kord.common.entity.Permission
 import dev.kord.core.kordLogger
 import kotlinx.coroutines.runBlocking
+import org.apache.commons.lang3.time.DurationFormatUtils
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
+@OptIn(ExperimentalTime::class)
 suspend fun CoreModule.exitCommand() = publicSlashCommand {
     name = "exit"
     description = "Exits the bot."
@@ -18,18 +22,27 @@ suspend fun CoreModule.exitCommand() = publicSlashCommand {
         hasPermission(Permission.ManageGuild)
     }
     action {
+        val duration = measureTime {
+            for (extension in bot.extensions.values) {
+                if (extension is ShutdownTask) {
+                    try {
+                        extension.onShutdown()
+                    } catch (e: Exception) {
+                        kordLogger.error("Execution for shutdown task ${extension.javaClass.name} failed: $e")
+                    }
+                }
+            }
+        }
         try {
             respond {
-                content = translate("commands.exit.message")
+                content = "Der Bot fährt nun herunter. Zeit zum Ausführen der Shutdown-Tasks: ${
+                    DurationFormatUtils.formatDurationHMS(duration.inWholeMilliseconds)
+                }"
             }
+            kordLogger.debug("Shutdown tasks took ${duration.inWholeMilliseconds}ms to finish.")
             kordLogger.debug("Shutdown initiated")
         } catch (e: Exception) {
             e.printStackTrace()
-        }
-        for (extension in bot.extensions.values) {
-            if (extension is ShutdownTask) {
-                extension.onShutdown()
-            }
         }
         this@exitCommand.kord.shutdown()
         exitProcess(0)

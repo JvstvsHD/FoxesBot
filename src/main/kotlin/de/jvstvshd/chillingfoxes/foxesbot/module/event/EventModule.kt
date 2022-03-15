@@ -74,7 +74,7 @@ class EventModule(val dataSource: HikariDataSource, val config: Config) : Extens
         }
     }
 
-    override fun onShutdown() {
+    override suspend fun onShutdown() {
         for (countdownEvent in countdownEvents) {
             countdownEvent.save()
         }
