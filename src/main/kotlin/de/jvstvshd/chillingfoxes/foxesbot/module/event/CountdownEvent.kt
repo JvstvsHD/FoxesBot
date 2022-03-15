@@ -54,20 +54,24 @@ class CountdownEvent(
             kordLogger.info("skipping saving for ${data.channel.asChannel().name}. shouldBeSaved: $shouldBeSaved")
             return
         }
-        dataSource.connection.use { connection ->
-            connection.prepareStatement(
-                "INSERT INTO foxes_bot.event_data (guild_id, channel_id, type, data) VALUES (?, ?, ?, ?) " +
-                        "ON DUPLICATE KEY UPDATE data = ?"
-            ).use { statement ->
-                statement.setLong(1, data.channel.guild.toLong())
-                statement.setLong(2, data.channel.toLong())
-                statement.setString(3, COUNTDOWN_EVENT_NAME)
-                val content = serialize()
-                statement.setString(4, content)
-                statement.setString(5, content)
-                statement.executeUpdate()
-                kordLogger.info("saved for ${data.channel.asChannel().name}")
+        try {
+            dataSource.connection.use { connection ->
+                connection.prepareStatement(
+                    "INSERT INTO event_data (guild_id, channel_id, type, data) VALUES (?, ?, ?, ?) " +
+                            "ON DUPLICATE KEY UPDATE data = ?"
+                ).use { statement ->
+                    statement.setLong(1, data.channel.guild.toLong())
+                    statement.setLong(2, data.channel.toLong())
+                    statement.setString(3, COUNTDOWN_EVENT_NAME)
+                    val content = serialize()
+                    statement.setString(4, content)
+                    statement.setString(5, content)
+                    kordLogger.info("saved for ${data.channel.asChannel().name}")
+                    kordLogger.info("statement#executeUpdater(): ${statement.executeUpdate()}")
+                }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
         shouldBeSaved = false
     }
