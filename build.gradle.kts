@@ -8,9 +8,9 @@ plugins {
 }
 
 group = "de.jvstvshd.chillingfoxes"
-version = "1.2.0-beta.5"
+version = "1.2.0-beta.6"
 
-val log4jVersion = "2.17.1"
+val log4jVersion = "2.17.2"
 
 repositories {
     mavenCentral()
