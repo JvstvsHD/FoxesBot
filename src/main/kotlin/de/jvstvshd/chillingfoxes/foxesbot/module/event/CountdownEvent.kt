@@ -17,7 +17,6 @@ import dev.kord.core.Kord
 import dev.kord.core.behavior.channel.TextChannelBehavior
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.entity.Message
-import dev.kord.core.entity.User
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.kordLogger
 import dev.kord.rest.builder.message.create.embed
@@ -94,7 +93,7 @@ class CountdownEvent(
             data.lastUser = it
         }
         val content = message.content
-        val transmitted = checkForFail(content, message.author!!).let {
+        val transmitted = checkForFail(content, message).let {
             if (it.failMessage != null) {
                 message.delete()
                 fail(it.failMessage)
@@ -111,18 +110,14 @@ class CountdownEvent(
         }
     }
 
-    private suspend fun checkForFail(raw: String, author: User): CheckResult {
-        val transmitted = raw.toLongOrNull() ?: try {
-            raw.keval().toLong()
-        } catch (e: KevalException) {
-            null
-        } ?: return CheckResult(-1, "${author.mention} hat leider keine valide Zahl abgesendet.")
-
+    private suspend fun checkForFail(raw: String, message: Message): CheckResult {
+        val transmitted = raw.toLongOrNull() ?: evaluate(raw, message)
+        ?: return CheckResult(-1, "${message.author?.mention} hat leider keine valide Zahl abgesendet.")
         synchronized(data.count) {
             if (data.count - 1 != transmitted) {
                 return CheckResult(
                     -1,
-                    "${author.mention} hat leider die falsche Zahl ($transmitted) abgesendet. Richtig: ${data.count - 1}"
+                    "${message.author?.mention} hat leider die falsche Zahl ($transmitted) abgesendet. Richtig: ${data.count - 1}"
                 )
             }
         }
@@ -137,8 +132,10 @@ class CountdownEvent(
             return null
         }
         message.respond {
-            content = ""
+            content =
+                "MATHE von ${message.author?.mention}\n$raw = $transmitted\nhttps://tenor.com/view/warning-alarm-warn-beware-careful-gif-10095783 "
         }
+        return transmitted
     }
 
     private suspend fun end() {
