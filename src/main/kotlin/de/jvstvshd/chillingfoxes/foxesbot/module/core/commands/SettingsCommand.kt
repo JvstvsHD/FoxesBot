@@ -11,8 +11,6 @@ import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
 import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.toLong
 import dev.kord.common.entity.Permission
 import dev.kord.core.entity.channel.Channel
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class SettingsArguments : Arguments() {
@@ -30,7 +28,6 @@ class SettingsArguments : Arguments() {
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 suspend fun CoreModule.settingsCommand() = publicSlashCommand(::SettingsArguments) {
     name = "settings"
     description = "Einstellungen"
@@ -47,7 +44,7 @@ suspend fun CoreModule.settingsCommand() = publicSlashCommand(::SettingsArgument
             }
             val channel = arguments.channelBarrierChannel as Channel
             val name = (arguments.channelBarrierName as String).lowercase()
-            GlobalScope.launch {
+            this@settingsCommand.kord.launch {
                 this@settingsCommand.dataSource.connection.use { connection ->
                     connection.prepareStatement("INSERT INTO channel_barriers (name, channel_id, guild_id) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE channel_id = ?, guild_id = ?")
                         .use {

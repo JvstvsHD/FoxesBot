@@ -9,8 +9,6 @@ import de.jvstvshd.chillingfoxes.foxesbot.module.event.commands.countdownStartCo
 import de.jvstvshd.chillingfoxes.foxesbot.util.ShutdownTask
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.core.kordLogger
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -37,9 +35,9 @@ class EventModule(val dataSource: HikariDataSource, val config: Config) : Extens
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
+
     private fun loadCountdownEvents() {
-        GlobalScope.launch {
+        kord.launch {
             dataSource.connection.use { connection ->
                 connection.prepareStatement("SELECT guild_id, channel_id, data FROM event_data WHERE type = ?")
                     .use { statement ->

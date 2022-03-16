@@ -17,7 +17,6 @@ import dev.kord.core.entity.Message
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.kordLogger
 import dev.kord.rest.builder.message.create.embed
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.Clock
@@ -157,7 +156,7 @@ class CountdownEvent(
         val modulo = configData.eventData.countdownResetState.value.toLong()
         var missing = modulo - (data.count % modulo)
         if (missing == modulo) {
-            missing = 0;
+            missing = 0
         }
         val resetValue = missing + data.count
         return (resetValue).also {
@@ -221,7 +220,6 @@ class CountdownEvent(
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun removeFromDatabase() {
         dataSource.connection.use { connection ->
             connection.prepareStatement("DELETE FROM event_data WHERE guild_id = ? AND channel_id = ? AND type = ?")
@@ -252,6 +250,7 @@ data class CountdownEventData(
     }
 }
 
+@Suppress("unused")
 @Serializable
 enum class CountdownResetState(val value: Int, override val readableName: String) : ChoiceEnum {
 
