@@ -36,6 +36,7 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import org.apache.commons.lang3.time.DurationFormatUtils
 import java.time.Duration
+import java.time.Instant
 import java.time.LocalDateTime
 import kotlin.math.roundToLong
 
@@ -94,9 +95,14 @@ class CountdownEvent(
         }
         val content = message.content
         val transmitted = checkForFail(content, message).let {
-            if (it.failMessage != null) {
+            if (it.type != null) {
                 message.delete()
-                fail(it.failMessage)
+                fail(
+                    it.failMessage ?: "Äh... Das sollte nicht passieren (wahrscheinlicher Grund: ${it.type.name})",
+                    null,
+                    it.type,
+                    message.author?.toLong() ?: -1
+                )
                 return
             }
             it.transmitted
@@ -112,12 +118,17 @@ class CountdownEvent(
 
     private suspend fun checkForFail(raw: String, message: Message): CheckResult {
         val transmitted = raw.toLongOrNull() ?: evaluate(raw, message)
-        ?: return CheckResult(-1, "${message.author?.mention} hat leider keine valide Zahl abgesendet.")
+        ?: return CheckResult(
+            -1,
+            "${message.author?.mention} hat leider keine valide Zahl abgesendet.",
+            FailType.NotANumber
+        )
         synchronized(data.count) {
             if (data.count - 1 != transmitted) {
                 return CheckResult(
                     -1,
-                    "${message.author?.mention} hat leider die falsche Zahl ($transmitted) abgesendet. Richtig: ${data.count - 1}"
+                    "${message.author?.mention} hat leider die falsche Zahl ($transmitted) abgesendet. Richtig: ${data.count - 1}",
+                    FailType.WrongNumber
                 )
             }
         }
@@ -176,8 +187,19 @@ class CountdownEvent(
         }
     }
 
-    private suspend fun fail(failMessage: String, customCountdownResetMessage: String? = null) {
+    private suspend fun fail(
+        failMessage: String,
+        customCountdownResetMessage: String? = null,
+        type: FailType,
+        memberId: Long
+    ) {
         data.channel.createMessage("$failMessage\n${customCountdownResetMessage ?: "Der Countdown wurde auf ${reset()} zurückgesetzt."}")
+        val newFail = Pair(type, Instant.now().toEpochMilli())
+        if (data.fails.containsKey(memberId)) {
+            data.fails[memberId]?.add(newFail)
+        } else {
+            data.fails[memberId] = mutableListOf(newFail)
+        }
     }
 
     private fun reset(): Long {
@@ -204,7 +226,6 @@ class CountdownEvent(
 
     private suspend fun deleteMessages() {
         val bulkDelete = mutableListOf<Snowflake>()
-        println("data = ${data.channel.messages.toList().size}")
         data.channel.asChannel().messages.toList().forEach {
             var add = false
             if (it.author?.isBot == true) {
@@ -265,7 +286,7 @@ class CountdownEvent(
 data class CountdownEventData(
     @Serializable(with = TextChannelBehaviorSerializer::class) val channel: TextChannelBehavior,
     var count: Long,
-    val fails: Map<Long, List<Pair<FailType, Long>>>,
+    val fails: MutableMap<Long, MutableList<Pair<@Serializable(with = FailType.FailTypeSerializer::class) FailType, Long>>>,
     @Serializable(with = JavaLocalDateTimeSerializer::class) val start: LocalDateTime,
     var lastUser: Long
 ) {
@@ -312,4 +333,4 @@ open class FailType(val name: String) {
     }
 }
 
-data class CheckResult(val transmitted: Long, val failMessage: String?)
+data class CheckResult(val transmitted: Long, val failMessage: String? = null, val type: FailType? = null)
