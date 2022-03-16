@@ -2,6 +2,9 @@ package de.jvstvshd.chillingfoxes.foxesbot.module.event
 
 import com.kotlindiscord.kord.extensions.commands.application.slash.converters.ChoiceEnum
 import com.kotlindiscord.kord.extensions.utils.dm
+import com.kotlindiscord.kord.extensions.utils.respond
+import com.notkamui.keval.KevalException
+import com.notkamui.keval.keval
 import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.chillingfoxes.foxesbot.config.data.ConfigData
 import de.jvstvshd.chillingfoxes.foxesbot.util.JavaLocalDateTimeSerializer
@@ -14,6 +17,7 @@ import dev.kord.core.Kord
 import dev.kord.core.behavior.channel.TextChannelBehavior
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.entity.Message
+import dev.kord.core.entity.User
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.kordLogger
 import dev.kord.rest.builder.message.create.embed
@@ -34,6 +38,7 @@ import kotlinx.serialization.json.Json
 import org.apache.commons.lang3.time.DurationFormatUtils
 import java.time.Duration
 import java.time.LocalDateTime
+import kotlin.math.roundToLong
 
 class CountdownEvent(
     val data: CountdownEventData,
@@ -89,62 +94,88 @@ class CountdownEvent(
             data.lastUser = it
         }
         val content = message.content
-        val transmitted = content.toLongOrNull()
-        var failMessage: String? = null
-        if (transmitted == null) {
-            message.delete("invalid number")
-            fail(
-                "${message.author?.mention} hat leider keine valide Zahl abgesendet."
-            )
-            return
-        }
-        synchronized(data.count) {
-            if (data.count - 1 != transmitted) {
-                failMessage =
-                    "${message.author?.mention} hat leider die falsche Zahl ($transmitted) abgesendet. Richtig: ${data.count - 1}"
+        val transmitted = checkForFail(content, message.author!!).let {
+            if (it.failMessage != null) {
+                message.delete()
+                fail(it.failMessage)
+                return
             }
-        }
-        failMessage?.let {
-            message.delete()
-            fail(it)
-            return
+            it.transmitted
         }
         synchronized(data.count) {
             setCount(transmitted)
             shouldBeSaved = true
         }
         if (data.count == 0L) {
-            locked = true
-            countdownEvents.remove(this)
-            data.channel.createMessage {
-                embed {
-                    title = "Event abgeschlossen!"
-                    selfAuthor(kord)
-                    description = "Das Countdown-Event wurde erfolgreich abgeschlossen."
-                    field {
-                        name = "Zeit"
-                        value = DurationFormatUtils.formatDuration(
-                            Duration.between(
-                                data.start,
-                                LocalDateTime.now()
-                            ).toMillis(), "d Tage, HH:mm:ss"
-                        )
-                    }
-                    field {
-                        name = "Start"
-                        value = data.start.format(standardDateTimeFormatter)
-                    }
-                    field {
-                        name = "Ende"
-                        value = LocalDateTime.now().format(standardDateTimeFormatter)
-                    }
-                    field {
-                        name = "Fails"
-                        value = data.fails().toString()
-                    }
+            end()
+        }
+    }
+
+    private suspend fun checkForFail(raw: String, author: User): CheckResult {
+        val transmitted = raw.toLongOrNull() ?: try {
+            raw.keval().toLong()
+        } catch (e: KevalException) {
+            null
+        } ?: return CheckResult(-1, "${author.mention} hat leider keine valide Zahl abgesendet.")
+
+        synchronized(data.count) {
+            if (data.count - 1 != transmitted) {
+                return CheckResult(
+                    -1,
+                    "${author.mention} hat leider die falsche Zahl ($transmitted) abgesendet. Richtig: ${data.count - 1}"
+                )
+            }
+        }
+        return CheckResult(transmitted, null)
+    }
+
+    private suspend fun evaluate(raw: String, message: Message): Long? {
+        val transmitted: Long
+        try {
+            transmitted = raw.keval().roundToLong()
+        } catch (e: KevalException) {
+            return null
+        }
+        message.respond {
+            content = ""
+        }
+    }
+
+    private suspend fun end() {
+        locked = true
+        countdownEvents.remove(this)
+        createEndMessage()
+        removeFromDatabase()
+    }
+
+    private suspend fun createEndMessage() {
+        data.channel.createMessage {
+            embed {
+                title = "Event abgeschlossen!"
+                selfAuthor(kord)
+                description = "Das Countdown-Event wurde erfolgreich abgeschlossen."
+                field {
+                    name = "Zeit"
+                    value = DurationFormatUtils.formatDuration(
+                        Duration.between(
+                            data.start,
+                            LocalDateTime.now()
+                        ).toMillis(), "d Tage, HH:mm:ss"
+                    )
+                }
+                field {
+                    name = "Start"
+                    value = data.start.format(standardDateTimeFormatter)
+                }
+                field {
+                    name = "Ende"
+                    value = LocalDateTime.now().format(standardDateTimeFormatter)
+                }
+                field {
+                    name = "Fails"
+                    value = data.fails().toString()
                 }
             }
-            removeFromDatabase()
         }
     }
 
@@ -283,3 +314,5 @@ open class FailType(val name: String) {
         }
     }
 }
+
+data class CheckResult(val transmitted: Long, val failMessage: String?)
