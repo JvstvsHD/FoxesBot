@@ -120,7 +120,7 @@ class CountdownEvent(
         val transmitted = raw.toLongOrNull() ?: evaluate(raw, message)
         ?: return CheckResult(
             -1,
-            "${message.author?.mention} hat leider keine valide Zahl abgesendet.",
+            "${message.author?.mention} hat leider keine Zahl abgesendet.",
             FailType.NotANumber
         )
         synchronized(data.count) {
@@ -203,7 +203,7 @@ class CountdownEvent(
     }
 
     private fun reset(): Long {
-        val modulo = configData.eventData.countdownResetState.value.toLong()
+        val modulo = configData.eventData.countdownResetState.value
         var missing = modulo - (data.count % modulo)
         if (missing == modulo) {
             missing = 0
@@ -263,7 +263,7 @@ class CountdownEvent(
                 selfAuthor(kord)
                 description =
                     "Ein neues Countdown-Event wurde gestartet! Zählt bis 0 runter, um dieses Event zu schaffen. " +
-                            "**Der Countdown startet bei ${data.count}**\nSollte eine Nachricht eine invalide Zahl enthalten, wird der Countdown zurückgesetzt.\n\n**${data.count}**"
+                            "**Der Countdown startet bei ${data.count}**\nSollte eine Nachricht eine inkorrekte Zahl enthalten, wird der Countdown zurückgesetzt.\n\n**${data.count}**"
                 timestamp = Clock.System.now()
             }
         }
@@ -301,10 +301,17 @@ data class CountdownEventData(
 
 @Suppress("unused")
 @Serializable
-enum class CountdownResetState(val value: Int, override val readableName: String) : ChoiceEnum {
+enum class CountdownResetState(val value: Long, override val readableName: String) : ChoiceEnum {
 
-    HUNDREDS_RESET_STATE(100, "Letzter Hunderter"),
-    TENS_RESET_STATE(10, "Letzter Zehner");
+    TENS_RESET_STATE(10, "Nächster Zehner"),
+    HUNDREDS_RESET_STATE(100, "Nächster Hunderter"),
+    THOUSANDS_RESET_STATE(1000, "Nächster Tausender"),
+    TEN_THOUSANDS_RESET_STATE(10_000, "Nächster Zehntausender"),
+    HUNDRED_THOUSANDS_RESET_STATE(100_100, "Nächster Hunderttausender"),
+    MILLIONS_RESET_STATE(1_000_000, "Nächste Million"),
+    BILLIONS_RESET_STATE(1_000_000_000, "Nächste Milliarde (ich übertreib' doch nicht)"),
+    TRILLIONS_RESET_STATE(1_000_000_000_000L, "Nächste Billion (ne, echt nicht)"),
+    QUADRILLIONS_RESET_STATE(1_000_000_000_000_000L, "Nächste Billiarde (...)");
 }
 
 @Serializable
