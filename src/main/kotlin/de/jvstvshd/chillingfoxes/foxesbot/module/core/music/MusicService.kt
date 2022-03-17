@@ -7,49 +7,34 @@ class MusicService(private val dataSource: HikariDataSource) {
 
     suspend fun getUrls(topic: String?) = getUrls(topic, MusicState.ACTIVATED)
 
-    private suspend fun getUrls(topic: String?, state: MusicState) =
-        runSuspended {
-            dataSource.connection.use { connection ->
-                val query =
-                    if (topic != null) "SELECT url FROM music WHERE topic = ? AND state = ?" else "SELECT url FROM music WHERE state = ?;"
-                connection.prepareStatement(query).use {
-                    if (topic == null) {
-                        it.setString(1, state.name)
-                    } else {
-                        it.setString(1, topic)
-                        it.setString(2, state.name)
-                    }
-                    val rs = it.executeQuery()
-                    val list = mutableListOf<String>()
-                    while (rs.next()) {
-                        list.add(rs.getString(1))
-                    }
-                    return@runSuspended list
-                }
-            }
-        }
+    private suspend fun getUrls(topic: String?, state: MusicState) = getStringColumn("url", topic, state)
 
-    suspend fun getNames(topic: String?, state: MusicState) =
-        runSuspended {
-            dataSource.connection.use { connection ->
-                val query =
-                    if (topic != null) "SELECT name FROM music WHERE topic = ? AND state = ?" else "SELECT name FROM music WHERE state = ?;"
-                connection.prepareStatement(query).use {
-                    if (topic == null) {
-                        it.setString(1, state.name)
-                    } else {
-                        it.setString(1, topic)
-                        it.setString(2, state.name)
-                    }
-                    val rs = it.executeQuery()
-                    val list = mutableListOf<String>()
-                    while (rs.next()) {
-                        list.add(rs.getString(1))
-                    }
-                    return@runSuspended list
+    @Suppress("MemberVisibilityCanBePrivate")
+    suspend fun getNames(topic: String?, state: MusicState) = getStringColumn("name", topic, state)
+
+    private suspend fun getStringColumn(column: String, topic: String?, state: MusicState) = runSuspended {
+        dataSource.connection.use { connection ->
+            val query = buildQuery(column, topic)
+            connection.prepareStatement(query).use {
+                if (topic == null) {
+                    it.setString(1, state.name)
+                } else {
+                    it.setString(1, topic)
+                    it.setString(2, state.name)
                 }
+                val rs = it.executeQuery()
+                val list = mutableListOf<String>()
+                while (rs.next()) {
+                    list.add(rs.getString(1))
+                }
+                return@runSuspended list
             }
         }
+    }
+
+    private fun buildQuery(column: String, topic: String?): String {
+        return if (topic != null) "SELECT $column FROM music WHERE topic = ? AND state = ?" else "SELECT $column FROM music WHERE state = ?;"
+    }
 
     suspend fun changeState(column: String, columnValue: String, state: MusicState) = runSuspended {
         dataSource.connection.use { connection ->

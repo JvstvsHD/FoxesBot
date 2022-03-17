@@ -5,10 +5,10 @@ import com.kotlindiscord.kord.extensions.utils.dm
 import de.jvstvshd.chillingfoxes.foxesbot.config.data.ConfigData
 import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil
 import dev.kord.common.entity.PresenceStatus
+import dev.kord.core.Kord
 import dev.kord.core.entity.Member
 import dev.kord.core.supplier.EntitySupplyStrategy
 import dev.kord.rest.builder.message.create.embed
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -19,7 +19,8 @@ import kotlin.time.ExperimentalTime
 
 class OfflineChecker(
     private val member: Member,
-    private var configData: ConfigData
+    private var configData: ConfigData,
+    private val kord: Kord
 ) {
 
     private var count = 0
@@ -34,13 +35,13 @@ class OfflineChecker(
         sendKickMessage()
     }
 
-    @OptIn(ExperimentalTime::class, kotlinx.coroutines.DelicateCoroutinesApi::class)
+    @OptIn(ExperimentalTime::class)
     fun start() {
         synchronized(running) {
             if (running)
                 return
         }
-        job = GlobalScope.launch {
+        job = kord.launch {
             while (job != null) {
                 count++
                 if (count > 2) {

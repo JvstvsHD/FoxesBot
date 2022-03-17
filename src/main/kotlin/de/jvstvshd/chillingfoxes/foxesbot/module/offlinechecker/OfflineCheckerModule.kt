@@ -15,8 +15,6 @@ import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.user.PresenceUpdateEvent
 import dev.kord.core.event.user.VoiceStateUpdateEvent
 import dev.kord.core.supplier.EntitySupplyStrategy
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onEach
@@ -30,7 +28,7 @@ class OfflineCheckerModule(private val config: Config, val dataSource: HikariDat
     override val bundle = "offline_checker"
     private val offlineCheckers = mutableMapOf<Snowflake, OfflineChecker>()
 
-    @OptIn(ExperimentalTime::class, DelicateCoroutinesApi::class)
+    @OptIn(ExperimentalTime::class)
     override suspend fun setup() {
         suppressCommand()
         event<VoiceStateUpdateEvent> {
@@ -44,7 +42,7 @@ class OfflineCheckerModule(private val config: Config, val dataSource: HikariDat
         }
         event<ReadyEvent> {
             action {
-                GlobalScope.launch {
+                kord.launch {
                     delay(5.seconds)
                     check(kord)
                 }
@@ -113,11 +111,11 @@ class OfflineCheckerModule(private val config: Config, val dataSource: HikariDat
     }
 
     private fun getOrCreateOfflineChecker(member: Member) =
-        offlineCheckers[member.id] ?: OfflineChecker(member, config.configData).also {
+        offlineCheckers[member.id] ?: OfflineChecker(member, config.configData, kord).also {
             offlineCheckers[member.id] = it
         }
 
-    @OptIn(DelicateCoroutinesApi::class)
+
     private suspend fun checkMember(member: Member) {
         if (member.getPresenceOrNull() == null) {
             return

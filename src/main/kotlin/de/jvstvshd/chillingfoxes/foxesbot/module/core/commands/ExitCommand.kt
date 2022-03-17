@@ -4,12 +4,17 @@ import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
+import de.jvstvshd.chillingfoxes.foxesbot.util.ShutdownTask
 import dev.kord.common.entity.Permission
 import dev.kord.core.kordLogger
 import kotlinx.coroutines.runBlocking
+import org.apache.commons.lang3.time.DurationFormatUtils
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
+@OptIn(ExperimentalTime::class)
 suspend fun CoreModule.exitCommand() = publicSlashCommand {
     name = "exit"
     description = "Exits the bot."
@@ -17,10 +22,28 @@ suspend fun CoreModule.exitCommand() = publicSlashCommand {
         hasPermission(Permission.ManageGuild)
     }
     action {
-        respond {
-            content = translate("commands.exit.message")
+        val duration = measureTime {
+            for (extension in bot.extensions.values) {
+                if (extension is ShutdownTask) {
+                    try {
+                        extension.onShutdown()
+                    } catch (e: Exception) {
+                        kordLogger.error("Execution for shutdown task ${extension.javaClass.name} failed: $e")
+                    }
+                }
+            }
         }
-        kordLogger.debug("Shutdown initiated")
+        try {
+            respond {
+                content = "Der Bot fährt nun herunter. Zeit zum Ausführen der Shutdown-Tasks: ${
+                    DurationFormatUtils.formatDurationHMS(duration.inWholeMilliseconds)
+                }"
+            }
+            kordLogger.debug("Shutdown tasks took ${duration.inWholeMilliseconds}ms to finish.")
+            kordLogger.debug("Shutdown initiated")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         this@exitCommand.kord.shutdown()
         exitProcess(0)
     }

@@ -5,10 +5,12 @@ import com.kotlindiscord.kord.extensions.i18n.SupportedLocales
 import de.jvstvshd.chillingfoxes.foxesbot.config.Config
 import de.jvstvshd.chillingfoxes.foxesbot.io.Database
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
+import de.jvstvshd.chillingfoxes.foxesbot.module.event.EventModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.offlinechecker.OfflineCheckerModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.status.StatusModule
 import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.toSnowflake
 import dev.kord.common.entity.PresenceStatus
+import dev.kord.core.supplier.EntitySupplyStrategy
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
 import java.io.File
@@ -27,6 +29,7 @@ class FoxesBot {
                 add { CoreModule(config, datasource) }
                 add { StatusModule(datasource, config) }
                 add { OfflineCheckerModule(config, datasource) }
+                add { EventModule(datasource, config) }
             }
 
             applicationCommands {
@@ -61,6 +64,10 @@ class FoxesBot {
                 localeResolver { _, _, _ ->
                     SupportedLocales.GERMAN
                 }
+            }
+            kord {
+                defaultStrategy = EntitySupplyStrategy.cacheWithCachingRestFallback
+                enableShutdownHook = true
             }
         }
         bot.start()
