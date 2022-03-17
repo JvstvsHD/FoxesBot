@@ -8,6 +8,7 @@ import de.jvstvshd.chillingfoxes.foxesbot.module.event.commands.countdownEventRe
 import de.jvstvshd.chillingfoxes.foxesbot.module.event.commands.countdownStartCommand
 import de.jvstvshd.chillingfoxes.foxesbot.util.ShutdownTask
 import dev.kord.core.event.message.MessageCreateEvent
+import dev.kord.core.event.message.MessageDeleteEvent
 import dev.kord.core.kordLogger
 import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
@@ -15,7 +16,6 @@ import kotlinx.serialization.json.Json
 
 const val COUNTDOWN_EVENT_NAME = "countdown_event"
 val countdownEvents = mutableListOf<CountdownEvent>()
-
 
 class EventModule(val dataSource: HikariDataSource, val config: Config) : Extension(), ShutdownTask {
     override val name: String = "event"
@@ -31,6 +31,15 @@ class EventModule(val dataSource: HikariDataSource, val config: Config) : Extens
                 }
                 countdownEvents.firstOrNull { countdownEvent -> countdownEvent.data.channel.id == event.message.channelId }
                     ?.countdown(event.message)
+            }
+        }
+        event<MessageDeleteEvent> {
+            action {
+                if (countdownEvents.any { countdownEvent -> countdownEvent.data.channel.id == event.channelId }) {
+                    if (!allowedDeletedMessages.contains(event.messageId)) {
+                        event.channel.createMessage("Die Nachricht von ${event.message?.author?.mention} wurde durch einen User gelöscht.\nInhalt: ${event.message?.content}")
+                    }
+                }
             }
         }
     }

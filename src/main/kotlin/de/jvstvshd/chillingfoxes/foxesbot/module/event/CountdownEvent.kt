@@ -40,6 +40,8 @@ import java.time.Instant
 import java.time.LocalDateTime
 import kotlin.math.roundToLong
 
+val allowedDeletedMessages = mutableListOf<Snowflake>()
+
 class CountdownEvent(
     val data: CountdownEventData,
     val configData: ConfigData,
@@ -86,7 +88,7 @@ class CountdownEvent(
             return
         }
         if (message.author?.toLong() == data.lastUser) {
-            message.delete()
+            message.allowAndDelete()
             message.author?.dm("Du musst warten, bis jemand anderes eine Nachricht schreibt.")
             return
         }
@@ -96,7 +98,7 @@ class CountdownEvent(
         val content = message.content
         val transmitted = checkForFail(content, message).let {
             if (it.type != null) {
-                message.delete()
+                message.allowAndDelete()
                 fail(
                     it.failMessage ?: "Äh... Das sollte nicht passieren (wahrscheinlicher Grund: ${it.type.name})",
                     null,
@@ -187,6 +189,11 @@ class CountdownEvent(
         }
     }
 
+    private suspend fun Message.allowAndDelete() {
+        allowedDeletedMessages.add(id)
+        delete()
+    }
+
     private suspend fun fail(
         failMessage: String,
         customCountdownResetMessage: String? = null,
@@ -244,9 +251,10 @@ class CountdownEvent(
                 bulkDelete.add(it.id)
             }
         }
+        allowedDeletedMessages.addAll(bulkDelete)
         data.channel.bulkDelete(bulkDelete)
         (data.channel.guild.getChannel(data.channel.id) as TextChannel).messages.onEach {
-            it.delete()
+            it.allowAndDelete()
         }
     }
 
