@@ -343,7 +343,7 @@ open class FailType(val name: String) {
             PrimitiveSerialDescriptor("de.jvstvshd.foxesbot.FailTypeToStringSerializer", PrimitiveKind.STRING)
 
         override fun serialize(encoder: Encoder, value: FailType) {
-            TODO("Not yet implemented")
+            encoder.encodeString(value.name.lowercase())
         }
     }
 }
