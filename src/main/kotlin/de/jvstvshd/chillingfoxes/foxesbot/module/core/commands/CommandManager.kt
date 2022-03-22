@@ -9,4 +9,5 @@ suspend fun CoreModule.commands() {
     settingsCommand()
     musicCommands()
     restartCommand()
+    testCommand()
 }

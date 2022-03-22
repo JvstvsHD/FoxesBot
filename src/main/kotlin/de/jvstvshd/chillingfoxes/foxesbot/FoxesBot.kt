@@ -2,7 +2,9 @@ package de.jvstvshd.chillingfoxes.foxesbot
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
 import com.kotlindiscord.kord.extensions.i18n.SupportedLocales
+import com.kotlindiscord.kord.extensions.utils.loadModule
 import de.jvstvshd.chillingfoxes.foxesbot.config.Config
+import de.jvstvshd.chillingfoxes.foxesbot.config.data.ConfigData
 import de.jvstvshd.chillingfoxes.foxesbot.io.Database
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.event.EventModule
@@ -13,6 +15,7 @@ import dev.kord.common.entity.PresenceStatus
 import dev.kord.core.supplier.EntitySupplyStrategy
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
+import org.koin.dsl.bind
 import java.io.File
 
 class FoxesBot {
@@ -51,7 +54,6 @@ class FoxesBot {
 
             members {
                 fillPresences = true
-
                 all()
             }
 
@@ -63,6 +65,13 @@ class FoxesBot {
                 defaultLocale = SupportedLocales.GERMAN
                 localeResolver { _, _, _ ->
                     SupportedLocales.GERMAN
+                }
+            }
+
+            hooks {
+                afterKoinSetup {
+                    loadModule { single { config.configData } bind ConfigData::class }
+
                 }
             }
             kord {

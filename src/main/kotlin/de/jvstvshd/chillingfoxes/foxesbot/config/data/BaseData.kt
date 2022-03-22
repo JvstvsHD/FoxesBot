@@ -5,5 +5,6 @@ data class BaseData(
     val token: String = "",
     val testGuildId: Long? = null,
     val gitHubToken: String = "",
-    val prefix: String = ""
+    val prefix: String = "",
+    var loggingWebhook: String? = null
 )

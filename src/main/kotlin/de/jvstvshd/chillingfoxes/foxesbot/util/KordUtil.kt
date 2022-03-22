@@ -1,7 +1,6 @@
 package de.jvstvshd.chillingfoxes.foxesbot.util
 
 import dev.kord.common.Color
-import dev.kord.common.entity.PresenceStatus
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.entity.Entity
@@ -16,11 +15,11 @@ suspend fun EmbedBuilder.selfAuthor(kord: Kord) {
         val self = kord.getSelf()
         icon = self.avatar?.url
         name = self.username
-        url = "https://chillingfoxes.jvstvshd.de/"
+        url = WEBSITE
     }
 }
 
-val standardDateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
+val standardDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
 
 object KordUtil {
 
@@ -45,13 +44,4 @@ object KordUtil {
     fun Long.toSnowflake() = Snowflake(this)
 
     fun Entity.toLong() = id.value.toLong()
-
-    fun String.toPresenceStatus() =
-        when (this) {
-            "online" -> PresenceStatus.Online
-            "idle" -> PresenceStatus.Idle
-            "dnd" -> PresenceStatus.DoNotDisturb
-            "offline", "invisible" -> PresenceStatus.Offline
-            else -> PresenceStatus.Unknown(this)
-        }
 }
