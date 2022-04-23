@@ -44,7 +44,6 @@ class EventModule(val dataSource: HikariDataSource, val config: Config) : Extens
         }
     }
 
-
     private fun loadCountdownEvents() {
         kord.launch {
             dataSource.connection.use { connection ->
