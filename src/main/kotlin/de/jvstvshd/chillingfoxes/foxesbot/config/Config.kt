@@ -1,20 +1,28 @@
 package de.jvstvshd.chillingfoxes.foxesbot.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import de.jvstvshd.chillingfoxes.foxesbot.config.data.ConfigData
 import de.jvstvshd.chillingfoxes.foxesbot.config.data.DataBaseData
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
+import kotlinx.serialization.json.encodeToStream
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.fileSize
+import kotlin.io.path.inputStream
+import kotlin.io.path.outputStream
 
 class Config(private val path: Path = Path.of("config.json")) {
 
-    private val objectMapper = ObjectMapper()
+    private val json: Json = Json {
+        prettyPrint = true
+    }
     lateinit var configData: ConfigData
 
+    @OptIn(ExperimentalSerializationApi::class)
     fun load() {
         create()
-        configData = objectMapper.readValue(path.toFile(), ConfigData::class.java)
+        configData = json.decodeFromStream(path.inputStream())
     }
 
     private fun create() {
@@ -32,7 +40,8 @@ class Config(private val path: Path = Path.of("config.json")) {
         }
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     fun save() {
-        objectMapper.writerWithDefaultPrettyPrinter().writeValues(path.toFile()).write(configData)
+        json.encodeToStream(configData, path.outputStream())
     }
 }

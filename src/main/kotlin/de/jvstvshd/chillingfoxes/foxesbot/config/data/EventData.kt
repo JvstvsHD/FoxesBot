@@ -1,3 +1,9 @@
 package de.jvstvshd.chillingfoxes.foxesbot.config.data
 
-data class EventData(var snowballLimit: Int = 6, var throwCooldown: Long = 24 * 60)
+import de.jvstvshd.chillingfoxes.foxesbot.module.event.CountdownResetState
+
+@kotlinx.serialization.Serializable
+data class EventData(
+    var events: List<String> = listOf(),
+    var countdownResetState: CountdownResetState = CountdownResetState.HUNDREDS_RESET_STATE
+)

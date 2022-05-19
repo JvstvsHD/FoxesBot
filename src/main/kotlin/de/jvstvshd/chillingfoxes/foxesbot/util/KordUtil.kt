@@ -1,12 +1,25 @@
 package de.jvstvshd.chillingfoxes.foxesbot.util
 
 import dev.kord.common.Color
-import dev.kord.common.entity.PresenceStatus
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.entity.Entity
 import dev.kord.core.supplier.EntitySupplyStrategy
 import dev.kord.rest.builder.message.EmbedBuilder
+import java.time.format.DateTimeFormatter
+
+const val WEBSITE = "https://chillingfoxes.jvstvshd.de"
+
+suspend fun EmbedBuilder.selfAuthor(kord: Kord) {
+    author {
+        val self = kord.getSelf()
+        icon = self.avatar?.url
+        name = self.username
+        url = WEBSITE
+    }
+}
+
+val standardDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
 
 object KordUtil {
 
@@ -28,16 +41,15 @@ object KordUtil {
         }
     }
 
+    @Deprecated(
+        message = "Use property access syntax",
+        replaceWith = ReplaceWith("this.snowflake"),
+        level = DeprecationLevel.WARNING
+    )
     fun Long.toSnowflake() = Snowflake(this)
 
-    fun Entity.toLong() = id.value.toLong()
+    val Long.snowflake: Snowflake
+        get() = Snowflake(this)
 
-    fun String.toPresenceStatus() =
-        when (this) {
-            "online" -> PresenceStatus.Online
-            "idle" -> PresenceStatus.Idle
-            "dnd" -> PresenceStatus.DoNotDisturb
-            "offline", "invisible" -> PresenceStatus.Offline
-            else -> PresenceStatus.Unknown(this)
-        }
+    fun Entity.toLong() = id.value.toLong()
 }

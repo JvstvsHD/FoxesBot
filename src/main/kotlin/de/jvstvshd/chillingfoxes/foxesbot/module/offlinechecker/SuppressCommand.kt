@@ -10,8 +10,14 @@ import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.toLong
 import dev.kord.common.entity.Permission
 
 class SuppressArgs : Arguments() {
-    val user by optionalUser("user", "User")
-    val channel by optionalChannel("channel", "Channel")
+    val user by optionalUser {
+        name = "user"
+        description = "User"
+    }
+    val channel by optionalChannel {
+        name = "channel"
+        description = "Channel"
+    }
 }
 
 suspend fun OfflineCheckerModule.suppressCommand() = publicSlashCommand(::SuppressArgs) {

@@ -17,7 +17,10 @@ import java.awt.Color
 import java.util.function.Function
 
 class StatusArguments : Arguments() {
-    val keyword by string("type", "Typ")
+    val keyword by string {
+        name = "type"
+        description = "Typ"
+    }
 }
 
 //https://www.codegrepper.com/code-examples/javascript/check+if+valid+url

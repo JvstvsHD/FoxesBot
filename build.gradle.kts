@@ -4,12 +4,13 @@ plugins {
     kotlin("jvm") version "1.6.10"
     java
     application
+    kotlin("plugin.serialization") version ("1.6.10")
 }
 
 group = "de.jvstvshd.chillingfoxes"
-version = "1.1.21"
+version = "1.3.0"
 
-val log4jVersion = "2.17.1"
+val log4jVersion = "2.17.2"
 
 repositories {
     mavenCentral()
@@ -28,28 +29,23 @@ dependencies {
     //implementation("io.github.qbosst:kordex-hybrid-commands:1.0.3-SNAPSHOT")
 
     //discord
-    implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.1-SNAPSHOT")
-    //implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.1-20211218.123243-29")
+    implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.2-SNAPSHOT")
     implementation("com.sedmelluq:lavaplayer:1.3.78")
 
     //logging
     implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
-    implementation("org.slf4j:slf4j-api:1.7.32")
+    implementation("org.slf4j:slf4j-api:1.7.36")
 
     //database
     implementation("org.mariadb.jdbc:mariadb-java-client:2.7.4")
     implementation("com.zaxxer:HikariCP:5.0.1")
     implementation("org.mybatis:mybatis:3.5.9")
 
-    //(de)serialization
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.1")
-
     //some other stuff
     implementation("org.kohsuke:github-api:1.301")
     implementation("org.jsoup:jsoup:1.14.3")
+    implementation("com.notkamui.libs:keval:0.8.0")
 
     //JUnit
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
@@ -63,7 +59,7 @@ tasks.getByName<Test>("test") {
 tasks {
     jar {
         manifest {
-            attributes["Main-Class"] = "de.jvstvshd.foxesbot.LauncherKt"
+            attributes["Main-Class"] = "de.jvstvshd.chillingfoxes.foxesbot.LauncherKt"
             attributes["Multi-Release"] = true
 
         }

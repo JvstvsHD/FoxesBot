@@ -3,31 +3,31 @@ package de.jvstvshd.chillingfoxes.foxesbot.module.core.commands
 import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChannel
-import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalLong
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.types.respondEphemeral
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
 import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.toLong
-import dev.kord.common.entity.ChannelType
 import dev.kord.common.entity.Permission
 import dev.kord.core.entity.channel.Channel
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class SettingsArguments : Arguments() {
-    val channelBarrierName by optionalString(
-        "channel_barrier_name",
-        "Name für eine Barriere für z.B. Nachrichten oder Commands für bestimmte Channel"
-    )
-    val channelBarrierChannel by optionalChannel("channel_barrier_channel", "Channel für die Channel-Barriere")
-    val extra by optionalString("extra", "Extra")
-    val throwCooldown by optionalLong("cooldown", "Cooldown zwischen Würfen")
+    val channelBarrierName by optionalString {
+        name = "channel_barrier_name"
+        description = "Name für eine Barriere für z.B. Nachrichten oder Commands für bestimmte Channel"
+    }
+    val channelBarrierChannel by optionalChannel {
+        name = "channel_barrier_channel"
+        description = "Channel für die Channel-Barriere"
+    }
+    val extra by optionalString {
+        name = "extra"
+        description = "Extra"
+    }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 suspend fun CoreModule.settingsCommand() = publicSlashCommand(::SettingsArguments) {
     name = "settings"
     description = "Einstellungen"
@@ -44,14 +44,7 @@ suspend fun CoreModule.settingsCommand() = publicSlashCommand(::SettingsArgument
             }
             val channel = arguments.channelBarrierChannel as Channel
             val name = (arguments.channelBarrierName as String).lowercase()
-            println(channel.type)
-            if (channel.type != ChannelType.GuildText) {
-                respondEphemeral {
-                    content = translate("command.settings.channel_barrier.channel")
-                }
-                return@action
-            }
-            GlobalScope.launch {
+            this@settingsCommand.kord.launch {
                 this@settingsCommand.dataSource.connection.use { connection ->
                     connection.prepareStatement("INSERT INTO channel_barriers (name, channel_id, guild_id) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE channel_id = ?, guild_id = ?")
                         .use {
@@ -78,25 +71,16 @@ suspend fun CoreModule.settingsCommand() = publicSlashCommand(::SettingsArgument
                 "save_config" -> {
                     this@settingsCommand.config.save()
                     respondEphemeral {
-                        ephemeral = true
                         content = "Config wurde gespeichert!"
                     }
                 }
                 else -> {
                     respondEphemeral {
-                        ephemeral = true
                         content = "Invalides Extra!"
                     }
                 }
             }
             return@action
-        }
-        if (arguments.throwCooldown != null) {
-            config.configData.eventData.throwCooldown = arguments.throwCooldown!!
-            config.save()
-            respond {
-                content = "Die Einstellungen wurden erfolgreich aktualisiert."
-            }
         }
     }
 }
