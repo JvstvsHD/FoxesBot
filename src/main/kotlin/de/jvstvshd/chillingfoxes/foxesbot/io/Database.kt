@@ -10,12 +10,14 @@ import java.util.*
 
 class Database(private val dataBaseData: DataBaseData) {
 
+    @Deprecated(message = "Replacement with JetBrains Exposed", level = DeprecationLevel.ERROR)
     val dataSource = createDataSource()
 
     init {
         init()
     }
 
+    @Deprecated(message = "Replacement with JetBrains Exposed", level = DeprecationLevel.ERROR)
     private fun createDataSource(): HikariDataSource {
         val properties = Properties()
         properties.setProperty("dataSource.databaseName", dataBaseData.database)
@@ -29,6 +31,7 @@ class Database(private val dataBaseData: DataBaseData) {
         return HikariDataSource(config)
     }
 
+    @Deprecated(message = "Replacement with JetBrains Exposed", level = DeprecationLevel.ERROR)
     private fun init() {
         dataSource.connection.use {
             ScriptRunner(it).runScript(
