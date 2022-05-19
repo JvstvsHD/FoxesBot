@@ -11,6 +11,7 @@ group = "de.jvstvshd.chillingfoxes"
 version = "1.3.0"
 
 val log4jVersion = "2.17.2"
+val exposedVersion = "0.38.2"
 
 repositories {
     mavenCentral()
@@ -41,6 +42,11 @@ dependencies {
     implementation("org.mariadb.jdbc:mariadb-java-client:2.7.4")
     implementation("com.zaxxer:HikariCP:5.0.1")
     implementation("org.mybatis:mybatis:3.5.9")
+
+    //Exposed
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
 
     //some other stuff
     implementation("org.kohsuke:github-api:1.301")
