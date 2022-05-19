@@ -41,7 +41,15 @@ object KordUtil {
         }
     }
 
+    @Deprecated(
+        message = "Use property access syntax",
+        replaceWith = ReplaceWith("this.snowflake"),
+        level = DeprecationLevel.WARNING
+    )
     fun Long.toSnowflake() = Snowflake(this)
+
+    val Long.snowflake: Snowflake
+        get() = Snowflake(this)
 
     fun Entity.toLong() = id.value.toLong()
 }

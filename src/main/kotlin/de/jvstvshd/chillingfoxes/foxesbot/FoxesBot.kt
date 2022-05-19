@@ -10,7 +10,7 @@ import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.event.EventModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.offlinechecker.OfflineCheckerModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.status.StatusModule
-import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.toSnowflake
+import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.snowflake
 import dev.kord.common.entity.PresenceStatus
 import dev.kord.core.supplier.EntitySupplyStrategy
 import dev.kord.gateway.Intent
@@ -38,9 +38,8 @@ class FoxesBot {
             applicationCommands {
                 enabled = true
                 register = true
-                config.configData.baseData.testGuildId?.let { defaultGuild(it.toSnowflake()) }
+                config.configData.baseData.testGuildId?.let { defaultGuild(it.snowflake) }
             }
-
             chatCommands {
                 enabled = true
                 defaultPrefix = config.configData.baseData.prefix
@@ -63,7 +62,7 @@ class FoxesBot {
             }
             i18n {
                 defaultLocale = SupportedLocales.GERMAN
-                localeResolver { _, _, _ ->
+                localeResolver { _, _, _, _ ->
                     SupportedLocales.GERMAN
                 }
             }
