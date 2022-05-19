@@ -1,15 +1,3 @@
-CREATE TABLE IF NOT EXISTS updates
-(
-    url  VARCHAR(1024) NOT NULL,
-    type VARCHAR(100)  NOT NULL,
-    primary key (type)
-);
-CREATE TABLE IF NOT EXISTS update_tracker_subscriptions
-(
-    id   BIGINT       NOT NULL,
-    type VARCHAR(255) NOT NULL,
-    CONSTRAINT update_tracker_subscriptions_constraint UNIQUE (type, id)
-);
 CREATE TABLE IF NOT EXISTS status_aliases
 (
     name VARCHAR(255) NOT NULL,
