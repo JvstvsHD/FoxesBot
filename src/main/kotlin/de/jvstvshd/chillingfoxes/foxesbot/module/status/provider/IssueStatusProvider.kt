@@ -30,9 +30,8 @@ class IssueStatusProvider(config: Config, private val repoUrl: String) : StatusP
                 }
             }
         }
-        return StatusData(map, repoUrl)
+        return StatusData(repoUrl, map, repoUrl)
     }
-
 
     private fun getStatusType(issue: GHIssue): StatusType {
         for (label in issue.labels) {

@@ -1,7 +1,7 @@
 package de.jvstvshd.chillingfoxes.foxesbot.module.status
 
-data class StatusData(val statusMap: MutableMap<String, StatusMetaData>, val iconUrl: String = "") {
-    fun isOperational() = statusMap.values.stream().noneMatch{ !it.operational() }
+data class StatusData(val url: String, val statusMap: MutableMap<String, StatusMetaData>, val iconUrl: String = "") {
+    fun isOperational() = statusMap.values.stream().noneMatch { !it.operational() }
 
     override fun toString(): String {
         val builder = StringBuilder()

@@ -13,6 +13,10 @@ class StatusAlias(id: EntityID<Int>) : IntEntity(id) {
     var name by StatusAliasesTable.name
     var url by StatusAliasesTable.url
     var type by StatusAliasesTable.type
+
+    operator fun component1() = url
+
+    operator fun component2() = type
 }
 
 class PresenceStatus(id: EntityID<Long>) : LongEntity(id) {

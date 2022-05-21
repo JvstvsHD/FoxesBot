@@ -28,7 +28,7 @@ class StatusPageProvider(private val url: String) : StatusProvider {
             url = botAvatarUrl
         }
 
-        return StatusData(map, url)
+        return StatusData(this.url, map, url)
     }
 
     private fun getStatus(element: Element): MutableMap<String, StatusMetaData> {

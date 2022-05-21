@@ -31,7 +31,7 @@ class FoxesBot {
         val bot = ExtensibleBot(config.configData.baseData.token) {
             extensions {
                 add { CoreModule(config) }
-                add { StatusModule(database.dataSource, config) }
+                add { StatusModule(config) }
                 add { OfflineCheckerModule(config, database.dataSource) }
                 add { EventModule(database.dataSource, config) }
             }
