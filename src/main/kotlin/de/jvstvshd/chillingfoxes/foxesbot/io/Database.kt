@@ -29,6 +29,10 @@ private fun createDataSource(dataBaseData: DataBaseData) = with(dataBaseData) {
     }.create().withMaximumPoolSize(maxPoolSize).withMinimumIdle(minimumIdle).build()
 }
 
+@Deprecated(
+    message = "Replacement with above methods since an instance of a DataSource is no longer needed due to migration to JetBrains Composed",
+    replaceWith = ReplaceWith("setupDatabase")
+)
 class Database(private val dataBaseData: DataBaseData) {
 
     @Deprecated(message = "Replacement with JetBrains Exposed")
