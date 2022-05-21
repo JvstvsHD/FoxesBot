@@ -13,3 +13,6 @@ It should also serve as the removal of [init.sql](src/main/resources/init.sql)
 ## Changelog
 
 - 18.05.2022: created this branch
+- 19.05.2022: Added Exposed dependencies and updated other dependencies (including MariaDB)
+- 21.05.2022: Implement Exposed DataBase connection establishment, deprecate Database (project class) and migrate the
+  modules core & status to Exposed
