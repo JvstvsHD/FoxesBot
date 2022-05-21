@@ -20,15 +20,16 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
 
-class OfflineCheckerModule(private val config: Config, val dataSource: HikariDataSource) : Extension() {
+class OfflineCheckerModule(
+    private val config: Config,
+    @Deprecated(message = "Use Exposed API instead.") val dataSource: HikariDataSource
+) : Extension() {
 
     override val name = "offline_checker"
     override val bundle = "offline_checker"
     private val offlineCheckers = mutableMapOf<Snowflake, OfflineChecker>()
 
-    @OptIn(ExperimentalTime::class)
     override suspend fun setup() {
         suppressCommand()
         event<VoiceStateUpdateEvent> {

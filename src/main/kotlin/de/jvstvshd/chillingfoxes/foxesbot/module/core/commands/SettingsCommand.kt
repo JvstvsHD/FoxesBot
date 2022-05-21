@@ -8,7 +8,6 @@ import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.types.respondEphemeral
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
-import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.toLong
 import dev.kord.common.entity.Permission
 import dev.kord.core.entity.channel.Channel
 import kotlinx.coroutines.launch
@@ -45,7 +44,11 @@ suspend fun CoreModule.settingsCommand() = publicSlashCommand(::SettingsArgument
             val channel = arguments.channelBarrierChannel as Channel
             val name = (arguments.channelBarrierName as String).lowercase()
             this@settingsCommand.kord.launch {
-                this@settingsCommand.dataSource.connection.use { connection ->
+                respond {
+                    content = "N/A"
+                }
+                return@launch
+                /*this@settingsCommand.dataSource.connection.use { connection ->
                     connection.prepareStatement("INSERT INTO channel_barriers (name, channel_id, guild_id) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE channel_id = ?, guild_id = ?")
                         .use {
                             try {
@@ -59,7 +62,7 @@ suspend fun CoreModule.settingsCommand() = publicSlashCommand(::SettingsArgument
                                 e.printStackTrace()
                             }
                         }
-                }
+                }*/
                 respond {
                     content = translate("command.settings.success")
                 }

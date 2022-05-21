@@ -31,7 +31,7 @@ interface MusicPlayer {
     suspend fun playRandom(list: List<String>): AudioTrack = play(list.random())
 
     suspend fun playRandom(topic: String): AudioTrack =
-        playRandom(service.getUrls(topic))
+        playRandom(service.getMusicEntities().map { music -> music.url })
 
     suspend fun AudioPlayerManager.playTrack(query: String, player: AudioPlayer): AudioTrack {
         val track = suspendCoroutine<AudioTrack> {

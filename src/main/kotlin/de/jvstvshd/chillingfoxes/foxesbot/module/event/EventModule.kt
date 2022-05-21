@@ -17,7 +17,10 @@ import kotlinx.serialization.json.Json
 const val COUNTDOWN_EVENT_NAME = "countdown_event"
 val countdownEvents = mutableListOf<CountdownEvent>()
 
-class EventModule(val dataSource: HikariDataSource, val config: Config) : Extension(), ShutdownTask {
+class EventModule(
+    @Deprecated(message = "Use API Exposed instead.") val dataSource: HikariDataSource,
+    val config: Config
+) : Extension(), ShutdownTask {
     override val name: String = "event"
 
     override suspend fun setup() {

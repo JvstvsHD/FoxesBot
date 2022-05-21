@@ -7,7 +7,10 @@ import de.jvstvshd.chillingfoxes.foxesbot.module.status.provider.IssueStatusProv
 import de.jvstvshd.chillingfoxes.foxesbot.module.status.provider.StatusPageProvider
 import de.jvstvshd.chillingfoxes.foxesbot.module.status.provider.StatusProvider
 
-class StatusModule(private val dataSource: HikariDataSource, private val config: Config) : Extension() {
+class StatusModule(
+    @Deprecated(message = "Use Exposed API instead") private val dataSource: HikariDataSource,
+    private val config: Config
+) : Extension() {
 
     override val name = "status"
     override val bundle = "status"

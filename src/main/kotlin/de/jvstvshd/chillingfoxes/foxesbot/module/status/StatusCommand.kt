@@ -39,7 +39,6 @@ suspend fun StatusModule.statusCommand(dataSource: HikariDataSource) = publicSla
     val kord = kord
     action {
         val keyword = arguments.keyword
-
         dataSource.connection.use { connection ->
             connection.prepareStatement("SELECT url, type FROM status_aliases WHERE name = ?;").use { statement ->
                 statement.setString(1, keyword)
