@@ -1,7 +1,6 @@
 package de.jvstvshd.chillingfoxes.foxesbot.module.offlinechecker
 
 import com.kotlindiscord.kord.extensions.extensions.Extension
-import com.kotlindiscord.kord.extensions.extensions.event
 import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.chillingfoxes.foxesbot.config.Config
 import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.toLong
@@ -11,16 +10,16 @@ import dev.kord.core.Kord
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.channel.StageChannel
-import dev.kord.core.event.gateway.ReadyEvent
-import dev.kord.core.event.user.PresenceUpdateEvent
-import dev.kord.core.event.user.VoiceStateUpdateEvent
-import dev.kord.core.supplier.EntitySupplyStrategy
-import kotlinx.coroutines.delay
+import dev.kord.core.kordLogger
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.seconds
 
+/**
+ * This module is currently only has limited usability and is therefore temporarily deprecated.
+ * @deprecated This deprecation is only temporarily.
+ * @since 1.4.0-SNAPSHOT
+ */
+@Deprecated(message = "Temporary deprecation as of needed reimplementation", level = DeprecationLevel.WARNING)
 class OfflineCheckerModule(
     private val config: Config,
     @Deprecated(message = "Use Exposed API instead.") val dataSource: HikariDataSource
@@ -31,8 +30,10 @@ class OfflineCheckerModule(
     private val offlineCheckers = mutableMapOf<Snowflake, OfflineChecker>()
 
     override suspend fun setup() {
+        kordLogger.warn("The functionality of the offline checker module is temporarily not available")
         suppressCommand()
-        event<VoiceStateUpdateEvent> {
+        //TODO reimplement offline checker module
+        /*event<VoiceStateUpdateEvent> {
             action {
                 val member: Member = event.state.getMemberOrNull() ?: event.kord.getUser(
                     event.state.userId,
@@ -55,7 +56,7 @@ class OfflineCheckerModule(
                     checkMember0(event.getMember(), it.status)
                 }
             }
-        }
+        }*/
     }
 
     private suspend fun check(kord: Kord) {

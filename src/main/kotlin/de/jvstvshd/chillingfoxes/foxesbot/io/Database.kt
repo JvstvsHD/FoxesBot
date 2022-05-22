@@ -10,7 +10,7 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.io.InputStreamReader
 
-@Deprecated(message = "Consider migration to Exposed. This variable does only exist to create backwards compatibility.")
+@Deprecated(message = "Consider migration to Exposed. This variable does only exist to create backwards compatibility. It is only used by the offline checker module which needs a rewrite before.")
 lateinit var _dataSource: HikariDataSource
     private set
 
@@ -20,7 +20,7 @@ suspend fun setupDatabase(dataBaseData: DataBaseData) {
 }
 
 suspend fun initDatabase() = newSuspendedTransaction {
-    SchemaUtils.create(StatusAliasesTable, PresenceStatusTable, ChannelBarriersTable, MusicTable)
+    SchemaUtils.create(StatusAliasesTable, PresenceStatusTable, ChannelBarriersTable, MusicTable, EventDataTable)
 }
 
 private fun createDataSource(dataBaseData: DataBaseData) = with(dataBaseData) {
@@ -43,6 +43,7 @@ class Database(private val dataBaseData: DataBaseData) {
         init()
     }
 
+    @Deprecated("Consider migration to Exposed.")
     private fun createDataSource(): HikariDataSource {
         /*val properties = Properties()
         properties.setProperty("dataSource.databaseName", dataBaseData.database)
