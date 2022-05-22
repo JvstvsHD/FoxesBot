@@ -45,6 +45,7 @@ val allowedDeletedMessages = mutableListOf<Snowflake>()
 class CountdownEvent(
     val data: CountdownEventData,
     val configData: ConfigData,
+    @Deprecated(message = "Migrate to Exposed")
     val dataSource: HikariDataSource,
     val kord: Kord
 ) {
