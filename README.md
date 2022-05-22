@@ -16,3 +16,5 @@ It should also serve as the removal of [init.sql](src/main/resources/init.sql)
 - 19.05.2022: Added Exposed dependencies and updated other dependencies (including MariaDB)
 - 21.05.2022: Implement Exposed DataBase connection establishment, deprecate Database (project class) and migrate the
   modules core & status to Exposed
+- 22.05.2022: Migrate the event module and some other stuff excluding the offline checker module (which needs a rewrite)
+  to Exposed and changed some other things
