@@ -63,24 +63,6 @@ class EventModule(
                     )
                 }
             }
-            dataSource.connection.use { connection ->
-                connection.prepareStatement("SELECT guild_id, channel_id, data FROM event_data WHERE type = ?")
-                    .use { statement ->
-                        statement.setString(1, COUNTDOWN_EVENT_NAME)
-                        val rs = statement.executeQuery()
-                        synchronized(countdownEvents) {
-                            while (rs.next()) {
-                                countdownEvents.add(
-                                    CountdownEvent(
-                                        Json.decodeFromString(rs.getString(3)),
-                                        config.configData,
-                                        kord
-                                    )
-                                )
-                            }
-                        }
-                    }
-            }
             kordLogger.info("loaded ${countdownEvents.size} countdown events from database")
             for ((index, countdownEvent) in countdownEvents.withIndex()) {
                 kordLogger.info("CD Event #$index: ${countdownEvent.data.channel.asChannel().name} in guild ${countdownEvent.data.channel.guild.asGuild().name}")
