@@ -69,14 +69,16 @@ class CountdownEvent(
             val channelId = data.channel.toLong()
             val guildId = data.channel.guild.toLong()
             val content = serialize()
-            EventData.find { (EventDataTable.guildId eq guildId) and (EventDataTable.channelId eq channelId) and (EventDataTable.type eq COUNTDOWN_EVENT_NAME) }
-                .firstOrNull()?.let {
-                    it.data = content
-                } ?: EventData.new {
-                this.guildId = guildId
-                this.channelId = channelId
-                this.type = COUNTDOWN_EVENT_NAME
-                this.data = content
+            newSuspendedTransaction {
+                EventData.find { (EventDataTable.guildId eq guildId) and (EventDataTable.channelId eq channelId) and (EventDataTable.type eq COUNTDOWN_EVENT_NAME) }
+                    .firstOrNull()?.let {
+                        it.data = content
+                    } ?: EventData.new {
+                    this.guildId = guildId
+                    this.channelId = channelId
+                    this.type = COUNTDOWN_EVENT_NAME
+                    this.data = content
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()

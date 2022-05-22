@@ -15,6 +15,7 @@ import dev.kord.common.entity.ChannelType
 import dev.kord.common.entity.Permission
 import dev.kord.core.behavior.channel.TextChannelBehavior
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.time.LocalDateTime
 
 class CountdownArgs : Arguments() {
@@ -68,16 +69,18 @@ suspend fun EventModule.countdownStartCommand() = publicSlashCommand(::Countdown
     }
     action {
         val channel = guild!!.getChannel(arguments.channel.id) as TextChannelBehavior
-        val allowedChannels =
+        val allowedChannels = newSuspendedTransaction {
             ChannelBarrier.find { (ChannelBarriersTable.name eq COUNTDOWN_EVENT_NAME) and (ChannelBarriersTable.guildId eq guild!!.toLong()) }
                 .map { it.channelId }
+        }
         if (allowedChannels.isEmpty()) {
             respond {
                 content = "Es existiert kein zulässiger Channel!"
             }
             return@action
         }
-        if (!allowedChannels.contains(channel.toLong())) {
+        println(allowedChannels.contains(channel.fetchChannel().category?.toLong()))
+        if (!(allowedChannels.contains(channel.toLong()) || allowedChannels.contains(channel.fetchChannel().category?.toLong()))) {
             respond {
                 content = "Der Channel ist nicht zulässig."
             }
