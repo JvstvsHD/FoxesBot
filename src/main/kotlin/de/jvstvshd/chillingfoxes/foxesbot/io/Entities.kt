@@ -44,3 +44,12 @@ class Music(id: EntityID<Int>) : IntEntity(id) {
     var state by MusicTable.state
     var topic by MusicTable.topic
 }
+
+class EventData(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<EventData>(EventDataTable)
+
+    var guildId by EventDataTable.guildId
+    var channelId by EventDataTable.channelId
+    var type by EventDataTable.type
+    var data by EventDataTable.data
+}
