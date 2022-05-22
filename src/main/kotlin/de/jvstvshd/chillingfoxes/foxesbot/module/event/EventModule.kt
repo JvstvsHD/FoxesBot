@@ -58,7 +58,6 @@ class EventModule(
                         CountdownEvent(
                             Json.decodeFromString(it.data),
                             config.configData,
-                            dataSource,
                             kord
                         )
                     )
@@ -75,7 +74,6 @@ class EventModule(
                                     CountdownEvent(
                                         Json.decodeFromString(rs.getString(3)),
                                         config.configData,
-                                        dataSource,
                                         kord
                                     )
                                 )

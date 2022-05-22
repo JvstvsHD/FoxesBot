@@ -90,7 +90,6 @@ suspend fun EventModule.countdownStartCommand() = publicSlashCommand(::Countdown
         val event = CountdownEvent(
             CountdownEventData(channel, startValue, mutableMapOf(), LocalDateTime.now(), member?.toLong() ?: -1),
             config.configData,
-            dataSource,
             this@countdownStartCommand.kord
         )
         countdownEvents.add(event)
