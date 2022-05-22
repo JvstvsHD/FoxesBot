@@ -2,7 +2,6 @@ package de.jvstvshd.chillingfoxes.foxesbot.module.event
 
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.event
-import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.chillingfoxes.foxesbot.config.Config
 import de.jvstvshd.chillingfoxes.foxesbot.io.EventData
 import de.jvstvshd.chillingfoxes.foxesbot.io.EventDataTable
@@ -20,10 +19,7 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 const val COUNTDOWN_EVENT_NAME = "countdown_event"
 val countdownEvents = mutableListOf<CountdownEvent>()
 
-class EventModule(
-    @Deprecated(message = "Use API Exposed instead.") val dataSource: HikariDataSource,
-    val config: Config
-) : Extension(), ShutdownTask {
+class EventModule(val config: Config) : Extension(), ShutdownTask {
     override val name: String = "event"
 
     override suspend fun setup() {

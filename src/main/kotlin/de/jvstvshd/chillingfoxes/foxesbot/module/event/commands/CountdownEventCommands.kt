@@ -7,11 +7,14 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.channel
 import com.kotlindiscord.kord.extensions.commands.converters.impl.long
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
+import de.jvstvshd.chillingfoxes.foxesbot.io.ChannelBarrier
+import de.jvstvshd.chillingfoxes.foxesbot.io.ChannelBarriersTable
 import de.jvstvshd.chillingfoxes.foxesbot.module.event.*
 import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.toLong
 import dev.kord.common.entity.ChannelType
 import dev.kord.common.entity.Permission
 import dev.kord.core.behavior.channel.TextChannelBehavior
+import org.jetbrains.exposed.sql.and
 import java.time.LocalDateTime
 
 class CountdownArgs : Arguments() {
@@ -65,26 +68,20 @@ suspend fun EventModule.countdownStartCommand() = publicSlashCommand(::Countdown
     }
     action {
         val channel = guild!!.getChannel(arguments.channel.id) as TextChannelBehavior
-        dataSource.connection.use { connection ->
-            connection.prepareStatement("SELECT channel_id FROM channel_barriers WHERE name = ? AND guild_id = ?")
-                .use { preparedStatement ->
-                    preparedStatement.setString(1, COUNTDOWN_EVENT_NAME)
-                    preparedStatement.setLong(2, guild!!.toLong())
-                    val resultSet = preparedStatement.executeQuery()
-                    if (!resultSet.next()) {
-                        respond {
-                            content = "Es existiert kein zulässiger Channel!"
-                        }
-                        return@action
-                    }
-                    val channelId = resultSet.getLong(1)
-                    if (channelId != channel.asChannel().category?.toLong()!!) {
-                        respond {
-                            content = "Der Channel ist nicht zulässig."
-                        }
-                        return@action
-                    }
-                }
+        val allowedChannels =
+            ChannelBarrier.find { (ChannelBarriersTable.name eq COUNTDOWN_EVENT_NAME) and (ChannelBarriersTable.guildId eq guild!!.toLong()) }
+                .map { it.channelId }
+        if (allowedChannels.isEmpty()) {
+            respond {
+                content = "Es existiert kein zulässiger Channel!"
+            }
+            return@action
+        }
+        if (!allowedChannels.contains(channel.toLong())) {
+            respond {
+                content = "Der Channel ist nicht zulässig."
+            }
+            return@action
         }
         val startValue = arguments.startValue
         val event = CountdownEvent(

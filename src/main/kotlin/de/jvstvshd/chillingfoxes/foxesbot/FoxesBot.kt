@@ -33,7 +33,7 @@ class FoxesBot {
                 add { CoreModule(config) }
                 add { StatusModule(config) }
                 add { OfflineCheckerModule(config, database.dataSource) }
-                add { EventModule(database.dataSource, config) }
+                add { EventModule(config) }
             }
 
             applicationCommands {
