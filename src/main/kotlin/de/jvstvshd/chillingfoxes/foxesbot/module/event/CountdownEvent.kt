@@ -5,8 +5,9 @@ import com.kotlindiscord.kord.extensions.utils.dm
 import com.kotlindiscord.kord.extensions.utils.respond
 import com.notkamui.keval.KevalException
 import com.notkamui.keval.keval
-import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.chillingfoxes.foxesbot.config.data.ConfigData
+import de.jvstvshd.chillingfoxes.foxesbot.io.EventData
+import de.jvstvshd.chillingfoxes.foxesbot.io.EventDataTable
 import de.jvstvshd.chillingfoxes.foxesbot.util.JavaLocalDateTimeSerializer
 import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.toLong
 import de.jvstvshd.chillingfoxes.foxesbot.util.TextChannelBehaviorSerializer
@@ -22,6 +23,8 @@ import dev.kord.core.kordLogger
 import dev.kord.rest.builder.message.create.embed
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
@@ -35,6 +38,8 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import org.apache.commons.lang3.time.DurationFormatUtils
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
@@ -45,12 +50,12 @@ val allowedDeletedMessages = mutableListOf<Snowflake>()
 class CountdownEvent(
     val data: CountdownEventData,
     val configData: ConfigData,
-    val dataSource: HikariDataSource,
     val kord: Kord
 ) {
 
     private var locked = true
     private var shouldBeSaved = true
+    private val mutex = Mutex()
 
     private fun serialize() = Json.encodeToString(data)
 
@@ -61,19 +66,18 @@ class CountdownEvent(
             return
         }
         try {
-            dataSource.connection.use { connection ->
-                connection.prepareStatement(
-                    "INSERT INTO event_data (guild_id, channel_id, type, data) VALUES (?, ?, ?, ?) " +
-                            "ON DUPLICATE KEY UPDATE data = ?"
-                ).use { statement ->
-                    statement.setLong(1, data.channel.guild.toLong())
-                    statement.setLong(2, data.channel.toLong())
-                    statement.setString(3, COUNTDOWN_EVENT_NAME)
-                    val content = serialize()
-                    statement.setString(4, content)
-                    statement.setString(5, content)
-                    kordLogger.info("saved for ${data.channel.asChannel().name}")
-                    kordLogger.info("statement#executeUpdater(): ${statement.executeUpdate()}")
+            val channelId = data.channel.toLong()
+            val guildId = data.channel.guild.toLong()
+            val content = serialize()
+            newSuspendedTransaction {
+                EventData.find { (EventDataTable.guildId eq guildId) and (EventDataTable.channelId eq channelId) and (EventDataTable.type eq COUNTDOWN_EVENT_NAME) }
+                    .firstOrNull()?.let {
+                        it.data = content
+                    } ?: EventData.new {
+                    this.guildId = guildId
+                    this.channelId = channelId
+                    this.type = COUNTDOWN_EVENT_NAME
+                    this.data = content
                 }
             }
         } catch (e: Exception) {
@@ -109,8 +113,8 @@ class CountdownEvent(
             }
             it.transmitted
         }
-        synchronized(data.count) {
-            setCount(transmitted)
+        setCount(transmitted)
+        mutex.withLock(shouldBeSaved) {
             shouldBeSaved = true
         }
         if (data.count == 0L) {
@@ -125,7 +129,7 @@ class CountdownEvent(
             "${message.author?.mention} hat leider keine Zahl abgesendet.",
             FailType.NotANumber
         )
-        synchronized(data.count) {
+        mutex.withLock {
             if (data.count - 1 != transmitted) {
                 return CheckResult(
                     -1,
@@ -209,7 +213,7 @@ class CountdownEvent(
         }
     }
 
-    private fun reset(): Long {
+    private suspend fun reset(): Long {
         val modulo = configData.eventData.countdownResetState.value
         var missing = modulo - (data.count % modulo)
         if (missing == modulo) {
@@ -221,7 +225,7 @@ class CountdownEvent(
         }
     }
 
-    private fun setCount(newCount: Long) {
+    private suspend fun setCount(newCount: Long) = mutex.withLock {
         data.count = newCount
     }
 
@@ -258,8 +262,8 @@ class CountdownEvent(
         }
     }
 
-    fun unlock() {
-        synchronized(locked) {
+    suspend fun unlock() {
+        mutex.withLock(locked) {
             locked = false
         }
     }
@@ -277,17 +281,22 @@ class CountdownEvent(
         }
     }
 
-    private fun removeFromDatabase() {
-        dataSource.connection.use { connection ->
-            connection.prepareStatement("DELETE FROM event_data WHERE guild_id = ? AND channel_id = ? AND type = ?")
-                .use { preparedStatement ->
-                    preparedStatement.setLong(1, data.channel.guild.toLong())
-                    preparedStatement.setLong(2, data.channel.toLong())
-                    preparedStatement.setString(3, COUNTDOWN_EVENT_NAME)
-                    preparedStatement.executeUpdate()
-                }
-        }
+    private suspend fun removeFromDatabase() = newSuspendedTransaction {
+        val channelId = data.channel.toLong()
+        val guildId = data.channel.guild.toLong()
+        EventData.find { (EventDataTable.guildId eq guildId) and (EventDataTable.channelId eq channelId) and (EventDataTable.type eq COUNTDOWN_EVENT_NAME) }
+            .forEach { it.delete() }
     }
+
+    /*dataSource.connection.use { connection ->
+        connection.prepareStatement("DELETE FROM event_data WHERE guild_id = ? AND channel_id = ? AND type = ?")
+            .use { preparedStatement ->
+                preparedStatement.setLong(1, data.channel.guild.toLong())
+                preparedStatement.setLong(2, data.channel.toLong())
+                preparedStatement.setString(3, COUNTDOWN_EVENT_NAME)
+                preparedStatement.executeUpdate()
+            }
+    }*/
 }
 
 @Serializable

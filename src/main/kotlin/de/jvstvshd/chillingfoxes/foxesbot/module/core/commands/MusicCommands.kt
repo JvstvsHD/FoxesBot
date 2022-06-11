@@ -5,20 +5,18 @@ import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.application.slash.publicSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
-import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingInt
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.types.respondingPaginator
-import com.kotlindiscord.kord.extensions.utils.runSuspended
-import com.zaxxer.hikari.HikariDataSource
+import de.jvstvshd.chillingfoxes.foxesbot.io.Music
+import de.jvstvshd.chillingfoxes.foxesbot.io.MusicTable
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.music.MusicState
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.music.MusicTrack
-import dev.kord.common.annotation.KordVoice
 import dev.kord.common.entity.Permission
-import dev.kord.core.kordLogger
 import org.apache.commons.lang3.exception.ExceptionUtils
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 open class MusicArgs : Arguments() {
     open val name by optionalString {
@@ -49,18 +47,12 @@ class ActivationArgs : MusicArgs() {
 }
 
 class ListArgs : Arguments() {
-    val page by defaultingInt {
-        name = "page"
-        description = "Seite (20 Elemente pro Seite)"
-        defaultValue = 1
-    }
     val topic by optionalString {
         name = "thema"
         description = "Thema bzw. Bereich der abzufragenden Elemente"
     }
 }
 
-@OptIn(KordVoice::class)
 suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand(::MusicArgs) {
     name = commandName
     description = "Verwaltet Musik-Elemente"
@@ -78,7 +70,7 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
                 return@action
             }
             try {
-                addTitle(arguments.name!!, arguments.url!!, dataSource, arguments.topic ?: "general")
+                addTitle(arguments.name!!, arguments.url!!, arguments.topic ?: "general")
             } catch (e: Exception) {
                 respond {
                     content = ExceptionUtils.getMessage(e)
@@ -100,11 +92,12 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
         }
         action {
             val state = if (arguments.activated) MusicState.ACTIVATED else MusicState.DEACTIVATED
+            val topic = arguments.topic
             if (arguments.all) {
                 TODO()
-            } else if (arguments.topic != null) {
+            } else if (topic != null) {
                 println("topic != null")
-                service.changeState("topic", arguments.topic!!, state)
+                service.changeState(state) { MusicTable.topic eq topic }
             } else {
                 if (arguments.name == null && arguments.topic == null) {
                     respond {
@@ -112,7 +105,7 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
                     }
                     return@action
                 }
-                changeState(arguments.name!!, state, dataSource)
+                service.changeState(state) { MusicTable.name eq arguments.name!! }
             }
             respond {
                 content = "Der Status wurde erfolgreich geändert."
@@ -132,7 +125,7 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
             } else if (arguments.url != null) {
                 service.deleteByUrl(arguments.url!!)
             } else if (arguments.name != null) {
-                service.deleteByUrl(arguments.name!!)
+                service.deleteByName(arguments.name!!)
             } else {
                 respond {
                     content = "Es muss mindestens ein Name, Bereich/Thema oder eine URL angegeben werden!"
@@ -152,39 +145,9 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
             hasPermission(Permission.ManageGuild)
         }
         action {
-            val query = "SELECT * FROM music " + if (arguments.topic != null) "WHERE topic = ?" else ""
-            val tracks: List<MusicTrack> = try {
-                dataSource.connection.use { connection ->
-                    val rs = connection.prepareStatement(query).use inner@{ ps ->
-                        arguments.topic?.let {
-                            ps.setString(1, it)
-                        }
-                        return@inner ps.executeQuery()
-                    }
-                    val list = mutableListOf<MusicTrack>()
-                    while (rs.next()) {
-                        val stateName = rs.getString(3).uppercase()
-                        val state: MusicState = try {
-                            MusicState.valueOf(stateName)
-                        } catch (e: IllegalStateException) {
-                            kordLogger.warn("mysql query returned unknown enum constant name: $stateName")
-                            MusicState.UNKNOWN
-                        }
-                        list.add(
-                            MusicTrack(
-                                rs.getString(1),
-                                rs.getString(2),
-                                state,
-                                rs.getString(4)
-                            )
-                        )
-                    }
-                    return@use list
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                listOf(MusicTrack("Ein Fehler ist aufgetreten.", "", MusicState.UNKNOWN, "Fehler"))
-            }
+            println("test1")
+            val tracks: List<MusicTrack> = service.getMusicEntities(arguments.topic?.let { { MusicTable.topic eq it } })
+                .map { MusicTrack(it.name, it.url, MusicState.valueOf(it.state.uppercase()), it.topic) }
             val chunked = tracks.chunked(15)
             respondingPaginator {
                 for ((page, trackList) in chunked.withIndex()) {
@@ -204,28 +167,14 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
     }
 }
 
-private suspend fun changeState(name: String, to: MusicState, dataSource: HikariDataSource) = runSuspended {
-    dataSource.connection.use { connection ->
-        connection.prepareStatement("UPDATE music SET state = ? WHERE name = ?").use {
-            it.setString(1, to.name)
-            it.setString(2, name)
-            it.executeUpdate()
-        }
+private suspend fun addTitle(name: String, url: String, topic: String) = newSuspendedTransaction {
+    Music.new {
+        this.name = name
+        this.url = url
+        this.state = MusicState.ACTIVATED.name
+        this.topic = topic
     }
 }
-
-private suspend fun addTitle(name: String, url: String, dataSource: HikariDataSource, topic: String) =
-    runSuspended {
-        dataSource.connection.use { connection ->
-            connection.prepareStatement("INSERT INTO music (name, url, state, topic) VALUES (?, ?, ?, ?)").use {
-                it.setString(1, name)
-                it.setString(2, url)
-                it.setString(3, MusicState.ACTIVATED.name)
-                it.setString(4, topic)
-                it.executeUpdate()
-            }
-        }
-    }
 
 suspend fun CoreModule.musicCommands() {
     musicCommand("music")

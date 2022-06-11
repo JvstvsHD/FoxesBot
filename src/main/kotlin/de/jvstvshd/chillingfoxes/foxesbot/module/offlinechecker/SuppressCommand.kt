@@ -6,7 +6,6 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChanne
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalUser
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
-import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.toLong
 import dev.kord.common.entity.Permission
 
 class SuppressArgs : Arguments() {
@@ -22,12 +21,16 @@ class SuppressArgs : Arguments() {
 
 suspend fun OfflineCheckerModule.suppressCommand() = publicSlashCommand(::SuppressArgs) {
     name = "suppress"
-    description = "Unterdrückt das Offline-Checken bei Usern & Channeln"
+    description = "Unterdrückt das Offline-Checken bei Usern & Channels"
     check {
         hasPermission(Permission.ManageGuild)
     }
     action {
-        val type: String
+        respond {
+            content = ":warning: Die Funktionalität dieses Moduls ist derzeit (nur eingeschränkt) verfügbar. :warning:"
+        }
+        return@action
+        /*val type: String
         val id: Long
         if (arguments.user != null) {
             type = "member"
@@ -54,7 +57,6 @@ suspend fun OfflineCheckerModule.suppressCommand() = publicSlashCommand(::Suppre
                     }
                     return@action
                 }
-        }
-
+        }*/
     }
 }

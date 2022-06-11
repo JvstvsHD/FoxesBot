@@ -1,18 +1,42 @@
 package de.jvstvshd.chillingfoxes.foxesbot.module.core.music
 
-import com.kotlindiscord.kord.extensions.utils.runSuspended
-import com.zaxxer.hikari.HikariDataSource
+import de.jvstvshd.chillingfoxes.foxesbot.io.Music
+import de.jvstvshd.chillingfoxes.foxesbot.io.MusicTable
+import org.jetbrains.exposed.sql.Op
+import org.jetbrains.exposed.sql.SizedIterable
+import org.jetbrains.exposed.sql.SqlExpressionBuilder
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
-class MusicService(private val dataSource: HikariDataSource) {
 
-    suspend fun getUrls(topic: String?) = getUrls(topic, MusicState.ACTIVATED)
+class MusicService {
 
-    private suspend fun getUrls(topic: String?, state: MusicState) = getStringColumn("url", topic, state)
+    suspend fun getMusicEntities(
+        sqlExpressionBuilder: (SqlExpressionBuilder.() -> Op<Boolean>)? = null,
+        builder: SizedIterable<Music>.() -> List<Music> = { toList() }
+    ): List<Music> = newSuspendedTransaction {
+        if (sqlExpressionBuilder == null) {
+            return@newSuspendedTransaction builder(Music.all())
+        }
+        builder(Music.find(sqlExpressionBuilder))
+    }
 
-    @Suppress("MemberVisibilityCanBePrivate")
-    suspend fun getNames(topic: String?, state: MusicState) = getStringColumn("name", topic, state)
+    @Deprecated(message = "replacement with Exposed functions", level = DeprecationLevel.ERROR)
+    private suspend fun getUrls(topic: String?, state: MusicState) = newSuspendedTransaction {
+        if (topic != null) {
+            return@newSuspendedTransaction Music.find { (MusicTable.topic eq topic) and (MusicTable.state eq state.name) }
+                .map { music -> music.url }
+        } else {
+            return@newSuspendedTransaction Music.find { MusicTable.state eq state.name }
+                .map { music: Music -> music.url }
+        }
+    }
 
-    private suspend fun getStringColumn(column: String, topic: String?, state: MusicState) = runSuspended {
+    @Deprecated(message = "replacement with Exposed functions", level = DeprecationLevel.ERROR)
+    private suspend fun getStringColumn(column: String, topic: String?, state: MusicState) = newSuspendedTransaction {
+        //Music.find
+    }
+    /* runSuspended {
         dataSource.connection.use { connection ->
             val query = buildQuery(column, topic)
             connection.prepareStatement(query).use {
@@ -30,48 +54,30 @@ class MusicService(private val dataSource: HikariDataSource) {
                 return@runSuspended list
             }
         }
-    }
+    }*/
 
-    private fun buildQuery(column: String, topic: String?): String {
-        return if (topic != null) "SELECT $column FROM music WHERE topic = ? AND state = ?" else "SELECT $column FROM music WHERE state = ?;"
-    }
 
-    suspend fun changeState(column: String, columnValue: String, state: MusicState) = runSuspended {
-        dataSource.connection.use { connection ->
-            connection.prepareStatement("UPDATE music SET state = ? WHERE $column = ?").use {
-                it.setString(1, state.name)
-                it.setString(2, columnValue)
-                it.executeUpdate()
+    @Suppress("UNCHECKED_CAST")
+    suspend fun changeState(state: MusicState, sqlExpressionBuilder: (SqlExpressionBuilder.() -> Op<Boolean>)? = null) =
+        newSuspendedTransaction {
+            getMusicEntities(sqlExpressionBuilder).forEach { music ->
+                music.state = state.name.lowercase()
             }
         }
-    }
 
-    suspend fun getNames(topic: String?) = getNames(topic, MusicState.ACTIVATED)
+    /*suspend fun reactivateAll() = runSuspended {
 
-    suspend fun reactivateAll() = runSuspended {
-        dataSource.connection.use { connection ->
-            connection.prepareStatement("UPDATE music SET state = ?").use {
-                it.setString(1, MusicState.ACTIVATED.name)
-                it.executeUpdate()
-            }
-        }
-    }
+    }*/
 
-    suspend fun deleteByTopic(topic: String) = delete(createStatement("topic"), topic)
+    suspend fun deleteByTopic(topic: String) = delete { MusicTable.topic eq topic }
 
-    private fun createStatement(column: String) = "DELETE FROM music WHERE $column = ?"
+    private suspend fun delete(sqlExpressionBuilder: SqlExpressionBuilder.() -> Op<Boolean>) =
+        getMusicEntities(sqlExpressionBuilder).forEach { music: Music -> music.delete() }
 
-    suspend fun delete(query: String, value: String) = runSuspended {
-        dataSource.connection.use { connection ->
-            connection.prepareStatement(query).use {
-                it.setString(1, value)
-                return@runSuspended it.executeUpdate()
-            }
-        }
-    }
 
-    suspend fun deleteByName(name: String) = delete(createStatement("name"), name)
+    suspend fun deleteByName(name: String) = delete { MusicTable.name eq name }
 
-    suspend fun deleteByUrl(url: String) = delete(createStatement("url"), url)
+
+    suspend fun deleteByUrl(url: String) = delete { MusicTable.url eq url }
 
 }

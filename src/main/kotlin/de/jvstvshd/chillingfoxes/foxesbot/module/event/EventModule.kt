@@ -2,8 +2,9 @@ package de.jvstvshd.chillingfoxes.foxesbot.module.event
 
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.event
-import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.chillingfoxes.foxesbot.config.Config
+import de.jvstvshd.chillingfoxes.foxesbot.io.EventData
+import de.jvstvshd.chillingfoxes.foxesbot.io.EventDataTable
 import de.jvstvshd.chillingfoxes.foxesbot.module.event.commands.countdownEventResetStateCommand
 import de.jvstvshd.chillingfoxes.foxesbot.module.event.commands.countdownStartCommand
 import de.jvstvshd.chillingfoxes.foxesbot.util.ShutdownTask
@@ -13,11 +14,12 @@ import dev.kord.core.kordLogger
 import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 const val COUNTDOWN_EVENT_NAME = "countdown_event"
 val countdownEvents = mutableListOf<CountdownEvent>()
 
-class EventModule(val dataSource: HikariDataSource, val config: Config) : Extension(), ShutdownTask {
+class EventModule(val config: Config) : Extension(), ShutdownTask {
     override val name: String = "event"
 
     override suspend fun setup() {
@@ -44,26 +46,18 @@ class EventModule(val dataSource: HikariDataSource, val config: Config) : Extens
         }
     }
 
-    private fun loadCountdownEvents() {
+    private fun loadCountdownEvents() =
         kord.launch {
-            dataSource.connection.use { connection ->
-                connection.prepareStatement("SELECT guild_id, channel_id, data FROM event_data WHERE type = ?")
-                    .use { statement ->
-                        statement.setString(1, COUNTDOWN_EVENT_NAME)
-                        val rs = statement.executeQuery()
-                        synchronized(countdownEvents) {
-                            while (rs.next()) {
-                                countdownEvents.add(
-                                    CountdownEvent(
-                                        Json.decodeFromString(rs.getString(3)),
-                                        config.configData,
-                                        dataSource,
-                                        kord
-                                    )
-                                )
-                            }
-                        }
-                    }
+            newSuspendedTransaction {
+                EventData.find { EventDataTable.type eq COUNTDOWN_EVENT_NAME }.forEach {
+                    countdownEvents.add(
+                        CountdownEvent(
+                            Json.decodeFromString(it.data),
+                            config.configData,
+                            kord
+                        )
+                    )
+                }
             }
             kordLogger.info("loaded ${countdownEvents.size} countdown events from database")
             for ((index, countdownEvent) in countdownEvents.withIndex()) {
@@ -71,7 +65,6 @@ class EventModule(val dataSource: HikariDataSource, val config: Config) : Extens
                 countdownEvent.unlock()
             }
         }
-    }
 
     override suspend fun unload() {
         println("unload")

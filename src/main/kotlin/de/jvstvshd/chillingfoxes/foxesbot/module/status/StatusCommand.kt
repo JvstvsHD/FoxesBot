@@ -5,16 +5,16 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.types.respondEphemeral
-import com.zaxxer.hikari.HikariDataSource
+import de.jvstvshd.chillingfoxes.foxesbot.io.StatusAlias
+import de.jvstvshd.chillingfoxes.foxesbot.io.StatusAliasesTable
 import de.jvstvshd.chillingfoxes.foxesbot.module.status.provider.StatusProvider
 import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil
 import dev.kord.core.Kord
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.embed
-import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.awt.Color
-import java.util.function.Function
 
 class StatusArguments : Arguments() {
     val keyword by string {
@@ -33,90 +33,60 @@ private val regex = Regex(
             "(#[-a-z\\d_]*)?$"
 )
 
-suspend fun StatusModule.statusCommand(dataSource: HikariDataSource) = publicSlashCommand(::StatusArguments) {
+suspend fun StatusModule.statusCommand() = publicSlashCommand(::StatusArguments) {
     name = "status"
     description = translationsProvider.get("command.status.description", bundleName = "status")
     val kord = kord
     action {
         val keyword = arguments.keyword
-
-        dataSource.connection.use { connection ->
-            connection.prepareStatement("SELECT url, type FROM status_aliases WHERE name = ?;").use { statement ->
-                statement.setString(1, keyword)
-                val resultSet = statement.executeQuery()
-                val provider: StatusProvider
-                var url: String
-                if (!resultSet.next()) {
-                    if (regex.matches(keyword)) {
-                        try {
-                            provider = createProviderFromUncheckedUrl(keyword)
-                            respond {
-                                embed {
-                                    fillIn(keyword, keyword, kord, provider.provide(), Function {
-                                        return@Function runBlocking {
-                                            return@runBlocking translate(it)
-                                        }
-                                    }, this)
-                                }
-                            }
-                            return@action
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            respondEphemeral {
-                                content = translate(
-                                    "command.status.noresults",
-                                    keyword
-                                ) + ", internal error whilst fetching url"
-                            }
-                            return@action
+        newSuspendedTransaction {
+            try {
+                val result = StatusAlias.find { StatusAliasesTable.name eq keyword }.firstOrNull()
+                val provider: StatusProvider = if (result == null) {
+                    if (!regex.matches(keyword)) {
+                        respondEphemeral {
+                            content = "Die Anfrage ist weder voreingespeichert noch eine gültige URL."
                         }
+                        return@newSuspendedTransaction
                     }
-                    respondEphemeral {
-                        content = translate("command.status.noresults", bundleName = "status", arrayOf(keyword))
-                    }
-                    return@action
-                }
-                try {
-                    provider = createProvider(resultSet.getString(1).also { url = it }, resultSet.getString(2))
-                } catch (e: Exception) {
-                    respondEphemeral {
-                        content = e.message
-                    }
-                    return@action
+                    createProviderFromUncheckedUrl(keyword)
+                } else {
+                    createProvider(result.url, result.type)
                 }
                 val data = provider.provide()
                 respond {
                     embed {
-                        fillIn(keyword, url, kord, data, Function {
-                            return@Function runBlocking {
-                                return@runBlocking translate(it)
-                            }
-                        }, this)
+                        statusData(data, keyword, kord) {
+                            translate(this)
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                respond {
+                    content = "Während der Bearbeitung deiner Anfrage ist ein interner Fehler aufgetreten."
+                }
+                e.printStackTrace()
             }
         }
     }
 }
 
-private suspend fun fillIn(
-    keyword: String,
-    url: String,
-    kord: Kord?,
+private suspend fun EmbedBuilder.statusData(
     data: StatusData,
-    translate: Function<String, String>,
-    builder: EmbedBuilder
+    keyword: String,
+    kord: Kord,
+    translator: suspend String.() -> String
 ) {
-    builder.description = ""
-    builder.title = "$keyword - Status"
-    builder.url = url
-    builder.author = KordUtil.createAuthor(kord)
+    description = ""
+    title = "$keyword - Status"
+    url = data.url
+    author = KordUtil.createAuthor(kord)
     for (mutableEntry in data.statusMap) {
         val name = mutableEntry.key
         val metaData = mutableEntry.value
         if (metaData.hasChildren()) {
-            builder.field {
-                this.name = "__$name:__ " + translate.apply(metaData.type.translationKey)
+            field {
+                this.name = "__$name:__ " + translator(metaData.type.translationKey)
                 val stringBuilder = StringBuilder()
                 for (child in metaData.children) {
                     if (child.value.hasChildren()) {
@@ -124,15 +94,15 @@ private suspend fun fillIn(
                         stringBuilder.append("Invalid!\n")
                     }
                     stringBuilder.append("**").append(child.key).append("**: ")
-                        .append(translate.apply(child.value.type.translationKey)).append("\n")
+                        .append(translator(child.value.type.translationKey)).append("\n")
                 }
                 value = stringBuilder.toString()
             }
         } else {
-            builder.description = builder.description + "**$name**: ${translate.apply(metaData.type.translationKey)}\n"
+            description += "**$name**: ${translator(metaData.type.translationKey)}\n"
         }
     }
-    builder.color = KordUtil.convertColor(if (data.isOperational()) Color.GREEN else Color.ORANGE)
-    builder.footer = KordUtil.createFooter("Status", data.iconUrl)
-    builder.timestamp = Clock.System.now()
+    color = KordUtil.convertColor(if (data.isOperational()) Color.GREEN else Color.ORANGE)
+    footer = KordUtil.createFooter("Status", data.iconUrl)
+    timestamp = Clock.System.now()
 }

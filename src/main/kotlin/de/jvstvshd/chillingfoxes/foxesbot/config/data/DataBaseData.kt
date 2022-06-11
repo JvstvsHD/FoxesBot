@@ -6,5 +6,7 @@ data class DataBaseData(
     val password: String = "<password>",
     val username: String = "root",
     val database: String = "foxes_bot",
-    val port: String = "3306"
+    val port: String = "3306",
+    val maxPoolSize: Int = 10,
+    val minimumIdle: Int = 2
 )
