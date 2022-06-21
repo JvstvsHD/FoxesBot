@@ -1,0 +1,15 @@
+{
+  "baseBranches": [
+    "master"
+  ],
+  "dependencyDashboard": true,
+  "labels": [
+    "dependencies"
+  ],
+  "extends": [
+    "config:base"
+  ],
+  "reviewers": [
+    "JvstvsHD"
+  ]
+}
