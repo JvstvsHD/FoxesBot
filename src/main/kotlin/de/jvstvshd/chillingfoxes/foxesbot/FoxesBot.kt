@@ -5,7 +5,6 @@ import com.kotlindiscord.kord.extensions.i18n.SupportedLocales
 import com.kotlindiscord.kord.extensions.utils.loadModule
 import de.jvstvshd.chillingfoxes.foxesbot.config.Config
 import de.jvstvshd.chillingfoxes.foxesbot.config.data.ConfigData
-import de.jvstvshd.chillingfoxes.foxesbot.io.Database
 import de.jvstvshd.chillingfoxes.foxesbot.io.setupDatabase
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.event.EventModule
@@ -26,13 +25,12 @@ class FoxesBot {
         val config = Config(File(System.getProperty("bot.config.file") ?: "config.json").toPath())
         config.load()
         setupDatabase(config.configData.dataBaseData)
-        val database = Database(config.configData.dataBaseData)
 
         val bot = ExtensibleBot(config.configData.baseData.token) {
             extensions {
                 add { CoreModule(config) }
                 add { StatusModule(config) }
-                add { OfflineCheckerModule(config, database.dataSource) }
+                add { OfflineCheckerModule(config) }
                 add { EventModule(config) }
             }
 

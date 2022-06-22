@@ -1,9 +1,7 @@
 package de.jvstvshd.chillingfoxes.foxesbot.module.offlinechecker
 
 import com.kotlindiscord.kord.extensions.extensions.Extension
-import com.zaxxer.hikari.HikariDataSource
 import de.jvstvshd.chillingfoxes.foxesbot.config.Config
-import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.toLong
 import dev.kord.common.entity.PresenceStatus
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
@@ -21,8 +19,7 @@ import kotlinx.coroutines.flow.onEach
  */
 @Deprecated(message = "Temporary deprecation as of needed reimplementation", level = DeprecationLevel.WARNING)
 class OfflineCheckerModule(
-    private val config: Config,
-    @Deprecated(message = "Use Exposed API instead.") val dataSource: HikariDataSource
+    private val config: Config
 ) : Extension() {
 
     override val name = "offline_checker"
@@ -74,7 +71,7 @@ class OfflineCheckerModule(
     }
 
     private fun suppressed(member: Member, channel: Snowflake?): Boolean {
-        if (channel != null) {
+        /*if (channel != null) {
             dataSource.connection.use { connection ->
                 connection.prepareStatement("SELECT id FROM offline_checker WHERE id = ? AND suppressed = ? AND type = ?")
                     .use {
@@ -95,7 +92,8 @@ class OfflineCheckerModule(
                     it.setString(3, "member")
                     return it.executeQuery().next()
                 }
-        }
+        }*/
+        return true
     }
 
     private suspend fun checkMember0(member: Member, status: PresenceStatus) {
