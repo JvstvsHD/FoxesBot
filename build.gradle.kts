@@ -1,7 +1,8 @@
 plugins {
-    kotlin("jvm") version "1.7.0"
+    kotlin("jvm") version "1.6.21"
     application
-    kotlin("plugin.serialization") version ("1.6.21")
+    kotlin("plugin.serialization") version "1.6.21"
+    id("org.cadixdev.licenser") version "0.6.1"
 }
 
 group = "de.jvstvshd.chillingfoxes"
@@ -23,13 +24,10 @@ repositories {
 }
 
 dependencies {
-    //kotlin
-    //implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.5.2-native-mt")
-    //implementation("io.github.qbosst:kordex-hybrid-commands:1.0.3-SNAPSHOT")
-
     //discord
     implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.4-SNAPSHOT")
     implementation("com.sedmelluq:lavaplayer:1.3.78")
+    implementation("dev.kord:kord-voice:0.8.0-M14")
 
     //logging
     implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
@@ -72,4 +70,13 @@ tasks {
         from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
         exclude("org/apache/logging/log4j&core/lookup/JndiLookup.class")
     }
+    compileKotlin {
+        kotlinOptions.jvmTarget = "11"
+    }
+}
+
+license {
+    header(rootProject.file("LICENSE_HEADER"))
+    include("**/*.kt")
+    newLine(true)
 }
