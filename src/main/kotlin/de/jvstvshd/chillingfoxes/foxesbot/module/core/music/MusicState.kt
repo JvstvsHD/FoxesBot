@@ -5,9 +5,11 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.module.core.music
 
-enum class MusicState(val playable: Boolean, val readableName: String) {
-    ACTIVATED(true, "aktiviert"),
-    DEACTIVATED(false, "deaktiviert"),
-    DELETED(false, "gelöscht (wtf?!)"),
-    UNKNOWN(false, "unbekannt (WARUM???)")
+enum class MusicState(val readableName: String) {
+    ACTIVATED("aktiviert"),
+    DEACTIVATED("deaktiviert"),
+    DELETED("gelöscht (wtf?!)"),
+    UNKNOWN("unbekannt (WARUM???)");
+
+    val playable by lazy { this == ACTIVATED }
 }

@@ -2,6 +2,7 @@
 
 - Further migration ([see 1.4.0](#1.4.0))
 - add license (header)
+- add renovate for updating dependencies
 
 ## 1.4.0
 
