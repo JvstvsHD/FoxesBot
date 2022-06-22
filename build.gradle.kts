@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm") version "1.7.0"
     application
@@ -30,7 +28,7 @@ dependencies {
     //implementation("io.github.qbosst:kordex-hybrid-commands:1.0.3-SNAPSHOT")
 
     //discord
-    implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.2-SNAPSHOT")
+    implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.4-SNAPSHOT")
     implementation("com.sedmelluq:lavaplayer:1.3.78")
 
     //logging
@@ -74,18 +72,4 @@ tasks {
         from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
         exclude("org/apache/logging/log4j&core/lookup/JndiLookup.class")
     }
-
-    compileKotlin {
-        kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
-        targetCompatibility = "17"
-    }
-
-    compileTestKotlin {
-        kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
-        targetCompatibility = "17"
-    }
-}
-val compileKotlin: KotlinCompile by tasks
-compileKotlin.kotlinOptions {
-    languageVersion = "1.6"
 }
