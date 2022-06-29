@@ -5,6 +5,7 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.util
 
+import com.kotlindiscord.kord.extensions.commands.Command
 import dev.kord.common.Color
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
@@ -23,6 +24,9 @@ suspend fun EmbedBuilder.selfAuthor(kord: Kord) {
         url = WEBSITE
     }
 }
+
+context(Command)
+        suspend fun EmbedBuilder.selfAuthor() = selfAuthor(kord)
 
 val standardDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
 
