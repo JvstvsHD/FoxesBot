@@ -23,6 +23,7 @@ object PresenceStatusTable : LongIdTable("presence_status") {
     val status = varchar("status", 256)
 }
 
+@Deprecated(message = "Will be merged with ChannelSettingsTable")
 object ChannelBarriersTable : GuildChannelIntIdTable("channel_barriers") {
     val name = varchar("name", 256)
 }
@@ -37,4 +38,10 @@ object MusicTable : IntIdTable("music") {
 object EventDataTable : GuildChannelIntIdTable("event_data") {
     val type = varchar("type", 128)
     val data = text("data")
+}
+
+object ChannelSettingsTable : GuildChannelIntIdTable("channel_settings") {
+    val type = varchar("type", 128)
+    val activated = bool("activated")
+    val value = text("value").nullable()
 }

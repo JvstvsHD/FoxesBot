@@ -31,6 +31,7 @@ class PresenceStatus(id: EntityID<Long>) : LongEntity(id) {
     var status by PresenceStatusTable.status
 }
 
+@Deprecated(message = "in favor of ChannelSettings")
 class ChannelBarrier(id: EntityID<Int>) : IntEntity(id) {
 
     companion object : IntEntityClass<ChannelBarrier>(ChannelBarriersTable)
@@ -57,4 +58,15 @@ class EventData(id: EntityID<Int>) : IntEntity(id) {
     var channelId by EventDataTable.channelId
     var type by EventDataTable.type
     var data by EventDataTable.data
+}
+
+class ChannelSettings(id: EntityID<Int>) : IntEntity(id) {
+
+    companion object : IntEntityClass<ChannelSettings>(ChannelSettingsTable)
+
+    var guildId by ChannelSettingsTable.guildId
+    var channelId by ChannelSettingsTable.channelId
+    var type by ChannelSettingsTable.type
+    var activated by ChannelSettingsTable.activated
+    var value by ChannelSettingsTable.value
 }

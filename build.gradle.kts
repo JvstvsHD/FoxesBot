@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "de.jvstvshd.chillingfoxes"
-version = "1.4.1"
+version = "1.4.2"
 
 val log4jVersion = "2.17.2"
 val exposedVersion = "0.38.2"
@@ -72,6 +72,7 @@ tasks {
     }
     compileKotlin {
         kotlinOptions.jvmTarget = "11"
+        kotlinOptions.freeCompilerArgs = listOf("-Xcontext-receivers")
     }
 }
 

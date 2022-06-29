@@ -9,6 +9,7 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import de.jvstvshd.chillingfoxes.foxesbot.config.Config
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.commands.commands
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.music.MusicService
+import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.createMessageEvent
 
 class CoreModule(val config: Config) : Extension() {
 
@@ -18,5 +19,6 @@ class CoreModule(val config: Config) : Extension() {
 
     override suspend fun setup() {
         commands()
+        createMessageEvent()
     }
 }

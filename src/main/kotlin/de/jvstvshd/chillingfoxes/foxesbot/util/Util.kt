@@ -5,6 +5,7 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.util
 
+import dev.kord.common.entity.ChannelType
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import java.util.concurrent.Callable
@@ -28,3 +29,14 @@ object Util {
         return cf
     }
 }
+
+val guildChannelTypes = setOf<ChannelType>(
+    ChannelType.GuildCategory,
+    ChannelType.GuildDirectory,
+    ChannelType.GuildNews,
+    ChannelType.GuildStageVoice,
+    ChannelType.GuildText,
+    ChannelType.GuildVoice
+)
+
+val threadChannelTypes = setOf(ChannelType.PrivateThread, ChannelType.PublicGuildThread, ChannelType.PublicNewsThread)
