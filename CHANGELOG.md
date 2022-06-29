@@ -1,3 +1,10 @@
+## 1.4.2
+
+- Channel features/settings:
+  - /channel settings will send a message where you can activate/deactivate some channel-specific things
+  - current existing features are: OneMessage (you can only send one message in this channel) and ChannelBarriers (not
+    really working since it's not needed; access to these channels/categories will be restricted)
+
 ## 1.4.1
 
 - Further migration ([see 1.4.0](#1.4.0))
