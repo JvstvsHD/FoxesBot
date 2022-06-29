@@ -18,7 +18,14 @@ suspend fun setupDatabase(dataBaseData: DataBaseData) {
 }
 
 suspend fun initDatabase() = newSuspendedTransaction {
-    SchemaUtils.create(StatusAliasesTable, PresenceStatusTable, ChannelBarriersTable, MusicTable, EventDataTable)
+    SchemaUtils.create(
+        StatusAliasesTable,
+        PresenceStatusTable,
+        ChannelBarriersTable,
+        MusicTable,
+        EventDataTable,
+        ChannelSettingsTable
+    )
 }
 
 private fun createDataSource(dataBaseData: DataBaseData) = with(dataBaseData) {

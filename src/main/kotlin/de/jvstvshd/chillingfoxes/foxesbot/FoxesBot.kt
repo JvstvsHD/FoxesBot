@@ -12,11 +12,13 @@ import de.jvstvshd.chillingfoxes.foxesbot.config.Config
 import de.jvstvshd.chillingfoxes.foxesbot.config.data.ConfigData
 import de.jvstvshd.chillingfoxes.foxesbot.io.setupDatabase
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
+import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.ChannelFeature
 import de.jvstvshd.chillingfoxes.foxesbot.module.event.EventModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.offlinechecker.OfflineCheckerModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.status.StatusModule
 import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.snowflake
 import dev.kord.common.entity.PresenceStatus
+import dev.kord.core.Kord
 import dev.kord.core.supplier.EntitySupplyStrategy
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
@@ -44,6 +46,7 @@ class FoxesBot {
                 register = true
                 config.configData.baseData.testGuildId?.let { defaultGuild(it.snowflake) }
             }
+
             chatCommands {
                 enabled = true
                 defaultPrefix = config.configData.baseData.prefix
@@ -74,9 +77,13 @@ class FoxesBot {
             hooks {
                 afterKoinSetup {
                     loadModule { single { config.configData } bind ConfigData::class }
-
+                }
+                setup {
+                    com.kotlindiscord.kord.extensions.utils.getKoin()
+                        .get<Kord>().cache.register(ChannelFeature.dataDescription)
                 }
             }
+
             kord {
                 defaultStrategy = EntitySupplyStrategy.cacheWithCachingRestFallback
                 enableShutdownHook = true

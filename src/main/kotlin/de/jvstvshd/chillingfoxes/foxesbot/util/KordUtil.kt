@@ -56,5 +56,9 @@ object KordUtil {
     val Long.snowflake: Snowflake
         get() = Snowflake(this)
 
+    @Deprecated("Use property access", ReplaceWith("this.long"))
     fun Entity.toLong() = id.value.toLong()
+
+    val Entity.long: Long
+        get() = id.value.toLong()
 }
