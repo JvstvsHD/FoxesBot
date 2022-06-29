@@ -1,3 +1,7 @@
+## 1.4.3
+
+- Small change of the /channel settings message
+
 ## 1.4.2
 
 - Channel features/settings:
