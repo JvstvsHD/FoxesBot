@@ -79,7 +79,8 @@ class FoxesBot {
                     loadModule { single { config.configData } bind ConfigData::class }
                 }
                 setup {
-                    com.kotlindiscord.kord.extensions.utils.getKoin().get<Kord>().cache.register(ChannelFeature.dataDescription)
+                    com.kotlindiscord.kord.extensions.utils.getKoin()
+                        .get<Kord>().cache.register(ChannelFeature.dataDescription)
                 }
             }
 
