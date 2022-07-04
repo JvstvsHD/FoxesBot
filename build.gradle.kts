@@ -47,7 +47,7 @@ dependencies {
 
     //some other stuff
     implementation("org.kohsuke:github-api:1.306")
-    implementation("org.jsoup:jsoup:1.15.1")
+    implementation("org.jsoup:jsoup:1.15.2")
     implementation("com.notkamui.libs:keval:0.8.0")
 
     //JUnit
