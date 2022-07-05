@@ -11,6 +11,13 @@ import org.jetbrains.exposed.dao.EntityClass
 import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
+import kotlin.reflect.KProperty1
+
+@Suppress("UNCHECKED_CAST")
+fun <R> Any.instanceOf(propertyName: String): R? {
+    val property = this::class.members.firstOrNull { it.name == propertyName } as KProperty1<Any, *>?
+    return property?.get(this) as R?
+}
 
 fun <ID : Comparable<ID>, T : Entity<ID>> EntityClass<ID, T>.getColumn(name: String) =
     table.columns.firstOrNull { column -> column.name.equals(name, true) }

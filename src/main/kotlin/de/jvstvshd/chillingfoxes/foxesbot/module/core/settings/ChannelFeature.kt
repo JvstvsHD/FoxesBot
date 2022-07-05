@@ -3,11 +3,12 @@
  * This file is part of the FoxesBot, a discord bot for the Chilling Foxes Discord (https://discord.gg/K5rhddJtyW), which is licensed under the MIT license. The full version is located in the LICENSE file (top level directory)
  */
 
+@file:Suppress("UNCHECKED_CAST")
+
 package de.jvstvshd.chillingfoxes.foxesbot.module.core.settings
 
 import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.utils.getKoin
-import com.kotlindiscord.kord.extensions.utils.hasPermission
 import de.jvstvshd.chillingfoxes.foxesbot.io.ChannelSettings
 import de.jvstvshd.chillingfoxes.foxesbot.io.ChannelSettingsTable
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
@@ -15,12 +16,8 @@ import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.long
 import dev.kord.cache.api.data.description
 import dev.kord.cache.api.put
 import dev.kord.cache.api.query
-import dev.kord.common.entity.Permission
-import dev.kord.common.entity.Permissions
 import dev.kord.core.Kord
 import dev.kord.core.behavior.channel.GuildChannelBehavior
-import dev.kord.core.behavior.channel.editMemberPermission
-import dev.kord.core.entity.channel.TopGuildChannel
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.core.kordLogger
 import kotlinx.coroutines.launch
@@ -29,7 +26,7 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 
 class ChannelFeature private constructor(
     val channel: GuildChannelBehavior,
-    val features: MutableMap<ChannelFeatureType, Boolean>
+    val features: MutableMap<ChannelFeatureType<out ChannelFeatureData>, Boolean>
 ) {
 
     companion object {
@@ -44,7 +41,7 @@ class ChannelFeature private constructor(
             }
             val channelId = channel.long
             val guildId = channel.guild.long
-            val features = mutableMapOf<ChannelFeatureType, Boolean>()
+            val features = mutableMapOf<ChannelFeatureType<out ChannelFeatureData>, Boolean>()
             val feature = newSuspendedTransaction {
                 val results =
                     ChannelSettings.find { (ChannelSettingsTable.guildId eq guildId) and (ChannelSettingsTable.channelId eq channelId) }
@@ -87,7 +84,7 @@ class ChannelFeature private constructor(
                     kordLogger.info("Reloading ${query.count()} items. This may take a while...")
                     val newData = mutableListOf<ChannelFeature>()
                     query.asFlow().collect { channelFeature ->
-                        val features = mutableMapOf<ChannelFeatureType, Boolean>()
+                        val features = mutableMapOf<ChannelFeatureType<*>, Boolean>()
                         ChannelSettings.find { (ChannelSettingsTable.guildId eq channelFeature.channel.guild.long) and (ChannelSettingsTable.channelId eq channelFeature.channel.long) }
                             .onEach {
                                 features[ChannelFeatureType.fromStringOrElseThrow(it.type)] = it.activated
@@ -112,41 +109,21 @@ class ChannelFeature private constructor(
         }
     }
 
-    fun isFeatureEnabled(type: ChannelFeatureType) = features[type] == true
-}
-
-sealed class ChannelFeatureType(val name: String) {
-
-    companion object {
-        val features = listOf(Barrier, OneMessage)
-
-        fun fromString(name: String) = features.find { it.name == name.lowercase() }
-
-        fun fromStringOrElseThrow(name: String) =
-            fromString(name) ?: throw IllegalArgumentException("unknown channel feature type $name")
-    }
-
-    object Barrier : ChannelFeatureType("channel_barrier")
-    object OneMessage : ChannelFeatureType("one_message")
+    fun isFeatureEnabled(type: ChannelFeatureType<*>) = features[type] == true
 }
 
 suspend fun CoreModule.createMessageEvent() = event<MessageCreateEvent> {
     action {
-        val channel = event.message.channel.asChannel()
-        println(channel.javaClass)
-        if (channel !is TopGuildChannel) {
+        val channel = event.message.channel
+        if (channel !is GuildChannelBehavior) {
             return@action
         }
         val channelFeature = ChannelFeature.feature(channel)
-        if (!channelFeature.isFeatureEnabled(ChannelFeatureType.OneMessage)) {
-            return@action
-        }
-        val author = event.message.getAuthorAsMember() ?: return@action
-        if (author.hasPermission(Permission.Administrator) || author.isBot) {
-            return@action
-        }
-        channel.editMemberPermission(author.id) {
-            denied = Permissions(Permission.SendMessages)
+        for ((feature, active) in channelFeature.features) {
+            if (!active) continue
+            feature.createData(event)?.let {
+                (feature as ChannelFeatureType<ChannelFeatureData>).handle(it)
+            }
         }
     }
 }

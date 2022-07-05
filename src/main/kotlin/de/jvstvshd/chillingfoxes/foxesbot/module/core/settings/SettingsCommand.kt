@@ -119,7 +119,7 @@ context(CoreModule)
                         }
                     }
                     components(2.minutes) {
-                        var selectedFeature: ChannelFeatureType? = null
+                        var selectedFeature: ChannelFeatureType<*>? = null
                         publicButton {
                             deferredAck = true
                             label = "Aktivieren"
@@ -167,7 +167,7 @@ context(CoreModule)
     }
 
 context(PublicInteractionButtonContext)
-        suspend fun ChannelFeature.changeState(feature: ChannelFeatureType?, to: Boolean) {
+        suspend fun ChannelFeature.changeState(feature: ChannelFeatureType<*>?, to: Boolean) {
     if (feature == null) {
         respondEphemeral {
             content = "bitte wähle eine Option!"
