@@ -46,7 +46,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
 
     //some other stuff
-    implementation("org.kohsuke:github-api:1.306")
+    implementation("org.kohsuke:github-api:1.307")
     implementation("org.jsoup:jsoup:1.15.2")
     implementation("com.notkamui.libs:keval:0.8.0")
 
