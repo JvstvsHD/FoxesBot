@@ -27,7 +27,7 @@ dependencies {
     //discord
     implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.4-SNAPSHOT")
     implementation("com.sedmelluq:lavaplayer:1.3.78")
-    implementation("dev.kord:kord-voice:0.8.0-M14")
+    implementation("dev.kord:kord-voice:0.8.0-M15")
 
     //logging
     implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
