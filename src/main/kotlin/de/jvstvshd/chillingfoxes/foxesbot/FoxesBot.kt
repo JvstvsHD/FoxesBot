@@ -40,7 +40,6 @@ class FoxesBot {
                 add { OfflineCheckerModule(config) }
                 add { EventModule(config) }
             }
-
             applicationCommands {
                 enabled = true
                 register = true

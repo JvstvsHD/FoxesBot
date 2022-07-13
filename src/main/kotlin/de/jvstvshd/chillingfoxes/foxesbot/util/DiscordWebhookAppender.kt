@@ -6,6 +6,7 @@
 package de.jvstvshd.chillingfoxes.foxesbot.util
 
 import com.kotlindiscord.kord.extensions.*
+import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import de.jvstvshd.chillingfoxes.foxesbot.config.data.ConfigData
 import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.toSnowflake
 import dev.kord.core.Kord
@@ -30,7 +31,6 @@ import org.apache.logging.log4j.core.config.plugins.PluginElement
 import org.apache.logging.log4j.core.config.plugins.PluginFactory
 import org.apache.logging.log4j.core.impl.MutableLogEvent
 import org.apache.logging.log4j.message.SimpleMessage
-import org.koin.core.component.KoinComponent
 import org.koin.core.error.NoBeanDefFoundException
 import java.io.Serializable
 
@@ -41,7 +41,7 @@ class DiscordWebhookAppender(
     layout: Layout<out Serializable>?,
     ignoreExceptions: Boolean,
     properties: Array<out Property>?
-) : AbstractAppender(name, filter, layout, ignoreExceptions, properties), KoinComponent {
+) : AbstractAppender(name, filter, layout, ignoreExceptions, properties), KordExKoinComponent {
 
     private val logEvents = mutableListOf<LogEvent>()
     private val mutex = Mutex()
