@@ -1,14 +1,14 @@
 plugins {
-    kotlin("jvm") version "1.6.21"
+    kotlin("jvm") version "1.7.10"
     application
-    kotlin("plugin.serialization") version "1.6.21"
+    kotlin("plugin.serialization") version "1.7.10"
     id("org.cadixdev.licenser") version "0.6.1"
 }
 
 group = "de.jvstvshd.chillingfoxes"
 version = "1.4.4-SNAPSHOT"
 
-val log4jVersion = "2.17.2"
+val log4jVersion = "2.18.0"
 val exposedVersion = "0.38.2"
 
 repositories {
@@ -27,7 +27,7 @@ dependencies {
     //discord
     implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.5-SNAPSHOT")
     implementation("com.sedmelluq:lavaplayer:1.3.78")
-    implementation("dev.kord:kord-voice:0.8.0-M14")
+    implementation("dev.kord:kord-voice:0.8.0-M15")
 
     //logging
     implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
@@ -35,7 +35,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api:1.7.36")
 
     //database
-    implementation("org.mariadb.jdbc:mariadb-java-client:3.0.5")
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.0.6")
     implementation("com.zaxxer:HikariCP:5.0.1")
     implementation("org.mybatis:mybatis:3.5.10")
     implementation("de.chojo:sql-util:1.4.6")
