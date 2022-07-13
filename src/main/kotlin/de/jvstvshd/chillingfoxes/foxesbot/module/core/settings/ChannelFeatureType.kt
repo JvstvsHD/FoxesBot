@@ -84,6 +84,6 @@ open class MessageChannelFeatureData(override val channel: TopGuildChannelBehavi
     ChannelFeatureData
 
 val Event.channel
-    get() = instanceOf<ChannelBehavior>( "channel")
+    get() = instanceOf<ChannelBehavior>("channel")
 
 inline fun <reified T : ChannelBehavior> ChannelBehavior.castChannel(): T? = if (this is T) this else null
