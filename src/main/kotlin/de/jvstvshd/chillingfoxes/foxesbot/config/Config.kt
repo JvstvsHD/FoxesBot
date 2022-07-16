@@ -19,6 +19,10 @@ import kotlin.io.path.outputStream
 
 class Config(private val path: Path = Path.of("config.json")) {
 
+    companion object {
+        const val configVersion: Int = 0
+    }
+
     private val json: Json = Json {
         prettyPrint = true
         encodeDefaults = true
@@ -37,11 +41,11 @@ class Config(private val path: Path = Path.of("config.json")) {
         }
         if (!Files.exists(path)) {
             Files.createFile(path)
-            configData = ConfigData(DataBaseData())
+            configData = ConfigData(DataBaseData(),)
             save()
         }
         if (path.fileSize() <= 0) {
-            configData = ConfigData(DataBaseData())
+            configData = ConfigData(DataBaseData(),)
             save()
         }
     }

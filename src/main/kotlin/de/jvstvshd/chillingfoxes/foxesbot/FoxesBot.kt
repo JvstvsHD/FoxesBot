@@ -17,8 +17,9 @@ import de.jvstvshd.chillingfoxes.foxesbot.module.event.EventModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.offlinechecker.OfflineCheckerModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.status.StatusModule
 import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.snowflake
-import dev.kord.common.entity.PresenceStatus
+import dev.kord.common.entity.ActivityType
 import dev.kord.core.Kord
+import dev.kord.core.kordLogger
 import dev.kord.core.supplier.EntitySupplyStrategy
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
@@ -32,7 +33,12 @@ class FoxesBot {
         val config = Config(File(System.getProperty("bot.config.file") ?: "config.json").toPath())
         config.load()
         setupDatabase(config.configData.dataBaseData)
-
+        val configVersion = config.configData.configVersion
+        if (configVersion != Config.configVersion) {
+            kordLogger.info("config version update detected: $configVersion -> ${Config.configVersion}")
+            config.configData.configVersion = Config.configVersion
+            config.save()
+        }
         val bot = ExtensibleBot(config.configData.baseData.token) {
             extensions {
                 add { CoreModule(config) }
@@ -63,8 +69,17 @@ class FoxesBot {
             }
 
             presence {
-                status = PresenceStatus.Online
-                playing("mit neuen Ideen & deinem Leben")
+                val presence = config.configData.presenceData
+                status = presence.status
+                val name = presence.name
+                when (presence.activityType) {
+                    ActivityType.Unknown, ActivityType.Custom -> return@presence
+                    ActivityType.Game -> playing(name)
+                    ActivityType.Streaming -> streaming(name, presence.url!!)
+                    ActivityType.Listening -> listening(name)
+                    ActivityType.Watching -> watching(name)
+                    ActivityType.Competing -> competing(name)
+                }
             }
             i18n {
                 defaultLocale = SupportedLocales.GERMAN

@@ -21,6 +21,7 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import java.lang.Runtime.Version
 import java.time.LocalDateTime
 
 class TextChannelBehaviorSerializer : KSerializer<TextChannelBehavior> {
@@ -55,5 +56,14 @@ object JavaLocalDateTimeSerializer : KSerializer<LocalDateTime> {
     override fun serialize(encoder: Encoder, value: LocalDateTime) {
         LocalDateTimeIso8601Serializer.serialize(encoder, value.toKotlinLocalDateTime())
     }
+}
 
+class VersionSerializer : KSerializer<Version> {
+    override fun deserialize(decoder: Decoder): Version = Version.parse(decoder.decodeString())
+
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("de.jvstvshd.foxesbot.VersionSerializer", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: Version) {
+        encoder.encodeString(value.toString())
+    }
 }

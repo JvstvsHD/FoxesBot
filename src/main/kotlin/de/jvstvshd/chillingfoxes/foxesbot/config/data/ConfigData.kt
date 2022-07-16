@@ -11,5 +11,7 @@ data class ConfigData(
     val baseData: BaseData = BaseData(),
     val offlineCheckerData: OfflineCheckerData = OfflineCheckerData(),
     val eventData: EventData = EventData(),
-    val moderationData: ModerationData = ModerationData()
+    val moderationData: ModerationData = ModerationData(),
+    var configVersion: Int = -1,
+    val presenceData: PresenceData = PresenceData()
 )
