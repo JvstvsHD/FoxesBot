@@ -6,4 +6,4 @@
 package de.jvstvshd.chillingfoxes.foxesbot.config.data
 
 @kotlinx.serialization.Serializable
-data class OfflineCheckerData(val periodInSeconds: Long = 120L)
+data class OfflineCheckerData(val periodInSeconds: Long = 120L, val timeoutInSeconds: Long = 5L)

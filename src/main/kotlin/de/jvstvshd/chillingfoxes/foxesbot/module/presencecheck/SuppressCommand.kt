@@ -3,11 +3,12 @@
  * This file is part of the FoxesBot, a discord bot for the Chilling Foxes Discord (https://discord.gg/K5rhddJtyW), which is licensed under the MIT license. The full version is located in the LICENSE file (top level directory)
  */
 
-package de.jvstvshd.chillingfoxes.foxesbot.module.offlinechecker
+package de.jvstvshd.chillingfoxes.foxesbot.module.presencecheck
 
 import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChannel
+import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalRole
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalUser
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
@@ -18,19 +19,31 @@ class SuppressArgs : Arguments() {
         name = "user"
         description = "User"
     }
+    val role by optionalRole {
+        name = "role"
+        description = "Rolle"
+    }
     val channel by optionalChannel {
         name = "channel"
         description = "Channel"
     }
 }
 
-suspend fun OfflineCheckerModule.suppressCommand() = publicSlashCommand(::SuppressArgs) {
+suspend fun PresenceCheckModule.suppressCommand() = publicSlashCommand(::SuppressArgs) {
     name = "suppress"
-    description = "Unterdrückt das Offline-Checken bei Usern & Channels"
+    description = "Unterdrückt den Präsenz-Check bei ausgewählten Usern/Rollen sowie in bestimmten Channels"
     check {
         hasPermission(Permission.ManageGuild)
     }
     action {
+        val user = arguments.user
+        val role = arguments.role
+        val channel = arguments.channel
+        if (user == null && role == null && channel == null) {
+            respond {
+                content = "Bitte wähle min. ein Argument aus"
+            }
+        }
         respond {
             content = ":warning: Die Funktionalität dieses Moduls ist derzeit (nur eingeschränkt) verfügbar. :warning:"
         }

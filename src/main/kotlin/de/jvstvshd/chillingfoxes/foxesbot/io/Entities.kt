@@ -7,8 +7,6 @@ package de.jvstvshd.chillingfoxes.foxesbot.io
 
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
-import org.jetbrains.exposed.dao.LongEntity
-import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
 class StatusAlias(id: EntityID<Int>) : IntEntity(id) {
@@ -22,13 +20,6 @@ class StatusAlias(id: EntityID<Int>) : IntEntity(id) {
     operator fun component1() = url
 
     operator fun component2() = type
-}
-
-class PresenceStatus(id: EntityID<Long>) : LongEntity(id) {
-
-    companion object : LongEntityClass<PresenceStatus>(PresenceStatusTable)
-
-    var status by PresenceStatusTable.status
 }
 
 @Deprecated(message = "in favor of ChannelSettings")
@@ -69,4 +60,15 @@ class ChannelSettings(id: EntityID<Int>) : IntEntity(id) {
     var type by ChannelSettingsTable.type
     var activated by ChannelSettingsTable.activated
     var value by ChannelSettingsTable.value
+}
+
+class MemberSettings(id: EntityID<Int>) : IntEntity(id) {
+
+    companion object : IntEntityClass<MemberSettings>(MemberSettingsTable)
+
+    var userId by MemberSettingsTable.userId
+    var guildId by MemberSettingsTable.guildId
+    var type by MemberSettingsTable.type
+    var active by MemberSettingsTable.active
+    var value by MemberSettingsTable.value
 }

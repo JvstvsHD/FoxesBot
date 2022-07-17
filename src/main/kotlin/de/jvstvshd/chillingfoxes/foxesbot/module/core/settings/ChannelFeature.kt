@@ -12,7 +12,7 @@ import com.kotlindiscord.kord.extensions.utils.getKoin
 import de.jvstvshd.chillingfoxes.foxesbot.io.ChannelSettings
 import de.jvstvshd.chillingfoxes.foxesbot.io.ChannelSettingsTable
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
-import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.long
+import de.jvstvshd.chillingfoxes.foxesbot.util.long
 import dev.kord.cache.api.data.description
 import dev.kord.cache.api.put
 import dev.kord.cache.api.query
@@ -35,7 +35,7 @@ class ChannelFeature private constructor(
 
         suspend fun feature(channel: GuildChannelBehavior): ChannelFeature {
             val kord: Kord by getKoin().inject()
-            val queryItem = kord.cache.query<ChannelFeature> { ChannelFeature::channel eq channel }.singleOrNull()
+            val queryItem = kord.cache.query { ChannelFeature::channel eq channel }.singleOrNull()
             if (queryItem != null) {
                 return queryItem
             }

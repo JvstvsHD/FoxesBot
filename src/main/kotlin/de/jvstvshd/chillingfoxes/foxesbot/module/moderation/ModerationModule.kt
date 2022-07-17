@@ -8,7 +8,7 @@ package de.jvstvshd.chillingfoxes.foxesbot.module.moderation
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.event
 import de.jvstvshd.chillingfoxes.foxesbot.config.Config
-import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.snowflake
+import de.jvstvshd.chillingfoxes.foxesbot.util.snowflake
 import dev.kord.common.entity.AuditLogChange
 import dev.kord.common.entity.AuditLogChangeKey
 import dev.kord.common.entity.AuditLogEvent

@@ -8,7 +8,6 @@ package de.jvstvshd.chillingfoxes.foxesbot.util
 import com.kotlindiscord.kord.extensions.*
 import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import de.jvstvshd.chillingfoxes.foxesbot.config.data.ConfigData
-import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.toSnowflake
 import dev.kord.core.Kord
 import dev.kord.core.behavior.execute
 import dev.kord.core.entity.Webhook
@@ -90,7 +89,7 @@ class DiscordWebhookAppender(
             runBlocking {
                 val webhookUrl = configData.baseData.loggingWebhook ?: return@runBlocking
                 val (idString, token) = webhookUrl.split("/")
-                val id = idString.toLong().toSnowflake()
+                val id = idString.toLong().snowflake
                 val webhook = kord.getWebhookWithToken(id, token)
                 send(webhook, token)
             }

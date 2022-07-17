@@ -6,7 +6,6 @@
 package de.jvstvshd.chillingfoxes.foxesbot.io
 
 import org.jetbrains.exposed.dao.id.IntIdTable
-import org.jetbrains.exposed.dao.id.LongIdTable
 
 open class GuildChannelIntIdTable(override val tableName: String) : IntIdTable(tableName) {
     open val channelId = long("channel_id")
@@ -17,10 +16,6 @@ object StatusAliasesTable : IntIdTable("status_aliases") {
     val name = varchar("name", 256)
     val url = varchar("url", 512)
     val type = varchar("type", 256)
-}
-
-object PresenceStatusTable : LongIdTable("presence_status") {
-    val status = varchar("status", 256)
 }
 
 @Deprecated(message = "Will be merged with ChannelSettingsTable")
@@ -43,5 +38,13 @@ object EventDataTable : GuildChannelIntIdTable("event_data") {
 object ChannelSettingsTable : GuildChannelIntIdTable("channel_settings") {
     val type = varchar("type", 128)
     val activated = bool("activated")
+    val value = text("value").nullable()
+}
+
+object MemberSettingsTable : IntIdTable("member_settings") {
+    val userId = long("user_id")
+    val guildId = long("guild_id").nullable()
+    val type = varchar("type", 128)
+    val active = bool("active")
     val value = text("value").nullable()
 }

@@ -5,6 +5,7 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.module.status
 
+import com.kotlindiscord.kord.extensions.DISCORD_YELLOW
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
@@ -13,13 +14,12 @@ import com.kotlindiscord.kord.extensions.types.respondEphemeral
 import de.jvstvshd.chillingfoxes.foxesbot.io.StatusAlias
 import de.jvstvshd.chillingfoxes.foxesbot.io.StatusAliasesTable
 import de.jvstvshd.chillingfoxes.foxesbot.module.status.provider.StatusProvider
-import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil
-import dev.kord.core.Kord
+import de.jvstvshd.chillingfoxes.foxesbot.util.Colors
+import de.jvstvshd.chillingfoxes.foxesbot.util.selfAuthor
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.embed
 import kotlinx.datetime.Clock
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import java.awt.Color
 
 class StatusArguments : Arguments() {
     val keyword by string {
@@ -41,7 +41,6 @@ private val regex = Regex(
 suspend fun StatusModule.statusCommand() = publicSlashCommand(::StatusArguments) {
     name = "status"
     description = translationsProvider.get("command.status.description", bundleName = "status")
-    val kord = kord
     action {
         val keyword = arguments.keyword
         newSuspendedTransaction {
@@ -61,7 +60,7 @@ suspend fun StatusModule.statusCommand() = publicSlashCommand(::StatusArguments)
                 val data = provider.provide()
                 respond {
                     embed {
-                        statusData(data, keyword, kord) {
+                        statusData(data, keyword) {
                             translate(this)
                         }
                     }
@@ -79,13 +78,12 @@ suspend fun StatusModule.statusCommand() = publicSlashCommand(::StatusArguments)
 private suspend fun EmbedBuilder.statusData(
     data: StatusData,
     keyword: String,
-    kord: Kord,
     translator: suspend String.() -> String
 ) {
     description = ""
     title = "$keyword - Status"
     url = data.url
-    author = KordUtil.createAuthor(kord)
+    selfAuthor()
     for (mutableEntry in data.statusMap) {
         val name = mutableEntry.key
         val metaData = mutableEntry.value
@@ -107,7 +105,10 @@ private suspend fun EmbedBuilder.statusData(
             description += "**$name**: ${translator(metaData.type.translationKey)}\n"
         }
     }
-    color = KordUtil.convertColor(if (data.isOperational()) Color.GREEN else Color.ORANGE)
-    footer = KordUtil.createFooter("Status", data.iconUrl)
+    color = if (data.isOperational()) Colors.GREEN else DISCORD_YELLOW
+    footer {
+        text = "Status"
+        icon = data.iconUrl
+    }
     timestamp = Clock.System.now()
 }

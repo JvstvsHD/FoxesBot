@@ -13,11 +13,7 @@ import com.notkamui.keval.keval
 import de.jvstvshd.chillingfoxes.foxesbot.config.data.ConfigData
 import de.jvstvshd.chillingfoxes.foxesbot.io.EventData
 import de.jvstvshd.chillingfoxes.foxesbot.io.EventDataTable
-import de.jvstvshd.chillingfoxes.foxesbot.util.JavaLocalDateTimeSerializer
-import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.toLong
-import de.jvstvshd.chillingfoxes.foxesbot.util.TextChannelBehaviorSerializer
-import de.jvstvshd.chillingfoxes.foxesbot.util.selfAuthor
-import de.jvstvshd.chillingfoxes.foxesbot.util.standardDateTimeFormatter
+import de.jvstvshd.chillingfoxes.foxesbot.util.*
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.behavior.channel.TextChannelBehavior
@@ -71,8 +67,8 @@ class CountdownEvent(
             return
         }
         try {
-            val channelId = data.channel.toLong()
-            val guildId = data.channel.guild.toLong()
+            val channelId = data.channel.long
+            val guildId = data.channel.guild.long
             val content = serialize()
             newSuspendedTransaction {
                 EventData.find { (EventDataTable.guildId eq guildId) and (EventDataTable.channelId eq channelId) and (EventDataTable.type eq COUNTDOWN_EVENT_NAME) }
@@ -96,12 +92,12 @@ class CountdownEvent(
             message.author?.dm("Bitte warte einen Moment. Sollte sich das Problem nicht in den nächsten Minuten beheben, melde dich bitte im Support!")
             return
         }
-        if (message.author?.toLong() == data.lastUser) {
+        if (message.author?.long == data.lastUser) {
             message.allowAndDelete()
             message.author?.dm("Du musst warten, bis jemand anderes eine Nachricht schreibt.")
             return
         }
-        message.author?.toLong()?.let {
+        message.author?.long?.let {
             data.lastUser = it
         }
         val content = message.content
@@ -112,7 +108,7 @@ class CountdownEvent(
                     it.failMessage ?: "Äh... Das sollte nicht passieren (wahrscheinlicher Grund: ${it.type.name})",
                     null,
                     it.type,
-                    message.author?.toLong() ?: -1
+                    message.author?.long ?: -1
                 )
                 return
             }
@@ -171,7 +167,7 @@ class CountdownEvent(
         data.channel.createMessage {
             embed {
                 title = "Event abgeschlossen!"
-                selfAuthor(kord)
+                selfAuthor()
                 description = "Das Countdown-Event wurde erfolgreich abgeschlossen."
                 field {
                     name = "Zeit"
@@ -277,7 +273,7 @@ class CountdownEvent(
         data.channel.createMessage {
             embed {
                 title = "Countdown Event"
-                selfAuthor(kord)
+                selfAuthor()
                 description =
                     "Ein neues Countdown-Event wurde gestartet! Zählt bis 0 runter, um dieses Event zu schaffen. " +
                             "**Der Countdown startet bei ${data.count}**\nSollte eine Nachricht eine inkorrekte Zahl enthalten, wird der Countdown zurückgesetzt.\n\n**${data.count}**"
@@ -287,8 +283,8 @@ class CountdownEvent(
     }
 
     private suspend fun removeFromDatabase() = newSuspendedTransaction {
-        val channelId = data.channel.toLong()
-        val guildId = data.channel.guild.toLong()
+        val channelId = data.channel.long
+        val guildId = data.channel.guild.long
         EventData.find { (EventDataTable.guildId eq guildId) and (EventDataTable.channelId eq channelId) and (EventDataTable.type eq COUNTDOWN_EVENT_NAME) }
             .forEach { it.delete() }
     }

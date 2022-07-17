@@ -1,7 +1,11 @@
+/*
+ * Copyright (c) 2022 JvstvsHD
+ * This file is part of the FoxesBot, a discord bot for the Chilling Foxes Discord (https://discord.gg/K5rhddJtyW), which is licensed under the MIT license. The full version is located in the LICENSE file (top level directory)
+ */
+
 package de.jvstvshd.chillingfoxes.foxesbot.module.core.settings
 
 import com.kotlindiscord.kord.extensions.utils.hasPermission
-import de.jvstvshd.chillingfoxes.foxesbot.util.instanceOf
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Permissions
 import dev.kord.core.behavior.MessageBehavior
@@ -69,6 +73,11 @@ sealed class ChannelFeatureType<T : ChannelFeatureData>(val name: String) {
             return MessageChannelFeatureData(message.channel as TopGuildChannelBehavior, message)
         }
     }
+
+    object SuppressPresenceCheck : ChannelFeatureType<ChannelFeatureData>("suppress_presence_check") {
+
+        override suspend fun createData(event: Event): ChannelFeatureData? = null
+    }
 }
 
 interface ChannelFeatureData {
@@ -82,8 +91,5 @@ fun ChannelFeatureData(channel: GuildChannelBehavior) = object : ChannelFeatureD
 
 open class MessageChannelFeatureData(override val channel: TopGuildChannelBehavior, open val message: MessageBehavior) :
     ChannelFeatureData
-
-val Event.channel
-    get() = instanceOf<ChannelBehavior>("channel")
 
 inline fun <reified T : ChannelBehavior> ChannelBehavior.castChannel(): T? = if (this is T) this else null

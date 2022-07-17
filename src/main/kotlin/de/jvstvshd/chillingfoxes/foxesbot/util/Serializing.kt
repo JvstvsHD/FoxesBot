@@ -6,8 +6,6 @@
 package de.jvstvshd.chillingfoxes.foxesbot.util
 
 import com.kotlindiscord.kord.extensions.utils.getKoin
-import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.toLong
-import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.toSnowflake
 import dev.kord.core.Kord
 import dev.kord.core.behavior.channel.TextChannelBehavior
 import kotlinx.coroutines.runBlocking
@@ -21,15 +19,14 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import java.lang.Runtime.Version
 import java.time.LocalDateTime
 
 class TextChannelBehaviorSerializer : KSerializer<TextChannelBehavior> {
 
-    val kord: Kord = getKoin().get<Kord>()
+    val kord: Kord = getKoin().get()
 
     override fun deserialize(decoder: Decoder): TextChannelBehavior = runBlocking {
-        val snowflake = decoder.decodeLong().toSnowflake()
+        val snowflake = decoder.decodeLong().snowflake
         val channel =
             kord.getChannel(snowflake) ?: throw SerializationException("the channel $snowflake could not be found")
         if (channel !is TextChannelBehavior) {
@@ -42,7 +39,7 @@ class TextChannelBehaviorSerializer : KSerializer<TextChannelBehavior> {
         PrimitiveSerialDescriptor("de.jvstvshd.foxesbot.TextChannelBehaviorSerializer", PrimitiveKind.LONG)
 
     override fun serialize(encoder: Encoder, value: TextChannelBehavior) {
-        encoder.encodeLong(value.toLong())
+        encoder.encodeLong(value.long)
     }
 }
 
@@ -55,15 +52,5 @@ object JavaLocalDateTimeSerializer : KSerializer<LocalDateTime> {
 
     override fun serialize(encoder: Encoder, value: LocalDateTime) {
         LocalDateTimeIso8601Serializer.serialize(encoder, value.toKotlinLocalDateTime())
-    }
-}
-
-class VersionSerializer : KSerializer<Version> {
-    override fun deserialize(decoder: Decoder): Version = Version.parse(decoder.decodeString())
-
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("de.jvstvshd.foxesbot.VersionSerializer", PrimitiveKind.STRING)
-
-    override fun serialize(encoder: Encoder, value: Version) {
-        encoder.encodeString(value.toString())
     }
 }

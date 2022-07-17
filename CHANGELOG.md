@@ -1,3 +1,9 @@
+## 1.4.4
+
+- Re-implement presence check (former offline checker): user gets kicked if they join a channel with presence status set
+  to invisible (offline)
+- Add feature to flush new config content to the file on startup automatically via comparison of config versions
+
 ## 1.4.3
 
 - Small change of the /channel settings message

@@ -15,7 +15,7 @@ import com.kotlindiscord.kord.extensions.types.respond
 import de.jvstvshd.chillingfoxes.foxesbot.io.ChannelBarrier
 import de.jvstvshd.chillingfoxes.foxesbot.io.ChannelBarriersTable
 import de.jvstvshd.chillingfoxes.foxesbot.module.event.*
-import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.toLong
+import de.jvstvshd.chillingfoxes.foxesbot.util.long
 import dev.kord.common.entity.ChannelType
 import dev.kord.common.entity.Permission
 import dev.kord.core.behavior.channel.TextChannelBehavior
@@ -75,7 +75,7 @@ suspend fun EventModule.countdownStartCommand() = publicSlashCommand(::Countdown
     action {
         val channel = guild!!.getChannel(arguments.channel.id) as TextChannelBehavior
         val allowedChannels = newSuspendedTransaction {
-            ChannelBarrier.find { (ChannelBarriersTable.name eq COUNTDOWN_EVENT_NAME) and (ChannelBarriersTable.guildId eq guild!!.toLong()) }
+            ChannelBarrier.find { (ChannelBarriersTable.name eq COUNTDOWN_EVENT_NAME) and (ChannelBarriersTable.guildId eq guild!!.long) }
                 .map { it.channelId }
         }
         if (allowedChannels.isEmpty()) {
@@ -84,8 +84,8 @@ suspend fun EventModule.countdownStartCommand() = publicSlashCommand(::Countdown
             }
             return@action
         }
-        println(allowedChannels.contains(channel.fetchChannel().category?.toLong()))
-        if (!(allowedChannels.contains(channel.toLong()) || allowedChannels.contains(channel.fetchChannel().category?.toLong()))) {
+        println(allowedChannels.contains(channel.fetchChannel().category?.long))
+        if (!(allowedChannels.contains(channel.long) || allowedChannels.contains(channel.fetchChannel().category?.long))) {
             respond {
                 content = "Der Channel ist nicht zulässig."
             }
@@ -93,7 +93,7 @@ suspend fun EventModule.countdownStartCommand() = publicSlashCommand(::Countdown
         }
         val startValue = arguments.startValue
         val event = CountdownEvent(
-            CountdownEventData(channel, startValue, mutableMapOf(), LocalDateTime.now(), member?.toLong() ?: -1),
+            CountdownEventData(channel, startValue, mutableMapOf(), LocalDateTime.now(), member?.long ?: -1),
             config.configData,
             this@countdownStartCommand.kord
         )

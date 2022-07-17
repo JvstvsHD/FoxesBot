@@ -14,9 +14,9 @@ import de.jvstvshd.chillingfoxes.foxesbot.io.setupDatabase
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.ChannelFeature
 import de.jvstvshd.chillingfoxes.foxesbot.module.event.EventModule
-import de.jvstvshd.chillingfoxes.foxesbot.module.offlinechecker.OfflineCheckerModule
+import de.jvstvshd.chillingfoxes.foxesbot.module.presencecheck.PresenceCheckModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.status.StatusModule
-import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil.snowflake
+import de.jvstvshd.chillingfoxes.foxesbot.util.snowflake
 import dev.kord.common.entity.ActivityType
 import dev.kord.core.Kord
 import dev.kord.core.kordLogger
@@ -34,6 +34,7 @@ class FoxesBot {
         config.load()
         setupDatabase(config.configData.dataBaseData)
         val configVersion = config.configData.configVersion
+        kordLogger.debug("loaded configuration (version $configVersion)")
         if (configVersion != Config.configVersion) {
             kordLogger.info("config version update detected: $configVersion -> ${Config.configVersion}")
             config.configData.configVersion = Config.configVersion
@@ -43,7 +44,7 @@ class FoxesBot {
             extensions {
                 add { CoreModule(config) }
                 add { StatusModule(config) }
-                add { OfflineCheckerModule(config) }
+                add { PresenceCheckModule(config) }
                 add { EventModule(config) }
             }
             applicationCommands {
