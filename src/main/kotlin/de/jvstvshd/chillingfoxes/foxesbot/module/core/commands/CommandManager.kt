@@ -6,6 +6,7 @@
 package de.jvstvshd.chillingfoxes.foxesbot.module.core.commands
 
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
+import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.settingsCommand
 
 suspend fun CoreModule.commands() {
     infoCommand()

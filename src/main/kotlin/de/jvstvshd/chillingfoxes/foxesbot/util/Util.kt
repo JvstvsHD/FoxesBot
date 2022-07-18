@@ -6,6 +6,7 @@
 package de.jvstvshd.chillingfoxes.foxesbot.util
 
 import dev.kord.common.entity.ChannelType
+import kotlinx.datetime.Clock
 import kotlin.reflect.KProperty1
 
 @Suppress("UNCHECKED_CAST")
@@ -24,3 +25,5 @@ val guildChannelTypes = setOf<ChannelType>(
 )
 
 val threadChannelTypes = setOf(ChannelType.PrivateThread, ChannelType.PublicGuildThread, ChannelType.PublicNewsThread)
+
+fun now() = Clock.System.now()

@@ -12,7 +12,8 @@ import de.jvstvshd.chillingfoxes.foxesbot.config.Config
 import de.jvstvshd.chillingfoxes.foxesbot.config.data.ConfigData
 import de.jvstvshd.chillingfoxes.foxesbot.io.setupDatabase
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
-import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.ChannelFeature
+import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.channel.ChannelFeature
+import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.member.MemberFeature
 import de.jvstvshd.chillingfoxes.foxesbot.module.event.EventModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.presencecheck.PresenceCheckModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.status.StatusModule
@@ -94,8 +95,10 @@ class FoxesBot {
                     loadModule { single { config.configData } bind ConfigData::class }
                 }
                 setup {
-                    com.kotlindiscord.kord.extensions.utils.getKoin()
-                        .get<Kord>().cache.register(ChannelFeature.dataDescription)
+                    val cache =
+                        com.kotlindiscord.kord.extensions.utils.getKoin()
+                            .get<Kord>().cache
+                    cache.register(ChannelFeature.dataDescription, MemberFeature.dataDescription)
                 }
             }
 
