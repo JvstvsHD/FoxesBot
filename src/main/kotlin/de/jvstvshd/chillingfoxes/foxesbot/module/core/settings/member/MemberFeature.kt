@@ -5,8 +5,6 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.member
 
-import de.jvstvshd.chillingfoxes.foxesbot.io.ChannelSettings
-import de.jvstvshd.chillingfoxes.foxesbot.io.ChannelSettingsTable
 import de.jvstvshd.chillingfoxes.foxesbot.io.MemberSettings
 import de.jvstvshd.chillingfoxes.foxesbot.io.MemberSettingsTable
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.EntityFeature
@@ -39,11 +37,11 @@ class MemberFeature(
             features: List<MemberFeatureType<out EntityFeatureData<MemberBehavior>>>
         ) = newSuspendedTransaction {
             for (feature in features) {
-                ChannelSettings.new {
-                    this.channelId = member.long
+                MemberSettings.new {
+                    this.userId = member.long
                     this.guildId = member.guild.long
                     this.type = feature.id
-                    this.activated = false
+                    this.active = false
                 }
             }
             return@newSuspendedTransaction MemberFeature(
@@ -60,17 +58,17 @@ class MemberFeature(
         }
 
         override suspend fun query(entity: MemberBehavior): MemberFeature {
-            val channelId = entity.long
+            val userId = entity.long
             val guildId = entity.guild.long
             val features = mutableMapOf<MemberFeatureType<out EntityFeatureData<MemberBehavior>>, Boolean>()
             return newSuspendedTransaction {
                 val results =
-                    ChannelSettings.find { (ChannelSettingsTable.guildId eq guildId) and (ChannelSettingsTable.channelId eq channelId) }
+                    MemberSettings.find { (MemberSettingsTable.guildId eq guildId) and (MemberSettingsTable.userId eq userId) }
                 if (results.empty()) {
                     return@newSuspendedTransaction createFeature(entity)
                 } else {
                     results.onEach {
-                        features[MemberFeatureType.fromStringOrElseThrow(it.type)] = it.activated
+                        features[MemberFeatureType.fromStringOrElseThrow(it.type)] = it.active
                     }
                     return@newSuspendedTransaction MemberFeature(entity, features)
                 }
@@ -83,7 +81,7 @@ class MemberFeature(
             MemberSettings.find {
                 (MemberSettingsTable.guildId eq entity.guild.long) and
                         (MemberSettingsTable.userId eq entity.long) and
-                        (MemberSettingsTable.type eq feature.name)
+                        (MemberSettingsTable.type eq feature.id)
             }.onEach {
                 it.active = active
             }

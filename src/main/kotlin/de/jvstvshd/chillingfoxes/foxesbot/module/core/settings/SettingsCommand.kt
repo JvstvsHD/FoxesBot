@@ -254,11 +254,12 @@ context(CoreModule)
             guild!!.getChannel(arguments.channel.id)
         }
         entityName = {
-            asChannel().data.name.value ?: "unbekannt"
+            "Channel ${asChannel().data.name.value ?: "unbekannt"}"
         }
         featureFromString = {
             ChannelFeatureType.fromStringOrElseThrow(this)
         }
+        features.addAll(ChannelFeatureType.features)
     }
 
 context (CoreModule)
@@ -275,11 +276,12 @@ context (CoreModule)
             arguments.member
         }
         entityName = {
-            asMember().username
+            "Member ${asMember().username}"
         }
         featureFromString = {
             MemberFeatureType.fromStringOrElseThrow(this)
         }
+        features.addAll(MemberFeatureType.features)
     }
 
 context(CoreModule)
@@ -300,7 +302,7 @@ context(CoreModule)
                 val entity = entityGetter!!(this)
                 val message = respond {
                     embed {
-                        title = "Channel Einstellungen/Features für ${entityName!!(entity) ?: "?"}"
+                        title = "Einstellungen/Features für ${entityName!!(entity) ?: "?"}"
                         description = "Loading..."
                     }
                 }
@@ -308,13 +310,13 @@ context(CoreModule)
                     val entityFeature = featureBuilder!!(entity)
                     message.edit {
                         embed {
-                            title = "Channel Einstellungen/Features für ${entityName!!(entity) ?: "?"}"
+                            title = "Einstellungen/Features für ${entityName!!(entity) ?: "?"}"
                             selfAuthor()
                             description = entity.instanceOf("mention") ?: "angefordert von ${member?.mention}"
                             for ((feature, active) in entityFeature.features) {
                                 val emoji = (if (active) ":green" else ":red") + "_square:"
                                 field {
-                                    name = "$emoji ${feature.id}"
+                                    name = "$emoji ${feature.name}"
                                     value = feature.description
                                 }
                             }
@@ -340,7 +342,7 @@ context(CoreModule)
                             }
 
                             publicSelectMenu {
-                                for (feature in ChannelFeatureType.features) {
+                                for (feature in features) {
                                     option(feature.name, feature.id) { deferredAck = true }
                                 }
                                 minimumChoices = 1
@@ -390,4 +392,7 @@ class EntitySettingsSubCommandBuilder<A : Arguments, ENTITY : KordEntity, TYPE :
 
     private var _featureFromString: Optional<String.() -> TYPE> = Optional.Missing()
     var featureFromString by ::_featureFromString.delegate()
+
+    private var _features: MutableList<TYPE> = mutableListOf()
+    var features by ::_features
 }

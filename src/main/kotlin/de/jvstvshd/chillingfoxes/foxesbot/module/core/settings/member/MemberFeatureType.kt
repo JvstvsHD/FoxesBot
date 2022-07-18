@@ -21,7 +21,8 @@ sealed class MemberFeatureType<T : EntityFeatureData<MemberBehavior>>(override v
 
     companion object {
 
-        val features: List<MemberFeatureType<EntityFeatureData<MemberBehavior>>> = listOf()
+        val features: List<MemberFeatureType<EntityFeatureData<MemberBehavior>>> =
+            listOf(SuppressPresenceCheck, BotAdmin)
 
         fun fromStringOrElseThrow(type: String): MemberFeatureType<out EntityFeatureData<MemberBehavior>> =
             fromString(type) ?: error("unknown channel feature type $type")

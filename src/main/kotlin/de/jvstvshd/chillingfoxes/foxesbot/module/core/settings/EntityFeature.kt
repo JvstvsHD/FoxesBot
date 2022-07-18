@@ -26,7 +26,7 @@ abstract class EntityFeature<out ENTITY : KordEntity, TYPE : EntityFeatureType<E
             if (queryItem != null) {
                 return completed(queryItem, kord.cache)
             }
-            return query(entity)
+            return completed(query(entity), kord.cache, true)
         }
 
         private suspend fun completed(
