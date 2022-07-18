@@ -1,3 +1,10 @@
+## 1.4.5
+
+- Migrate /suppress command to new added member settings (/settings member, similar to /settings channel)
+- abstract EntitySettings (currently channel and member settings)
+- add /settings extra and eval commands to run some extra functions/external code more convenient and without updating
+  the bot
+
 ## 1.4.4
 
 - Re-implement presence check (former offline checker): user gets kicked if they join a channel with presence status set

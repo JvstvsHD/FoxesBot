@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "de.jvstvshd.chillingfoxes"
-version = "1.4.4"
+version = "1.4.5"
 
 val log4jVersion = "2.18.0"
 val exposedVersion = "0.38.2"
@@ -49,6 +49,7 @@ dependencies {
     implementation("org.kohsuke:github-api:1.307")
     implementation("org.jsoup:jsoup:1.15.2")
     implementation("com.notkamui.libs:keval:0.8.0")
+    runtimeOnly(kotlin("scripting-jsr223"))
 
     //JUnit
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")

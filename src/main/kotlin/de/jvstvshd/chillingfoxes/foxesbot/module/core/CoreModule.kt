@@ -9,7 +9,7 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import de.jvstvshd.chillingfoxes.foxesbot.config.Config
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.commands.commands
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.music.MusicService
-import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.createMessageEvent
+import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.channel.createMessageEvent
 
 class CoreModule(val config: Config) : Extension() {
 

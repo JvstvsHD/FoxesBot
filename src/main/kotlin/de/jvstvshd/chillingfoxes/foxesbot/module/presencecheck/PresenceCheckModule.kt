@@ -12,8 +12,10 @@ import com.kotlindiscord.kord.extensions.utils.hasRole
 import de.jvstvshd.chillingfoxes.foxesbot.config.Config
 import de.jvstvshd.chillingfoxes.foxesbot.io.MemberSettings
 import de.jvstvshd.chillingfoxes.foxesbot.io.MemberSettingsTable
-import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.ChannelFeature
-import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.ChannelFeatureType
+import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.channel.ChannelFeature
+import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.channel.ChannelFeatureType
+import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.member.MemberFeature
+import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.member.MemberFeatureType
 import de.jvstvshd.chillingfoxes.foxesbot.util.*
 import dev.kord.common.entity.PresenceStatus
 import dev.kord.core.entity.Member
@@ -49,7 +51,6 @@ class PresenceCheckModule(
 
     override suspend fun setup() {
         kordLogger.warn("The functionality of the offline checker module is temporarily not available")
-        suppressCommand()
         event<VoiceStateUpdateEvent> {
             action {
                 val state = event.state
@@ -165,13 +166,14 @@ suspend fun Member.shouldMemberBeSkipped(): Boolean {
             kordLogger.info { "Skipping presence check for member $asString due to exception: $e" }
             return true
         } ?: return true
-    //TODO caching
-    if (newSuspendedTransaction {
-            MemberSettings.find { (MemberSettingsTable.userId eq long) and (MemberSettingsTable.guildId eq guild.long) and (MemberSettingsTable.type eq SUPPRESS_PRESENCE_CHECK_TYPE) }
-                .singleOrNull() != null
-        }) {
-        return true
-    }
+    val memberFeatures = MemberFeature.feature(this)
+    if (memberFeatures.isFeatureEnabled(MemberFeatureType.SuppressPresenceCheck))
+        if (newSuspendedTransaction {
+                MemberSettings.find { (MemberSettingsTable.userId eq long) and (MemberSettingsTable.guildId eq guild.long) and (MemberSettingsTable.type eq SUPPRESS_PRESENCE_CHECK_TYPE) }
+                    .singleOrNull() != null
+            }) {
+            return true
+        }
     if (newSuspendedTransaction {
             MemberSettings.find { (MemberSettingsTable.type eq SUPPRESS_PRESENCE_CHECK_ROLE_TYPE) and (MemberSettingsTable.guildId eq guild.long) }
                 .map { hasRole(guild.getRole(it.userId.snowflake)) }.isNotEmpty()

@@ -3,25 +3,28 @@
  * This file is part of the FoxesBot, a discord bot for the Chilling Foxes Discord (https://discord.gg/K5rhddJtyW), which is licensed under the MIT license. The full version is located in the LICENSE file (top level directory)
  */
 
-package de.jvstvshd.chillingfoxes.foxesbot.module.core.settings
+package de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.channel
 
 import com.kotlindiscord.kord.extensions.utils.hasPermission
+import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.EntityFeatureData
+import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.EntityFeatureType
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Permissions
 import dev.kord.core.behavior.MessageBehavior
-import dev.kord.core.behavior.channel.ChannelBehavior
 import dev.kord.core.behavior.channel.GuildChannelBehavior
 import dev.kord.core.behavior.channel.TopGuildChannelBehavior
 import dev.kord.core.behavior.channel.editMemberPermission
 import dev.kord.core.event.Event
 import dev.kord.core.event.message.MessageCreateEvent
 
-sealed class ChannelFeatureType<T : ChannelFeatureData>(val name: String) {
+sealed class ChannelFeatureType<T : EntityFeatureData<GuildChannelBehavior>>(override val id: String) :
+    EntityFeatureType<T, GuildChannelBehavior> {
 
     companion object {
-        val features = listOf(Barrier, OneMessage)
+        val features = listOf(Barrier, OneMessage, SuppressPresenceCheck)
 
-        fun fromString(name: String) = features.find { it.name == name.lowercase() }
+        fun fromString(name: String): ChannelFeatureType<out ChannelFeatureData>? =
+            features.find { it.id == name.lowercase() }
 
         fun fromStringOrElseThrow(name: String) =
             fromString(name) ?: throw IllegalArgumentException("unknown channel feature type $name")
@@ -36,9 +39,13 @@ sealed class ChannelFeatureType<T : ChannelFeatureData>(val name: String) {
     protected inline fun <reified T : Event> asEvent(event: Event) = if (event is T) event else null
 
     object Barrier : ChannelFeatureType<ChannelFeatureData>("channel_barrier") {
-        override suspend fun handle(data: ChannelFeatureData) {
-            TODO("Not yet implemented")
-        }
+
+        override val name: String
+            get() = "ChannelBarrier"
+        override val description: String
+            get() = "Aktionen, die nur in einem Channel (einer Kategorie) ausgeführt werden sollen"
+
+        override suspend fun handle(data: ChannelFeatureData) {}
 
         override suspend fun createData(event: Event): ChannelFeatureData? {
             val e = asEvent<MessageCreateEvent>(event) ?: return null
@@ -50,13 +57,14 @@ sealed class ChannelFeatureType<T : ChannelFeatureData>(val name: String) {
 
     object OneMessage : ChannelFeatureType<MessageChannelFeatureData>("one_message") {
 
+        override val name: String
+            get() = "OneMessage"
+        override val description: String
+            get() = "Es kann nur eine Nachricht pro User gesendet werden"
+
         override suspend fun handle(data: MessageChannelFeatureData) {
-            val channel = data.channel
+            val channel = data.entity
             val message = data.message.asMessage()
-            val channelFeature = ChannelFeature.feature(channel)
-            if (!channelFeature.isFeatureEnabled(OneMessage)) {
-                return
-            }
             val author = message.getAuthorAsMember() ?: return
             if (author.hasPermission(Permission.Administrator) || author.isBot) {
                 return
@@ -76,20 +84,21 @@ sealed class ChannelFeatureType<T : ChannelFeatureData>(val name: String) {
 
     object SuppressPresenceCheck : ChannelFeatureType<ChannelFeatureData>("suppress_presence_check") {
 
+        override val name: String
+            get() = "Präsenz-Status Check: Unterdrückung"
+        override val description: String
+            get() = "Ausnahme des Channels vom Präsenz-Status Check"
+
         override suspend fun createData(event: Event): ChannelFeatureData? = null
     }
 }
 
-interface ChannelFeatureData {
-    val channel: GuildChannelBehavior
-}
+typealias ChannelFeatureData = EntityFeatureData<GuildChannelBehavior>
 
 fun ChannelFeatureData(channel: GuildChannelBehavior) = object : ChannelFeatureData {
-    override val channel: GuildChannelBehavior
+    override val entity: GuildChannelBehavior
         get() = channel
 }
 
-open class MessageChannelFeatureData(override val channel: TopGuildChannelBehavior, open val message: MessageBehavior) :
+open class MessageChannelFeatureData(override val entity: TopGuildChannelBehavior, open val message: MessageBehavior) :
     ChannelFeatureData
-
-inline fun <reified T : ChannelBehavior> ChannelBehavior.castChannel(): T? = if (this is T) this else null

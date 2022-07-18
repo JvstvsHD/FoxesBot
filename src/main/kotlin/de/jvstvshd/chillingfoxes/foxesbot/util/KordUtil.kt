@@ -6,8 +6,11 @@
 package de.jvstvshd.chillingfoxes.foxesbot.util
 
 import com.kotlindiscord.kord.extensions.checks.hasPermission
+import com.kotlindiscord.kord.extensions.checks.memberFor
 import com.kotlindiscord.kord.extensions.checks.types.CheckContext
 import com.kotlindiscord.kord.extensions.utils.getKoin
+import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.member.MemberFeature
+import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.member.MemberFeatureType
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
@@ -71,5 +74,16 @@ val Snowflake.long
 val Member.asString
     get() = "$username/$id"
 
-//TODO member/role settings
-suspend fun CheckContext<*>.isPermitted(perm: Permission) = hasPermission(perm)
+suspend fun CheckContext<*>.isPermitted(perm: Permission) {
+    val member = memberFor(event)
+    if (member == null) {
+        fail("Unknown member")
+        return
+    }
+    val feature = MemberFeature.feature(member)
+    if (feature.isFeatureEnabled(MemberFeatureType.BotAdmin)) {
+        pass()
+        return
+    }
+    hasPermission(perm)
+}
