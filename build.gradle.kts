@@ -8,7 +8,7 @@ plugins {
 group = "de.jvstvshd.chillingfoxes"
 version = "1.4.5"
 
-val log4jVersion = "2.18.0"
+val log4jVersion = "2.19.0"
 val exposedVersion = "0.38.2"
 
 repositories {
