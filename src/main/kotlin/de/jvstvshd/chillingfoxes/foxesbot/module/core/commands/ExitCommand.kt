@@ -33,7 +33,7 @@ suspend fun CoreModule.exitCommand() = publicSlashCommand {
                     try {
                         extension.onShutdown()
                     } catch (e: Exception) {
-                        kordLogger.error("Execution for shutdown task ${extension.javaClass.name} failed: $e")
+                        kordLogger.error("Execution for shutdown task ${extension.javaClass.name} failed", e)
                     }
                 }
             }
@@ -49,6 +49,7 @@ suspend fun CoreModule.exitCommand() = publicSlashCommand {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        bot.stop()
         this@exitCommand.kord.shutdown()
         exitProcess(0)
     }

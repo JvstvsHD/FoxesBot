@@ -12,6 +12,10 @@ data class DataBaseData(
     val username: String = "root",
     val database: String = "foxes_bot",
     val port: String = "3306",
-    val maxPoolSize: Int = 10,
-    val minimumIdle: Int = 2
-)
+    val properties: MutableMap<String, String> = mutableMapOf(Pair("maxPoolSize", "10"), Pair("minIdle", "5"))
+) {
+    fun fullProperties() = properties.apply {
+        this["user"] = username
+        this["password"] = password
+    }
+}

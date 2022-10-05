@@ -20,12 +20,13 @@ import kotlin.io.path.outputStream
 class Config(private val path: Path = Path.of("config.json")) {
 
     companion object {
-        const val configVersion: Int = 1
+        const val configVersion: Int = 2
     }
 
     private val json: Json = Json {
         prettyPrint = true
         encodeDefaults = true
+        ignoreUnknownKeys = true
     }
     lateinit var configData: ConfigData
 
