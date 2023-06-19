@@ -47,7 +47,7 @@ dependencies {
     //some other stuff
     implementation("org.kohsuke:github-api:1.313")
     implementation("org.jsoup:jsoup:1.15.3")
-    implementation("com.notkamui.libs:keval:0.8.0")
+    implementation("com.notkamui.libs:keval:0.9.0")
     runtimeOnly(kotlin("scripting-jsr223"))
 
     //JUnit
