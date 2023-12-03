@@ -25,7 +25,7 @@ repositories {
 
 dependencies {
     //discord
-    implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.5-SNAPSHOT")
+    implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.6.0")
     implementation("com.sedmelluq:lavaplayer:1.3.78")
     implementation("dev.kord:kord-voice:0.8.0-M16")
 
