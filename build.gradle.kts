@@ -9,7 +9,7 @@ group = "de.jvstvshd.chillingfoxes"
 version = "1.4.5"
 
 val log4jVersion = "2.19.0"
-val exposedVersion = "0.40.1"
+val exposedVersion = "0.56.0"
 
 repositories {
     mavenCentral()
