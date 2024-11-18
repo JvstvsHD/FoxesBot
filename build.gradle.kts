@@ -36,7 +36,7 @@ dependencies {
 
     //database
     implementation("org.mariadb.jdbc:mariadb-java-client:3.0.8")
-    implementation("com.zaxxer:HikariCP:5.0.1")
+    implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.mybatis:mybatis:3.5.11")
 
     //Exposed
