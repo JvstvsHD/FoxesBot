@@ -35,7 +35,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.16")
 
     //database
-    implementation("org.mariadb.jdbc:mariadb-java-client:3.0.8")
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.5.0")
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.mybatis:mybatis:3.5.16")
 
