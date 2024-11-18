@@ -32,7 +32,7 @@ dependencies {
     //logging
     implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
-    implementation("org.slf4j:slf4j-api:2.0.3")
+    implementation("org.slf4j:slf4j-api:2.0.16")
 
     //database
     implementation("org.mariadb.jdbc:mariadb-java-client:3.0.8")
