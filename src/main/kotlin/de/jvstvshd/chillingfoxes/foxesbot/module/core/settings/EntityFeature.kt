@@ -5,11 +5,11 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.module.core.settings
 
-import com.kotlindiscord.kord.extensions.utils.getKoin
 import dev.kord.cache.api.DataCache
 import dev.kord.cache.api.Query
 import dev.kord.core.Kord
 import dev.kord.core.entity.KordEntity
+import dev.kordex.core.utils.getKoin
 
 abstract class EntityFeature<out ENTITY : KordEntity, TYPE : EntityFeatureType<EntityFeatureData<out ENTITY>, out ENTITY>>(
     open val entity: ENTITY,

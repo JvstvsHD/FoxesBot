@@ -5,9 +5,9 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.util
 
-import com.kotlindiscord.kord.extensions.utils.getKoin
 import dev.kord.core.Kord
 import dev.kord.core.behavior.channel.TextChannelBehavior
+import dev.kordex.core.utils.getKoin
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.serializers.LocalDateTimeIso8601Serializer
 import kotlinx.datetime.toJavaLocalDateTime

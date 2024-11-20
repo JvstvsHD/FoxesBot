@@ -5,16 +5,15 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.module.status
 
-import com.kotlindiscord.kord.extensions.extensions.Extension
 import de.jvstvshd.chillingfoxes.foxesbot.config.Config
 import de.jvstvshd.chillingfoxes.foxesbot.module.status.provider.IssueStatusProvider
 import de.jvstvshd.chillingfoxes.foxesbot.module.status.provider.StatusPageProvider
 import de.jvstvshd.chillingfoxes.foxesbot.module.status.provider.StatusProvider
+import dev.kordex.core.extensions.Extension
 
 class StatusModule(private val config: Config) : Extension() {
 
     override val name = "status"
-    override val bundle = "status"
 
     override suspend fun setup() {
         statusCommand()
@@ -30,7 +29,7 @@ class StatusModule(private val config: Config) : Extension() {
     fun createProviderFromUncheckedUrl(url: String): StatusProvider {
         return try {
             createProvider(url, "status_page")
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             createProvider(url, "issue_status")
         }
     }

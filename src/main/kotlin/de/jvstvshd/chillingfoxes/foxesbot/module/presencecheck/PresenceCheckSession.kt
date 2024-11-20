@@ -5,8 +5,8 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.module.presencecheck
 
-import com.kotlindiscord.kord.extensions.utils.dm
 import de.jvstvshd.chillingfoxes.foxesbot.config.data.ConfigData
+import de.jvstvshd.chillingfoxes.foxesbot.logger
 import de.jvstvshd.chillingfoxes.foxesbot.util.Colors
 import de.jvstvshd.chillingfoxes.foxesbot.util.asString
 import de.jvstvshd.chillingfoxes.foxesbot.util.selfAuthor
@@ -14,9 +14,8 @@ import dev.kord.common.entity.PresenceStatus
 import dev.kord.core.behavior.edit
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.Message
-import dev.kord.core.kordLogger
-import dev.kord.rest.builder.message.create.embed
-import dev.kord.rest.builder.message.modify.embed
+import dev.kord.rest.builder.message.embed
+import dev.kordex.core.utils.dm
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -83,7 +82,7 @@ class PresenceCheckSession(
         member.edit {
             voiceChannelId = null
         }
-        kordLogger.info { "kicked member ${member.asString} due to offline/invisible presence status" }
+        logger.info { "kicked member ${member.asString} due to offline/invisible presence status" }
     }
 
     fun cancel() = job?.cancel()

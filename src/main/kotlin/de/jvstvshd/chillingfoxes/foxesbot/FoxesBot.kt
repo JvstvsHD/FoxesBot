@@ -5,9 +5,6 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot
 
-import com.kotlindiscord.kord.extensions.ExtensibleBot
-import com.kotlindiscord.kord.extensions.i18n.SupportedLocales
-import com.kotlindiscord.kord.extensions.utils.loadModule
 import de.jvstvshd.chillingfoxes.foxesbot.config.Config
 import de.jvstvshd.chillingfoxes.foxesbot.config.data.ConfigData
 import de.jvstvshd.chillingfoxes.foxesbot.io.setupDatabase
@@ -20,12 +17,18 @@ import de.jvstvshd.chillingfoxes.foxesbot.module.status.StatusModule
 import de.jvstvshd.chillingfoxes.foxesbot.util.snowflake
 import dev.kord.common.entity.ActivityType
 import dev.kord.core.Kord
-import dev.kord.core.kordLogger
 import dev.kord.core.supplier.EntitySupplyStrategy
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
+import dev.kordex.core.ExtensibleBot
+import dev.kordex.core.i18n.SupportedLocales
+import dev.kordex.core.utils.getKoin
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.koin.dsl.bind
+import org.koin.dsl.module
 import java.io.File
+
+val logger = KotlinLogging.logger("FoxesBot")
 
 class FoxesBot {
 
@@ -35,9 +38,9 @@ class FoxesBot {
         config.load()
         setupDatabase(config.configData.dataBaseData)
         val configVersion = config.configData.configVersion
-        kordLogger.debug("loaded configuration (version $configVersion)")
+        logger.debug { "loaded configuration (version $configVersion)" }
         if (configVersion != Config.configVersion) {
-            kordLogger.info("config version update detected: $configVersion -> ${Config.configVersion}")
+            logger.info { "config version update detected: $configVersion -> ${Config.configVersion}" }
             config.configData.configVersion = Config.configVersion
             config.save()
         }
@@ -75,7 +78,7 @@ class FoxesBot {
                 status = presence.status
                 val name = presence.name
                 when (presence.activityType) {
-                    ActivityType.Unknown, ActivityType.Custom -> return@presence
+                    is ActivityType.Unknown, ActivityType.Custom -> return@presence
                     ActivityType.Game -> playing(name)
                     ActivityType.Streaming -> streaming(name, presence.url!!)
                     ActivityType.Listening -> listening(name)
@@ -92,12 +95,11 @@ class FoxesBot {
 
             hooks {
                 afterKoinSetup {
-                    loadModule { single { config.configData } bind ConfigData::class }
+                    val module = module { single { config.configData } bind ConfigData::class }
+                    getKoin().loadModules(listOf(module))
                 }
                 setup {
-                    val cache =
-                        com.kotlindiscord.kord.extensions.utils.getKoin()
-                            .get<Kord>().cache
+                    val cache = getKoin().get<Kord>().cache
                     cache.register(ChannelFeature.dataDescription, MemberFeature.dataDescription)
                 }
             }

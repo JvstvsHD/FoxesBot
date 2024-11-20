@@ -5,7 +5,6 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.channel
 
-import com.kotlindiscord.kord.extensions.utils.hasPermission
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.EntityFeatureData
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.EntityFeatureType
 import dev.kord.common.entity.Permission
@@ -16,6 +15,7 @@ import dev.kord.core.behavior.channel.TopGuildChannelBehavior
 import dev.kord.core.behavior.channel.editMemberPermission
 import dev.kord.core.event.Event
 import dev.kord.core.event.message.MessageCreateEvent
+import dev.kordex.core.utils.hasPermission
 
 sealed class ChannelFeatureType<T : EntityFeatureData<GuildChannelBehavior>>(override val id: String) :
     EntityFeatureType<T, GuildChannelBehavior> {
@@ -36,7 +36,7 @@ sealed class ChannelFeatureType<T : EntityFeatureData<GuildChannelBehavior>>(ove
 
     abstract suspend fun createData(event: Event): T?
 
-    protected inline fun <reified T : Event> asEvent(event: Event) = if (event is T) event else null
+    protected inline fun <reified T : Event> asEvent(event: Event) = event as? T
 
     object Barrier : ChannelFeatureType<ChannelFeatureData>("channel_barrier") {
 
@@ -65,7 +65,7 @@ sealed class ChannelFeatureType<T : EntityFeatureData<GuildChannelBehavior>>(ove
         override suspend fun handle(data: MessageChannelFeatureData) {
             val channel = data.entity
             val message = data.message.asMessage()
-            val author = message.getAuthorAsMember() ?: return
+            val author = message.getAuthorAsMemberOrNull() ?: return
             if (author.hasPermission(Permission.Administrator) || author.isBot) {
                 return
             }

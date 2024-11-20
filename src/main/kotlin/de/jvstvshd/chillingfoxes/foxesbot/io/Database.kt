@@ -20,7 +20,7 @@ suspend fun setupDatabase(dataBaseData: DataBaseData) {
 suspend fun initDatabase() = newSuspendedTransaction {
     SchemaUtils.create(
         StatusAliasesTable,
-        ChannelBarriersTable,
+        //ChannelBarriersTable,
         MusicTable,
         EventDataTable,
         ChannelSettingsTable,

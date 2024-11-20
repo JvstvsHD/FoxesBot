@@ -5,14 +5,12 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.module.event
 
-import com.kotlindiscord.kord.extensions.commands.application.slash.converters.ChoiceEnum
-import com.kotlindiscord.kord.extensions.utils.dm
-import com.kotlindiscord.kord.extensions.utils.respond
 import com.notkamui.keval.KevalException
 import com.notkamui.keval.keval
 import de.jvstvshd.chillingfoxes.foxesbot.config.data.ConfigData
 import de.jvstvshd.chillingfoxes.foxesbot.io.EventData
 import de.jvstvshd.chillingfoxes.foxesbot.io.EventDataTable
+import de.jvstvshd.chillingfoxes.foxesbot.logger
 import de.jvstvshd.chillingfoxes.foxesbot.util.*
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
@@ -20,8 +18,11 @@ import dev.kord.core.behavior.channel.TextChannelBehavior
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.entity.Message
 import dev.kord.core.entity.channel.TextChannel
-import dev.kord.core.kordLogger
-import dev.kord.rest.builder.message.create.embed
+import dev.kord.rest.builder.message.embed
+import dev.kordex.core.commands.application.slash.converters.ChoiceEnum
+import dev.kordex.core.i18n.types.Key
+import dev.kordex.core.utils.dm
+import dev.kordex.core.utils.respond
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.sync.Mutex
@@ -61,9 +62,9 @@ class CountdownEvent(
     private fun serialize() = Json.encodeToString(data)
 
     suspend fun save() {
-        kordLogger.info("attempting to save countdown event for channel ${data.channel.asChannel().name} in guild ${data.channel.guild.asGuild().name}")
+        logger.info("attempting to save countdown event for channel ${data.channel.asChannel().name} in guild ${data.channel.guild.asGuild().name}")
         if (data.count == 0L || !shouldBeSaved) {
-            kordLogger.info("skipping saving for ${data.channel.asChannel().name}. shouldBeSaved: $shouldBeSaved")
+            logger.info("skipping saving for ${data.channel.asChannel().name}. shouldBeSaved: $shouldBeSaved")
             return
         }
         try {
@@ -146,7 +147,7 @@ class CountdownEvent(
         val transmitted: Long
         try {
             transmitted = raw.keval().roundToLong()
-        } catch (e: KevalException) {
+        } catch (_: KevalException) {
             return null
         }
         message.respond {
@@ -319,7 +320,7 @@ data class CountdownEventData(
 
 @Suppress("unused")
 @Serializable
-enum class CountdownResetState(val value: Long, override val readableName: String) : ChoiceEnum {
+enum class CountdownResetState(val value: Long, override val readableName: Key) : ChoiceEnum {
 
     TENS_RESET_STATE(10, "Nächster Zehner"),
     HUNDREDS_RESET_STATE(100, "Nächster Hunderter"),
@@ -330,6 +331,8 @@ enum class CountdownResetState(val value: Long, override val readableName: Strin
     BILLIONS_RESET_STATE(1_000_000_000, "Nächste Milliarde (ich übertreib' doch nicht)"),
     TRILLIONS_RESET_STATE(1_000_000_000_000L, "Nächste Billion (ne, echt nicht)"),
     QUADRILLIONS_RESET_STATE(1_000_000_000_000_000L, "Nächste Billiarde (...)");
+
+    constructor(value: Long, readableName: String) : this(value, Key(readableName))
 }
 
 @Serializable

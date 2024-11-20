@@ -5,13 +5,10 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.module.presencecheck
 
-import com.kotlindiscord.kord.extensions.extensions.Extension
-import com.kotlindiscord.kord.extensions.extensions.event
-import com.kotlindiscord.kord.extensions.utils.dm
-import com.kotlindiscord.kord.extensions.utils.hasRole
 import de.jvstvshd.chillingfoxes.foxesbot.config.Config
 import de.jvstvshd.chillingfoxes.foxesbot.io.MemberSettings
 import de.jvstvshd.chillingfoxes.foxesbot.io.MemberSettingsTable
+import de.jvstvshd.chillingfoxes.foxesbot.logger
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.channel.ChannelFeature
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.channel.ChannelFeatureType
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.member.MemberFeature
@@ -23,10 +20,12 @@ import dev.kord.core.entity.Message
 import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.user.PresenceUpdateEvent
 import dev.kord.core.event.user.VoiceStateUpdateEvent
-import dev.kord.core.kordLogger
 import dev.kord.rest.builder.message.create.MessageCreateBuilder
-import dev.kord.rest.builder.message.create.embed
-import io.ktor.util.logging.*
+import dev.kord.rest.builder.message.embed
+import dev.kordex.core.extensions.Extension
+import dev.kordex.core.extensions.event
+import dev.kordex.core.utils.dm
+import dev.kordex.core.utils.hasRole
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -47,10 +46,9 @@ class PresenceCheckModule(
     }
 
     override val name = "presence_check"
-    override val bundle = "presence_check"
 
     override suspend fun setup() {
-        kordLogger.warn("The functionality of the offline checker module is temporarily not available")
+        logger.warn { "The functionality of the offline checker module is temporarily not available" }
         event<VoiceStateUpdateEvent> {
             action {
                 val state = event.state
@@ -84,7 +82,7 @@ class PresenceCheckModule(
     }
 
     private suspend fun checkMember(member: Member) {
-        kordLogger.debug("Performing presence check for member ${member.username} (${member.id})")
+        logger.debug { "Performing presence check for member ${member.username} (${member.id})" }
         val presence = member.getPresenceOrNull()
         if (member.shouldMemberBeSkipped()) {
             return
@@ -99,10 +97,10 @@ class PresenceCheckModule(
             else -> return
         }
         if (message == null) {
-            kordLogger.warn("member ${member.asString} has DMs disabled")
+            logger.warn { "member ${member.asString} has DMs disabled" }
         }
         startNewSession(member, message)
-        kordLogger.info { "presence check for member ${member.asString} failed" }
+        logger.info { "presence check for member ${member.asString} failed" }
     }
 
     private suspend fun MessageCreateBuilder.presenceNull() {
@@ -162,8 +160,7 @@ suspend fun Member.shouldMemberBeSkipped(): Boolean {
                 null
             }
         } catch (e: Exception) {
-            kordLogger.error(e)
-            kordLogger.info { "Skipping presence check for member $asString due to exception: $e" }
+            logger.error(e) { "Skipping presence check for member $asString due to exception" }
             return true
         } ?: return true
     val memberFeatures = MemberFeature.feature(this)
@@ -178,7 +175,7 @@ suspend fun Member.shouldMemberBeSkipped(): Boolean {
             MemberSettings.find { (MemberSettingsTable.type eq SUPPRESS_PRESENCE_CHECK_ROLE_TYPE) and (MemberSettingsTable.guildId eq guild.long) }
                 .map { hasRole(guild.getRole(it.userId.snowflake)) }.isNotEmpty()
         }) {
-        kordLogger.debug { "found role!" }
+        logger.debug { "found role!" }
         return true
     }
     return ChannelFeature.feature(channel).isFeatureEnabled(ChannelFeatureType.SuppressPresenceCheck)

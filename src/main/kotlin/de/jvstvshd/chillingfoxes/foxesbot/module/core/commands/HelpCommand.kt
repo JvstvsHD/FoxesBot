@@ -5,33 +5,36 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.module.core.commands
 
-import com.kotlindiscord.kord.extensions.commands.application.slash.SlashCommand
-import com.kotlindiscord.kord.extensions.commands.chat.ChatCommand
-import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
-import com.kotlindiscord.kord.extensions.types.respond
+
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
-import de.jvstvshd.chillingfoxes.foxesbot.util.KordUtil
+import de.jvstvshd.chillingfoxes.foxesbot.util.selfAuthor
 import dev.kord.core.supplier.EntitySupplyStrategy
 import dev.kord.rest.builder.message.EmbedBuilder
+import dev.kordex.core.commands.application.slash.SlashCommand
+import dev.kordex.core.commands.chat.ChatCommand
+import dev.kordex.core.extensions.publicSlashCommand
+import dev.kordex.core.i18n.types.Key
 
 suspend fun CoreModule.helpCommand() = publicSlashCommand {
-    name = "help"
-    description = translationsProvider.get("command.help.description", bundleName = "core")
+    name = Key("help")
+    description = Key("command.help.description")
     val kord = kord
     action {
         respond {
             val chatCommands = mutableListOf<ChatCommand<*>>()
-            val slashCommands = mutableListOf<SlashCommand<*, *>>()
+            val slashCommands = mutableListOf<SlashCommand<*, *, *>>()
             for (value in bot.extensions.values) {
                 chatCommands.addAll(value.chatCommands)
                 slashCommands.addAll(value.slashCommands)
             }
             val builder = EmbedBuilder()
-            builder.author = KordUtil.createAuthor(kord)
+            builder.selfAuthor()
             builder.title = "FoxesBot - Hilfe"
             builder.url = "https://github.com/JvstvsHD/FoxesBot"
-            builder.thumbnail {
-                url = kord.getSelf(EntitySupplyStrategy.cacheWithCachingRestFallback).avatar?.url.toString()
+            kord.getSelf(EntitySupplyStrategy.cacheWithCachingRestFallback).avatar?.cdnUrl?.toUrl()?.let {
+                builder.thumbnail {
+                    url = it
+                }
             }
             builder.description = "äh ja was"
             val stringBuilder = StringBuilder()
@@ -43,7 +46,7 @@ suspend fun CoreModule.helpCommand() = publicSlashCommand {
                 stringBuilder.append("**" + config.configData.baseData.prefix + chatCommand.name + "**: " + chatCommand.description + "\n")
             }
             builder.description = stringBuilder.toString()
-            embeds.add(builder)
+            embeds?.add(builder)
         }
     }
 }

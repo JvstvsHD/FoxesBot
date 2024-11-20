@@ -5,13 +5,13 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.module.core.commands
 
-import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
-import com.kotlindiscord.kord.extensions.types.respond
+import de.jvstvshd.chillingfoxes.foxesbot.logger
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
 import de.jvstvshd.chillingfoxes.foxesbot.util.ShutdownTask
 import de.jvstvshd.chillingfoxes.foxesbot.util.isPermitted
 import dev.kord.common.entity.Permission
-import dev.kord.core.kordLogger
+import dev.kordex.core.extensions.publicSlashCommand
+import dev.kordex.core.i18n.types.Key
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.time.DurationFormatUtils
 import kotlin.concurrent.thread
@@ -21,8 +21,8 @@ import kotlin.time.measureTime
 
 @OptIn(ExperimentalTime::class)
 suspend fun CoreModule.exitCommand() = publicSlashCommand {
-    name = "exit"
-    description = "Exits the bot."
+    name = Key("exit")
+    description = Key("Exits the bot.")
     check {
         isPermitted(Permission.ManageGuild)
     }
@@ -33,7 +33,7 @@ suspend fun CoreModule.exitCommand() = publicSlashCommand {
                     try {
                         extension.onShutdown()
                     } catch (e: Exception) {
-                        kordLogger.error("Execution for shutdown task ${extension.javaClass.name} failed", e)
+                        logger.error(e) { "Execution for shutdown task ${extension.javaClass.name} failed" }
                     }
                 }
             }
@@ -44,8 +44,8 @@ suspend fun CoreModule.exitCommand() = publicSlashCommand {
                     DurationFormatUtils.formatDurationHMS(duration.inWholeMilliseconds)
                 }"
             }
-            kordLogger.debug("Shutdown tasks took ${duration.inWholeMilliseconds}ms to finish.")
-            kordLogger.debug("Shutdown initiated")
+            logger.debug { "Shutdown tasks took ${duration.inWholeMilliseconds}ms to finish." }
+            logger.debug { "Shutdown initiated" }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -56,8 +56,8 @@ suspend fun CoreModule.exitCommand() = publicSlashCommand {
 }
 
 suspend fun CoreModule.restartCommand() = publicSlashCommand {
-    name = "restart"
-    description = "Startet den Bot neu"
+    name = Key("restart")
+    description = Key("Startet den Bot neu")
     check {
         isPermitted(Permission.ManageGuild)
     }
@@ -65,7 +65,7 @@ suspend fun CoreModule.restartCommand() = publicSlashCommand {
         respond {
             content = "Der Bot startet neu... Dies kann einen Moment dauern."
         }
-        kordLogger.debug("Restart initiated")
+        logger.debug { "Restart initiated" }
         this@restartCommand.kord.shutdown()
         Runtime.getRuntime().addShutdownHook(thread(start = false, isDaemon = true, name = "Foxes Bot Restart Thread") {
             if (System.getProperty("os.name").lowercase().contains("win")) {
@@ -74,7 +74,7 @@ suspend fun CoreModule.restartCommand() = publicSlashCommand {
                         content = "OS: Windows: Bot kann nicht neugestartet werden."
                     }
                 }
-                kordLogger.warn("Cannot restart bot on windows.")
+                logger.warn { "Cannot restart bot on windows." }
                 exitProcess(0)
             }
             Runtime.getRuntime().exec("sh start.sh")

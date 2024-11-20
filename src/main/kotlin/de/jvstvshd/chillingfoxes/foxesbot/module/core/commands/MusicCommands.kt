@@ -5,65 +5,64 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.module.core.commands
 
-import com.kotlindiscord.kord.extensions.checks.hasPermission
-import com.kotlindiscord.kord.extensions.commands.Arguments
-import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
-import com.kotlindiscord.kord.extensions.commands.application.slash.publicSubCommand
-import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
-import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
-import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
-import com.kotlindiscord.kord.extensions.types.respond
-import com.kotlindiscord.kord.extensions.types.respondingPaginator
 import de.jvstvshd.chillingfoxes.foxesbot.io.Music
 import de.jvstvshd.chillingfoxes.foxesbot.io.MusicTable
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.music.MusicState
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.music.MusicTrack
 import dev.kord.common.entity.Permission
+import dev.kordex.core.checks.hasPermission
+import dev.kordex.core.commands.Arguments
+import dev.kordex.core.commands.application.slash.ephemeralSubCommand
+import dev.kordex.core.commands.application.slash.publicSubCommand
+import dev.kordex.core.commands.converters.impl.defaultingBoolean
+import dev.kordex.core.commands.converters.impl.optionalString
+import dev.kordex.core.extensions.ephemeralSlashCommand
+import dev.kordex.core.i18n.toKey
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 open class MusicArgs : Arguments() {
     open val name by optionalString {
-        name = "name"
-        description = "Name des Titels"
+        name = "name".toKey()
+        description = "Name des Titels".toKey()
     }
     val url by optionalString {
-        name = "url"
-        description = "URL/Link zum Song/Playlist"
+        name = "url".toKey()
+        description = "URL/Link zum Song/Playlist".toKey()
     }
     val topic by optionalString {
-        name = "thema"
-        description = "Thema/Bereich/Topic des Lieds (optional)"
+        name = "thema".toKey()
+        description = "Thema/Bereich/Topic des Lieds (optional)".toKey()
     }
     val all by defaultingBoolean {
-        name = "all"
-        description = "alle Titel (nur bei Reaktivieren, Aktivieren & Deaktivieren)"
+        name = "alle".toKey()
+        description = "alle Titel (nur bei Reaktivieren, Aktivieren & Deaktivieren)".toKey()
         defaultValue = false
     }
 }
 
 class ActivationArgs : MusicArgs() {
     val activated by defaultingBoolean {
-        name = "aktiviert"
-        description = "aktiveren (True)/deaktivieren (False) "
+        name = "aktiviert".toKey()
+        description = "aktiveren (True)/deaktivieren (False) ".toKey()
         defaultValue = true
     }
 }
 
 class ListArgs : Arguments() {
     val topic by optionalString {
-        name = "thema"
-        description = "Thema bzw. Bereich der abzufragenden Elemente"
+        name = "thema".toKey()
+        description = "Thema bzw. Bereich der abzufragenden Elemente".toKey()
     }
 }
 
 suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand(::MusicArgs) {
-    name = commandName
-    description = "Verwaltet Musik-Elemente"
+    name = commandName.toKey()
+    description = "Verwaltet Musik-Elemente".toKey()
     ephemeralSubCommand(::MusicArgs) {
-        name = "add"
-        description = "Fügt Titel hinzu"
+        name = "add".toKey()
+        description = "Fügt Titel hinzu".toKey()
         check {
             hasPermission(Permission.ManageGuild)
         }
@@ -90,8 +89,8 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
         }
     }
     ephemeralSubCommand(::ActivationArgs) {
-        name = "aktiviert"
-        description = "Setzt den Titel auf (de)aktiviert"
+        name = "aktiviert".toKey()
+        description = "Setzt den Titel auf (de)aktiviert".toKey()
         check {
             hasPermission(Permission.ManageGuild)
         }
@@ -119,8 +118,8 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
         }
     }
     ephemeralSubCommand(::MusicArgs) {
-        name = "delete"
-        description = "Löscht Titel ausgehend vom Bereich bzw. Thema/Namen/von der Url"
+        name = "delete".toKey()
+        description = "Löscht Titel ausgehend vom Bereich bzw. Thema/Namen/von der Url".toKey()
         check {
             hasPermission(Permission.ManageGuild)
         }
@@ -144,13 +143,12 @@ suspend fun CoreModule.musicCommand(commandName: String) = ephemeralSlashCommand
         }
     }
     publicSubCommand(::ListArgs) {
-        name = "list"
-        description = "Listet alle Titel auf (Seite = n; von (n - 1) · 15 bis n · 15"
+        name = "list".toKey()
+        description = "Listet alle Titel auf (Seite = n; von (n - 1) · 15 bis n · 15".toKey()
         check {
             hasPermission(Permission.ManageGuild)
         }
         action {
-            println("test1")
             val tracks: List<MusicTrack> = service.getMusicEntities(arguments.topic?.let { { MusicTable.topic eq it } })
                 .map { MusicTrack(it.name, it.url, MusicState.valueOf(it.state.uppercase()), it.topic) }
             val chunked = tracks.chunked(15)

@@ -5,10 +5,6 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.util
 
-import com.kotlindiscord.kord.extensions.checks.hasPermission
-import com.kotlindiscord.kord.extensions.checks.memberFor
-import com.kotlindiscord.kord.extensions.checks.types.CheckContext
-import com.kotlindiscord.kord.extensions.utils.getKoin
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.member.MemberFeature
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.member.MemberFeatureType
 import dev.kord.common.entity.Permission
@@ -18,14 +14,19 @@ import dev.kord.core.entity.Entity
 import dev.kord.core.entity.Member
 import dev.kord.core.supplier.EntitySupplyStrategy
 import dev.kord.rest.builder.message.EmbedBuilder
+import dev.kordex.core.annotations.NotTranslated
+import dev.kordex.core.checks.hasPermission
+import dev.kordex.core.checks.memberFor
+import dev.kordex.core.checks.types.CheckContext
+import dev.kordex.core.utils.getKoin
 import java.time.format.DateTimeFormatter
 
-const val WEBSITE = "https://chillingfoxes.jvstvshd.de"
+const val WEBSITE = "https://github.com/JvstvsHD"
 
 suspend fun EmbedBuilder.selfAuthor() {
     author {
         val self = getKoin().get<Kord>().getSelf()
-        icon = self.avatar?.url
+        icon = self.avatar?.cdnUrl?.toUrl()
         name = self.username
         url = WEBSITE
     }
@@ -41,7 +42,7 @@ object KordUtil {
     suspend fun createAuthor(kord: Kord?) = createAuthor(
         "FoxesBot", "https://discord.gg/K5rhddJtyW", kord?.getSelf(
             EntitySupplyStrategy.cacheWithCachingRestFallback
-        )?.avatar?.url
+        )?.avatar?.cdnUrl?.toUrl()
     )
 
     @Deprecated("use builder instead")
@@ -74,6 +75,7 @@ val Snowflake.long
 val Member.asString
     get() = "$username/$id"
 
+@OptIn(NotTranslated::class)
 suspend fun CheckContext<*>.isPermitted(perm: Permission) {
     val member = memberFor(event)
     if (member == null) {

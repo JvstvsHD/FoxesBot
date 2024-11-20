@@ -5,8 +5,6 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.module.moderation
 
-import com.kotlindiscord.kord.extensions.extensions.Extension
-import com.kotlindiscord.kord.extensions.extensions.event
 import de.jvstvshd.chillingfoxes.foxesbot.config.Config
 import de.jvstvshd.chillingfoxes.foxesbot.util.snowflake
 import dev.kord.common.entity.AuditLogChange
@@ -19,12 +17,12 @@ import dev.kord.core.event.guild.BanAddEvent
 import dev.kord.core.event.guild.MemberLeaveEvent
 import dev.kord.core.event.guild.MemberUpdateEvent
 import dev.kord.core.event.user.VoiceStateUpdateEvent
-import dev.kord.core.kordLogger
+import dev.kordex.core.extensions.Extension
+import dev.kordex.core.extensions.event
 import org.apache.commons.lang3.time.DurationFormatUtils
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import kotlin.time.Duration
 import kotlin.time.toKotlinDuration
 
 class ModerationModule(private val config: Config) : Extension() {
@@ -33,7 +31,7 @@ class ModerationModule(private val config: Config) : Extension() {
 
     override suspend fun setup() {
         if (config.configData.moderationData.criminalRecordChannel <= 0 || config.configData.moderationData.criminalRecordGuild <= 0) {
-            kordLogger.error("configure criminal record")
+            error { "configure criminal record" }
             return
         }
         event<BanAddEvent> {
@@ -80,8 +78,8 @@ class ModerationModule(private val config: Config) : Extension() {
     }
 
     private suspend fun sendMessage(type: String, duration: Duration?, user: User, reason: String? = null) {
-        val channel = kord.getGuild(config.configData.moderationData.criminalRecordGuild.snowflake)
-            ?.getChannel(config.configData.moderationData.criminalRecordChannel.snowflake)
+        val channel = kord.getGuildOrNull(config.configData.moderationData.criminalRecordGuild.snowflake)
+            ?.getChannelOrNull(config.configData.moderationData.criminalRecordChannel.snowflake)
             ?: throw IllegalArgumentException("the given configuration for a channel was invalid: the channel could not be found")
         if (channel !is GuildMessageChannel) {
             throw IllegalArgumentException("the given configuration for a channel was invalid: the channel is not a guild message channel")
@@ -102,6 +100,4 @@ class ModerationModule(private val config: Config) : Extension() {
             )
         } ?: if (permanent) "Permanent" else "Einmalige Aktion"
     }
-
-    fun kotlin.time.Duration.customDuration() = Duration(this)
 }

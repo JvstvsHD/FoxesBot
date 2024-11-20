@@ -1,37 +1,46 @@
+import dev.kordex.gradle.plugins.kordex.DataCollection
+
 plugins {
-    kotlin("jvm") version "1.7.20"
+    kotlin("jvm") version "2.0.21"
     application
-    kotlin("plugin.serialization") version "1.7.20"
+    kotlin("plugin.serialization") version "2.0.21"
     id("org.cadixdev.licenser") version "0.6.1"
+    id("dev.kordex.gradle.kordex") version "1.5.6"
 }
 
 group = "de.jvstvshd.chillingfoxes"
-version = "1.4.5"
+version = "1.5.0-SNAPSHOT"
 
-val log4jVersion = "2.19.0"
+val log4jVersion = "2.24.1"
 val exposedVersion = "0.56.0"
 
 repositories {
     mavenCentral()
+    maven("https://snapshots-repo.kordex.dev")
+    maven("https://releases-repo.kordex.dev")
     maven("https://oss.sonatype.org/content/repositories/snapshots")
-    maven {
-        name = "Kotlin Discord"
-        url = uri("https://maven.kotlindiscord.com/repository/maven-public/")
-    }
     maven("https://s01.oss.sonatype.org/content/repositories/snapshots")
     maven("https://m2.dv8tion.net/releases")
     maven("https://eldonexus.de/repository/maven-public")
 }
 
+kordEx {
+    bot {
+        dataCollection(DataCollection.Standard)
+
+        mainClass = "de.jvstvshd.chillingfoxes.foxesbot.LauncherKt"
+    }
+}
+
 dependencies {
     //discord
-    implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.5-SNAPSHOT")
+    //implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.5-SNAPSHOT")
     implementation("com.sedmelluq:lavaplayer:1.3.78")
-    implementation("dev.kord:kord-voice:0.8.0-M16")
 
     //logging
     implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
+    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
+    annotationProcessor("org.apache.logging.log4j:log4j-core:$log4jVersion")
     implementation("org.slf4j:slf4j-api:2.0.16")
 
     //database
@@ -64,15 +73,16 @@ tasks {
         manifest {
             attributes["Main-Class"] = "de.jvstvshd.chillingfoxes.foxesbot.LauncherKt"
             attributes["Multi-Release"] = true
-
         }
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
         from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
         exclude("org/apache/logging/log4j&core/lookup/JndiLookup.class")
     }
-    compileKotlin {
-        kotlinOptions.jvmTarget = "11"
-        kotlinOptions.freeCompilerArgs = listOf("-Xcontext-receivers", "-opt-in=kotlin.RequiresOptIn")
+    kotlin {
+        jvmToolchain(17)
+        compilerOptions {
+            freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn", "-Xcontext-receivers")
+        }
     }
 }
 

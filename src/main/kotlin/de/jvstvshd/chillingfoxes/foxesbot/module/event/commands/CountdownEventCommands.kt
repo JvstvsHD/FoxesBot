@@ -5,13 +5,7 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.module.event.commands
 
-import com.kotlindiscord.kord.extensions.checks.hasPermission
-import com.kotlindiscord.kord.extensions.commands.Arguments
-import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.enumChoice
-import com.kotlindiscord.kord.extensions.commands.converters.impl.channel
-import com.kotlindiscord.kord.extensions.commands.converters.impl.long
-import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
-import com.kotlindiscord.kord.extensions.types.respond
+
 import de.jvstvshd.chillingfoxes.foxesbot.io.ChannelBarrier
 import de.jvstvshd.chillingfoxes.foxesbot.io.ChannelBarriersTable
 import de.jvstvshd.chillingfoxes.foxesbot.module.event.*
@@ -19,14 +13,21 @@ import de.jvstvshd.chillingfoxes.foxesbot.util.long
 import dev.kord.common.entity.ChannelType
 import dev.kord.common.entity.Permission
 import dev.kord.core.behavior.channel.TextChannelBehavior
+import dev.kordex.core.checks.hasPermission
+import dev.kordex.core.commands.Arguments
+import dev.kordex.core.commands.application.slash.converters.impl.enumChoice
+import dev.kordex.core.commands.converters.impl.channel
+import dev.kordex.core.commands.converters.impl.long
+import dev.kordex.core.extensions.publicSlashCommand
+import dev.kordex.core.i18n.toKey
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.time.LocalDateTime
 
 class CountdownArgs : Arguments() {
     val startValue by long {
-        name = "start"
-        description = "Startwert des Countdowns"
+        name = "start".toKey()
+        description = "Startwert des Countdowns".toKey()
         validate {
             if (value <= 0) {
                 fail("Der Startwert muss > 0 sein.")
@@ -36,8 +37,8 @@ class CountdownArgs : Arguments() {
         }
     }
     val channel by channel {
-        name = "channel"
-        description = "Channel, in dem das Event stattfinden soll"
+        name = "channel".toKey()
+        description = "Channel, in dem das Event stattfinden soll".toKey()
         validate {
             println(value::class.java)
             println(value.type)
@@ -60,15 +61,15 @@ class CountdownArgs : Arguments() {
 
 class CountdownEventResetArgs : Arguments() {
     val type by enumChoice<CountdownResetState> {
-        name = "typ"
-        typeName = "typeName"
-        description = "auf was der Countdown im Falle eines Fails zurückgesetzt werden soll"
+        name = "typ".toKey()
+        typeName = "typeName".toKey()
+        description = "auf was der Countdown im Falle eines Fails zurückgesetzt werden soll".toKey()
     }
 }
 
 suspend fun EventModule.countdownStartCommand() = publicSlashCommand(::CountdownArgs) {
-    name = "countdown"
-    description = "Startet ein Countdown-Event im angegebenen Channel"
+    name = "countdown".toKey()
+    description = "Startet ein Countdown-Event im angegebenen Channel".toKey()
     check {
         hasPermission(Permission.ManageGuild)
     }
@@ -106,8 +107,9 @@ suspend fun EventModule.countdownStartCommand() = publicSlashCommand(::Countdown
 }
 
 suspend fun EventModule.countdownEventResetStateCommand() = publicSlashCommand(::CountdownEventResetArgs) {
-    name = "countdownreset"
-    description = "Setzt die Art des Wertes, auf den der Countdown im Falle eines Fails zurückgesetzt werden soll"
+    name = "countdownreset".toKey()
+    description =
+        "Setzt die Art des Wertes, auf den der Countdown im Falle eines Fails zurückgesetzt werden soll".toKey()
     check {
         hasPermission(Permission.ManageGuild)
     }

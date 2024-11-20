@@ -28,7 +28,7 @@ class StatusPageProvider(private val url: String) : StatusProvider {
             ?: botAvatarUrl
         try {
             URL(url)
-        } catch (e: MalformedURLException) {
+        } catch (_: MalformedURLException) {
             System.err.println("Malformed url: $url")
             url = botAvatarUrl
         }

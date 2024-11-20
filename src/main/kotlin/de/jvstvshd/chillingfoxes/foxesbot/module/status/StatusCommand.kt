@@ -5,26 +5,26 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.module.status
 
-import com.kotlindiscord.kord.extensions.DISCORD_YELLOW
-import com.kotlindiscord.kord.extensions.commands.Arguments
-import com.kotlindiscord.kord.extensions.commands.converters.impl.string
-import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
-import com.kotlindiscord.kord.extensions.types.respond
-import com.kotlindiscord.kord.extensions.types.respondEphemeral
 import de.jvstvshd.chillingfoxes.foxesbot.io.StatusAlias
 import de.jvstvshd.chillingfoxes.foxesbot.io.StatusAliasesTable
 import de.jvstvshd.chillingfoxes.foxesbot.module.status.provider.StatusProvider
 import de.jvstvshd.chillingfoxes.foxesbot.util.Colors
 import de.jvstvshd.chillingfoxes.foxesbot.util.selfAuthor
 import dev.kord.rest.builder.message.EmbedBuilder
-import dev.kord.rest.builder.message.create.embed
+import dev.kord.rest.builder.message.embed
+import dev.kordex.core.DISCORD_YELLOW
+import dev.kordex.core.commands.Arguments
+import dev.kordex.core.commands.converters.impl.string
+import dev.kordex.core.extensions.publicSlashCommand
+import dev.kordex.core.i18n.toKey
+import dev.kordex.core.i18n.types.Key
 import kotlinx.datetime.Clock
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 class StatusArguments : Arguments() {
     val keyword by string {
-        name = "type"
-        description = "Typ"
+        name = "type".toKey()
+        description = "Typ".toKey()
     }
 }
 
@@ -39,8 +39,8 @@ private val regex = Regex(
 )
 
 suspend fun StatusModule.statusCommand() = publicSlashCommand(::StatusArguments) {
-    name = "status"
-    description = translationsProvider.get("command.status.description", bundleName = "status")
+    name = "status".toKey()
+    description = Key("command.status.description")
     action {
         val keyword = arguments.keyword
         newSuspendedTransaction {
@@ -48,7 +48,7 @@ suspend fun StatusModule.statusCommand() = publicSlashCommand(::StatusArguments)
                 val result = StatusAlias.find { StatusAliasesTable.name eq keyword }.firstOrNull()
                 val provider: StatusProvider = if (result == null) {
                     if (!regex.matches(keyword)) {
-                        respondEphemeral {
+                        respond {
                             content = "Die Anfrage ist weder voreingespeichert noch eine gültige URL."
                         }
                         return@newSuspendedTransaction
@@ -61,7 +61,7 @@ suspend fun StatusModule.statusCommand() = publicSlashCommand(::StatusArguments)
                 respond {
                     embed {
                         statusData(data, keyword) {
-                            translate(this)
+                            this
                         }
                     }
                 }

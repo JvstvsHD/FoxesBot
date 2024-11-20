@@ -7,7 +7,7 @@ package de.jvstvshd.chillingfoxes.foxesbot.io
 
 import org.jetbrains.exposed.dao.id.IntIdTable
 
-open class GuildChannelIntIdTable(override val tableName: String) : IntIdTable(tableName) {
+open class GuildChannelIntIdTable(tableName: String, columnName: String = "id") : IntIdTable(tableName, columnName) {
     open val channelId = long("channel_id")
     open val guildId = long("guild_id")
 }

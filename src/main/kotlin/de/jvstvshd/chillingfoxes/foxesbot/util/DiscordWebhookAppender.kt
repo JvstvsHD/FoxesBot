@@ -5,15 +5,15 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.util
 
-import com.kotlindiscord.kord.extensions.*
-import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import de.jvstvshd.chillingfoxes.foxesbot.config.data.ConfigData
 import dev.kord.core.Kord
 import dev.kord.core.behavior.execute
 import dev.kord.core.entity.Webhook
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.WebhookMessageCreateBuilder
-import dev.kord.rest.builder.message.create.embed
+import dev.kord.rest.builder.message.embed
+import dev.kordex.core.*
+import dev.kordex.core.koin.KordExKoinComponent
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -30,7 +30,7 @@ import org.apache.logging.log4j.core.config.plugins.PluginElement
 import org.apache.logging.log4j.core.config.plugins.PluginFactory
 import org.apache.logging.log4j.core.impl.MutableLogEvent
 import org.apache.logging.log4j.message.SimpleMessage
-import org.koin.core.error.NoBeanDefFoundException
+import org.koin.core.error.NoDefinitionFoundException
 import java.io.Serializable
 
 @Plugin(name = "DiscordWebhookAppender", category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE)
@@ -70,19 +70,19 @@ class DiscordWebhookAppender(
         logEvents.add(event)
         try {
             getKoin()
-        } catch (e: java.lang.IllegalStateException) {
+        } catch (_: java.lang.IllegalStateException) {
             return
         }
         val kord: Kord
         val configData: ConfigData
         try {
             kord = getKoin().get()
-        } catch (exception: NoBeanDefFoundException) {
+        } catch (_: NoDefinitionFoundException) {
             return
         }
         try {
             configData = getKoin().get()
-        } catch (e: NoBeanDefFoundException) {
+        } catch (_: NoDefinitionFoundException) {
             return
         }
         try {

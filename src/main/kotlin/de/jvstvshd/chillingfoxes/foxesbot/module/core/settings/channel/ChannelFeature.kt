@@ -7,7 +7,6 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.channel
 
-import com.kotlindiscord.kord.extensions.extensions.event
 import de.jvstvshd.chillingfoxes.foxesbot.io.ChannelSettings
 import de.jvstvshd.chillingfoxes.foxesbot.io.ChannelSettingsTable
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
@@ -20,6 +19,7 @@ import dev.kord.cache.api.put
 import dev.kord.cache.api.query
 import dev.kord.core.behavior.channel.GuildChannelBehavior
 import dev.kord.core.event.message.MessageCreateEvent
+import dev.kordex.core.extensions.event
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
