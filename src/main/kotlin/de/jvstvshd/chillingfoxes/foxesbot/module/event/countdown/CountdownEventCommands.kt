@@ -3,12 +3,14 @@
  * This file is part of the FoxesBot, a discord bot for the Chilling Foxes Discord (https://discord.gg/K5rhddJtyW), which is licensed under the MIT license. The full version is located in the LICENSE file (top level directory)
  */
 
-package de.jvstvshd.chillingfoxes.foxesbot.module.event.commands
+package de.jvstvshd.chillingfoxes.foxesbot.module.event.countdown
 
 
 import de.jvstvshd.chillingfoxes.foxesbot.io.ChannelBarrier
 import de.jvstvshd.chillingfoxes.foxesbot.io.ChannelBarriersTable
-import de.jvstvshd.chillingfoxes.foxesbot.module.event.*
+import de.jvstvshd.chillingfoxes.foxesbot.module.event.COUNTDOWN_EVENT_NAME
+import de.jvstvshd.chillingfoxes.foxesbot.module.event.EventModule
+import de.jvstvshd.chillingfoxes.foxesbot.module.event.countdownEvents
 import de.jvstvshd.chillingfoxes.foxesbot.util.long
 import dev.kord.common.entity.ChannelType
 import dev.kord.common.entity.Permission

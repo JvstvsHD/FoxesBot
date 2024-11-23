@@ -12,7 +12,6 @@ import de.jvstvshd.chillingfoxes.foxesbot.module.core.CoreModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.channel.ChannelFeature
 import de.jvstvshd.chillingfoxes.foxesbot.module.core.settings.member.MemberFeature
 import de.jvstvshd.chillingfoxes.foxesbot.module.event.EventModule
-import de.jvstvshd.chillingfoxes.foxesbot.module.presencecheck.PresenceCheckModule
 import de.jvstvshd.chillingfoxes.foxesbot.module.status.StatusModule
 import de.jvstvshd.chillingfoxes.foxesbot.util.snowflake
 import dev.kord.common.entity.ActivityType
@@ -48,7 +47,7 @@ class FoxesBot {
             extensions {
                 add { CoreModule(config) }
                 add { StatusModule(config) }
-                add { PresenceCheckModule(config) }
+                //add { PresenceCheckModule(config) }
                 add { EventModule(config) }
             }
             applicationCommands {

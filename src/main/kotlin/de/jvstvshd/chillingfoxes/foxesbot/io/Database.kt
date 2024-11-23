@@ -18,13 +18,14 @@ suspend fun setupDatabase(dataBaseData: DataBaseData) {
 }
 
 suspend fun initDatabase() = newSuspendedTransaction {
-    SchemaUtils.create(
+    SchemaUtils.createMissingTablesAndColumns(
         StatusAliasesTable,
-        //ChannelBarriersTable,
+        ChannelBarriersTable,
         MusicTable,
-        EventDataTable,
+        EventTable,
         ChannelSettingsTable,
-        MemberSettingsTable
+        MemberSettingsTable,
+        EventParticipantTable
     )
 }
 

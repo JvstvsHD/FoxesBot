@@ -5,7 +5,7 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.config.data
 
-import de.jvstvshd.chillingfoxes.foxesbot.module.event.CountdownResetState
+import de.jvstvshd.chillingfoxes.foxesbot.module.event.countdown.CountdownResetState
 
 @kotlinx.serialization.Serializable
 data class EventData(

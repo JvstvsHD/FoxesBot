@@ -3,14 +3,13 @@
  * This file is part of the FoxesBot, a discord bot for the Chilling Foxes Discord (https://discord.gg/K5rhddJtyW), which is licensed under the MIT license. The full version is located in the LICENSE file (top level directory)
  */
 
-package de.jvstvshd.chillingfoxes.foxesbot.module.event
+package de.jvstvshd.chillingfoxes.foxesbot.module.event.countdown
 
 import com.notkamui.keval.KevalException
 import com.notkamui.keval.keval
 import de.jvstvshd.chillingfoxes.foxesbot.config.data.ConfigData
-import de.jvstvshd.chillingfoxes.foxesbot.io.EventData
-import de.jvstvshd.chillingfoxes.foxesbot.io.EventDataTable
 import de.jvstvshd.chillingfoxes.foxesbot.logger
+import de.jvstvshd.chillingfoxes.foxesbot.module.event.countdownEvents
 import de.jvstvshd.chillingfoxes.foxesbot.util.*
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
@@ -40,7 +39,6 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import org.apache.commons.lang3.time.DurationFormatUtils
-import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.time.Duration
 import java.time.Instant
@@ -49,6 +47,7 @@ import kotlin.math.roundToLong
 
 val allowedDeletedMessages = mutableListOf<Snowflake>()
 
+//TODO replace event_data.data (Json) with dedicated solution
 class CountdownEvent(
     val data: CountdownEventData,
     val configData: ConfigData,
@@ -71,17 +70,17 @@ class CountdownEvent(
             val channelId = data.channel.long
             val guildId = data.channel.guild.long
             val content = serialize()
-            newSuspendedTransaction {
-                EventData.find { (EventDataTable.guildId eq guildId) and (EventDataTable.channelId eq channelId) and (EventDataTable.type eq COUNTDOWN_EVENT_NAME) }
+            /*newSuspendedTransaction {
+                EventData.find { (EventTable.guildId eq guildId) and (EventTable.channelId eq channelId) and (EventTable.type eq Events.COUNTDOWN.designation) }
                     .firstOrNull()?.let {
-                        it.data = content
+                        //it.data = content
                     } ?: EventData.new {
                     this.guildId = guildId
                     this.channelId = channelId
-                    this.type = COUNTDOWN_EVENT_NAME
-                    this.data = content
+                    this.type = Events.COUNTDOWN.designation
+                    //this.data = content
                 }
-            }
+            }*/
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -286,8 +285,8 @@ class CountdownEvent(
     private suspend fun removeFromDatabase() = newSuspendedTransaction {
         val channelId = data.channel.long
         val guildId = data.channel.guild.long
-        EventData.find { (EventDataTable.guildId eq guildId) and (EventDataTable.channelId eq channelId) and (EventDataTable.type eq COUNTDOWN_EVENT_NAME) }
-            .forEach { it.delete() }
+        /*EventData.find { (EventTable.guildId eq guildId) and (EventTable.channelId eq channelId) and (EventTable.type eq Events.COUNTDOWN.designation) }
+            .forEach { it.delete() }*/
     }
 
     /*dataSource.connection.use { connection ->

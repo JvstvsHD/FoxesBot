@@ -8,3 +8,8 @@ pluginManagement {
         maven("https://releases-repo.kordex.dev")
     }
 }
+dependencyResolutionManagement {
+    versionCatalogs {
+        create("libs")
+    }
+}

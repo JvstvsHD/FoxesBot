@@ -27,3 +27,5 @@ val guildChannelTypes = setOf<ChannelType>(
 val threadChannelTypes = setOf(ChannelType.PrivateThread, ChannelType.PublicGuildThread, ChannelType.PublicNewsThread)
 
 fun now() = Clock.System.now()
+
+const val FOXES_BOT_TIME_ZONE_ID = "Europe/Berlin"

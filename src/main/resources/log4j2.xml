@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration packages="de.jvstvshd.chillingfoxes.foxesbot" status="WARN">
+<!--        packages="de.jvstvshd.chillingfoxes.foxesbot"-->
+<Configuration status="WARN">
     <Appenders>
         <Console name="CONSOLE" target="SYSTEM_OUT">
             <PatternLayout disableAnsi="false"

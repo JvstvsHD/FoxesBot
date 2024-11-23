@@ -1,0 +1,7 @@
+[versions]
+ksp = "2.0.21-1.0.28"
+kord-extensions = "2.3.1-SNAPSHOT"
+
+[libraries]
+ksp = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
+kord-extensions-processor = { module = "dev.kordex:annotation-processor", version.ref = "kord-extensions" }

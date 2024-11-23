@@ -5,11 +5,18 @@
 
 package de.jvstvshd.chillingfoxes.foxesbot.io
 
+import de.jvstvshd.chillingfoxes.foxesbot.module.event.EventState
 import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.sql.ReferenceOption
+import org.jetbrains.exposed.sql.javatime.timestamp
 
-open class GuildChannelIntIdTable(tableName: String, columnName: String = "id") : IntIdTable(tableName, columnName) {
+abstract class GuildIntIdTable(tableName: String, columnName: String = "id") : IntIdTable(tableName, columnName) {
+    val guildId = long("guild_id")
+}
+
+open class GuildChannelIntIdTable(tableName: String, columnName: String = "id") :
+    GuildIntIdTable(tableName, columnName) {
     open val channelId = long("channel_id")
-    open val guildId = long("guild_id")
 }
 
 object StatusAliasesTable : IntIdTable("status_aliases") {
@@ -30,9 +37,24 @@ object MusicTable : IntIdTable("music") {
     val topic = varchar("topic", 256)
 }
 
-object EventDataTable : GuildChannelIntIdTable("event_data") {
-    val type = varchar("type", 128)
-    val data = text("data")
+object EventTypeTable : IntIdTable("event_type") {
+    val name = varchar("name", 256).uniqueIndex()
+}
+
+object EventTable : GuildIntIdTable("event") {
+    val type = reference("type", EventTypeTable.id)
+    val start = timestamp("start")
+    val end = timestamp("end").nullable()
+    val codeName = text("code_name")
+    val state = enumeration<EventState>("state").default(EventState.PENDING)
+}
+
+object EventParticipantTable : IntIdTable("event_participant") {
+    @Suppress("RemoveRedundantQualifierName")
+    val eventId = reference("event_id", EventTable.id, onDelete = ReferenceOption.CASCADE)
+    val userId = long("user_id")
+    val guildId = long("guild_id")
+    val placement = integer("placement").nullable()
 }
 
 object ChannelSettingsTable : GuildChannelIntIdTable("channel_settings") {

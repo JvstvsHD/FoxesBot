@@ -61,11 +61,9 @@ class DiscordWebhookAppender(
             return
         }
         if (event.message.formattedMessage.contains("\\")) {
-            println(event.message.formattedMessage)
             (event as MutableLogEvent).let {
                 it.message = SimpleMessage("no plugins root")
             }
-            println(event.message.formattedMessage)
         }
         logEvents.add(event)
         try {

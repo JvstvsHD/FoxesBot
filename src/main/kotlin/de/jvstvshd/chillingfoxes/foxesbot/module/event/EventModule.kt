@@ -6,18 +6,17 @@
 package de.jvstvshd.chillingfoxes.foxesbot.module.event
 
 import de.jvstvshd.chillingfoxes.foxesbot.config.Config
-import de.jvstvshd.chillingfoxes.foxesbot.io.EventData
-import de.jvstvshd.chillingfoxes.foxesbot.io.EventDataTable
-import de.jvstvshd.chillingfoxes.foxesbot.logger
-import de.jvstvshd.chillingfoxes.foxesbot.module.event.commands.countdownEventResetStateCommand
-import de.jvstvshd.chillingfoxes.foxesbot.module.event.commands.countdownStartCommand
+import de.jvstvshd.chillingfoxes.foxesbot.io.EventType
+import de.jvstvshd.chillingfoxes.foxesbot.module.event.commands.eventCommand
+import de.jvstvshd.chillingfoxes.foxesbot.module.event.countdown.CountdownEvent
+import de.jvstvshd.chillingfoxes.foxesbot.module.event.countdown.allowedDeletedMessages
+import de.jvstvshd.chillingfoxes.foxesbot.module.event.countdown.countdownEventResetStateCommand
+import de.jvstvshd.chillingfoxes.foxesbot.module.event.countdown.countdownStartCommand
 import de.jvstvshd.chillingfoxes.foxesbot.util.ShutdownTask
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.core.event.message.MessageDeleteEvent
 import dev.kordex.core.extensions.Extension
 import dev.kordex.core.extensions.event
-import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 const val COUNTDOWN_EVENT_NAME = "countdown_event"
@@ -25,9 +24,11 @@ val countdownEvents = mutableListOf<CountdownEvent>()
 
 class EventModule(val config: Config) : Extension(), ShutdownTask {
     override val name: String = "event"
+    val registeredTypes: MutableSet<String> = mutableSetOf()
 
     override suspend fun setup() {
-        loadCountdownEvents()
+        //loadCountdownEvents()
+        eventCommand()
         countdownStartCommand()
         countdownEventResetStateCommand()
         event<MessageCreateEvent> {
@@ -48,12 +49,17 @@ class EventModule(val config: Config) : Extension(), ShutdownTask {
                 }
             }
         }
+        newSuspendedTransaction {
+            EventType.all().forEach { eventType ->
+                registeredTypes.add(eventType.name)
+            }
+        }
     }
 
-    private fun loadCountdownEvents() =
+    /*private fun loadCountdownEvents() =
         kord.launch {
             newSuspendedTransaction {
-                EventData.find { EventDataTable.type eq COUNTDOWN_EVENT_NAME }.forEach {
+                EventData.find { EventOccurrence.type eq Events.COUNTDOWN }.forEach {
                     val decodedData: CountdownEventData =
                         runCatching { Json.decodeFromString<CountdownEventData>(it.data) }.onFailure { exception -> logger.warn { "Could not load event: " + exception.message } }
                             .getOrNull() ?: return@forEach
@@ -66,15 +72,14 @@ class EventModule(val config: Config) : Extension(), ShutdownTask {
                     )
                 }
             }
-            logger.info("loaded ${countdownEvents.size} countdown events from database")
+            logger.info { "loaded ${countdownEvents.size} countdown events from database" }
             for ((index, countdownEvent) in countdownEvents.withIndex()) {
-                logger.info("CD Event #$index: ${countdownEvent.data.channel.asChannel().name} in guild ${countdownEvent.data.channel.guild.asGuild().name}")
+                logger.info { "CD Event #$index: ${countdownEvent.data.channel.id} in guild ${countdownEvent.data.channel.guild.id}" }
                 countdownEvent.unlock()
             }
-        }
+        }*/
 
     override suspend fun unload() {
-        println("unload")
         for (countdownEvent in countdownEvents) {
             countdownEvent.save()
         }
