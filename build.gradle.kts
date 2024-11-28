@@ -6,7 +6,7 @@ plugins {
     application
     idea
     id("org.cadixdev.licenser") version "0.6.1"
-    id("dev.kordex.gradle.kordex") version "1.5.6"
+    id("dev.kordex.gradle.kordex") version "1.6.0"
     id("com.google.devtools.ksp") version "2.0.21-1.0.28"
 }
 
