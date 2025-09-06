@@ -75,7 +75,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
 
     //some other stuff
-    implementation("org.kohsuke:github-api:1.326")
+    implementation("org.kohsuke:github-api:1.330")
     implementation("org.jsoup:jsoup:1.18.1")
     implementation("com.notkamui.libs:keval:0.9.0")
     runtimeOnly(kotlin("scripting-jsr223"))
