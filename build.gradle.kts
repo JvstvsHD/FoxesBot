@@ -14,7 +14,7 @@ group = "de.jvstvshd.chillingfoxes"
 version = "1.5.0-SNAPSHOT"
 
 val log4jVersion = "2.24.1"
-val exposedVersion = "0.56.0"
+val exposedVersion = "0.61.0"
 
 repositories {
     mavenCentral()
