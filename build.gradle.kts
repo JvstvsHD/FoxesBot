@@ -81,8 +81,8 @@ dependencies {
     runtimeOnly(kotlin("scripting-jsr223"))
 
     //JUnit
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.3")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.14.4")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.14.4")
 }
 
 tasks.getByName<Test>("test") {
