@@ -61,7 +61,7 @@ dependencies {
     implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
     implementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
     annotationProcessor("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    implementation("org.slf4j:slf4j-api:2.0.16")
+    implementation("org.slf4j:slf4j-api:2.0.19")
 
     //database
     implementation("org.mariadb.jdbc:mariadb-java-client:3.5.0")
